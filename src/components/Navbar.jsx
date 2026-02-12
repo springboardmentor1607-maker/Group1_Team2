@@ -1,6 +1,7 @@
 import React from 'react'
+import ThemeToggle from './ThemeToggle'
 
-function Navbar({ showLogin, showSignup }) {
+function Navbar({ showLogin, showSignup, currentTheme, onThemeChange }) {
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
             <div className="container">
@@ -44,7 +45,8 @@ function Navbar({ showLogin, showSignup }) {
                             <a className="nav-link" href="#complaints">View Complaints</a>
                         </li>
                     </ul>
-                    <div className="d-flex gap-2">
+                    <div className="d-flex gap-2 align-items-center">
+                        <ThemeToggle currentTheme={currentTheme} onThemeChange={onThemeChange} />
                         <button className="btn btn-outline-primary" onClick={showLogin}>Login</button>
                         <button className="btn btn-primary" onClick={showSignup}>Register</button>
                     </div>

@@ -1,23 +1,95 @@
-:root {
-    /* Dark Civic/Environmental Theme Colors */
-    --primary-green: #22C55E;
-    --primary-green-hover: #16A34A;
-    --primary-green-dark: #15803D;
-    --accent-teal: #14B8A6;
-    --accent-emerald: #10B981;
-    --dark-bg: #000000;
-    --dark-card-bg: #0A0A0A;
+/* Dark Green Theme (Default) */
+:root,
+[data-theme="dark-green"] {
+    --primary-color: #22C55E;
+    --primary-hover: #16A34A;
+    --primary-dark: #15803D;
+    --accent-1: #14B8A6;
+    --accent-2: #10B981;
+    --bg-primary: #000000;
+    --bg-secondary: #0A0A0A;
+    --bg-card: #0A0A0A;
     --gradient-bg: linear-gradient(135deg, #000000 0%, #0D1B0D 50%, #001A0D 100%);
-    --white: #FFFFFF;
+    --navbar-gradient: linear-gradient(90deg, #000000 0%, #0D1B0D 50%, #000000 100%);
     --text-primary: #FFFFFF;
     --text-secondary: #22C55E;
     --text-muted: #9CA3AF;
     --border-color: #1F2937;
-    --border-green: #15803D;
+    --border-accent: #15803D;
     --shadow-sm: 0 2px 8px rgba(34, 197, 94, 0.15);
     --shadow-md: 0 4px 16px rgba(34, 197, 94, 0.2);
     --shadow-lg: 0 10px 30px rgba(34, 197, 94, 0.25);
     --shadow-glow: 0 0 20px rgba(34, 197, 94, 0.3);
+    --glow-color: rgba(34, 197, 94, 0.4);
+    --navbar-bg: rgba(10, 10, 10, 0.95);
+    --form-input-bg: rgba(15, 15, 15, 0.8);
+    --form-input-focus-bg: rgba(20, 20, 20, 0.9);
+    --radial-1: rgba(34, 197, 94, 0.08);
+    --radial-2: rgba(20, 184, 166, 0.06);
+    --radial-3: rgba(22, 163, 74, 0.04);
+}
+
+/* Light Theme */
+[data-theme="light"] {
+    --primary-color: #22C55E;
+    --primary-hover: #16A34A;
+    --primary-dark: #15803D;
+    --accent-1: #14B8A6;
+    --accent-2: #10B981;
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F9FAFB;
+    --bg-card: #FFFFFF;
+    --gradient-bg: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 50%, #ECFDF5 100%);
+    --navbar-gradient: linear-gradient(90deg, #FFFFFF 0%, #F0FDF4 50%, #FFFFFF 100%);
+    --text-primary: #111827;
+    --text-secondary: #15803D;
+    --text-muted: #6B7280;
+    --border-color: #E5E7EB;
+    --border-accent: #22C55E;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 20px rgba(34, 197, 94, 0.15);
+    --glow-color: rgba(34, 197, 94, 0.2);
+    --navbar-bg: rgba(255, 255, 255, 0.95);
+    --form-input-bg: #FFFFFF;
+    --form-input-focus-bg: #F9FAFB;
+    --radial-1: rgba(34, 197, 94, 0.03);
+    --radial-2: rgba(20, 184, 166, 0.02);
+    --radial-3: rgba(22, 163, 74, 0.02);
+}
+
+/* Blue Dark Theme (Inspired by reference) */
+[data-theme="blue-dark"] {
+    --primary-color: #0EA5E9;
+    --primary-hover: #0284C7;
+    --primary-dark: #0369A1;
+    --accent-1: #8B5CF6;
+    --accent-2: #06B6D4;
+    --bg-primary: #000814;
+    --bg-secondary: #000814;
+    --bg-card: #001D3D;
+    --gradient-bg: linear-gradient(135deg, #000814 0%, #001D3D 50%, #002855 100%);
+    --navbar-gradient: linear-gradient(90deg, #000814 0%, #001D3D 50%, #000814 100%);
+    --text-primary: #FFFFFF;
+    --text-secondary: #0EA5E9;
+    --text-muted: #94A3B8;
+    --border-color: #1E293B;
+    --border-accent: #0369A1;
+    --shadow-sm: 0 2px 8px rgba(14, 165, 233, 0.15);
+    --shadow-md: 0 4px 16px rgba(14, 165, 233, 0.2);
+    --shadow-lg: 0 10px 30px rgba(14, 165, 233, 0.25);
+    --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.3);
+    --glow-color: rgba(14, 165, 233, 0.4);
+    --navbar-bg: rgba(0, 8, 20, 0.95);
+    --form-input-bg: rgba(15, 23, 42, 0.8);
+    --form-input-focus-bg: rgba(30, 41, 59, 0.9);
+    --radial-1: rgba(14, 165, 233, 0.08);
+    --radial-2: rgba(139, 92, 246, 0.06);
+    --radial-3: rgba(6, 182, 212, 0.04);
+}
+
+:root {
     --border-radius: 14px;
     --transition: all 0.3s ease;
 }
@@ -29,12 +101,31 @@
     box-sizing: border-box;
 }
 
+@keyframes themeSwitch {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: var(--gradient-bg);
     color: var(--text-primary);
     min-height: 100vh;
     position: relative;
+    transition: background 0.5s ease, color 0.5s ease;
+    animation: themeSwitch 0.5s ease;
 }
 
 body::before {
@@ -45,22 +136,25 @@ body::before {
     width: 100%;
     height: 100%;
     background-image:
-        radial-gradient(circle at 20% 30%, rgba(34, 197, 94, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(20, 184, 166, 0.06) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(22, 163, 74, 0.04) 0%, transparent 70%);
+        radial-gradient(circle at 20% 30%, var(--radial-1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, var(--radial-2) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, var(--radial-3) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
+    transition: opacity 0.5s ease;
 }
 
 
 
 .navbar {
     padding: 1rem 0;
-    border-bottom: 2px solid var(--border-green);
-    background-color: rgba(10, 10, 10, 0.95);
+    border-bottom: 2px solid var(--border-accent);
+    background: var(--navbar-gradient);
     backdrop-filter: blur(10px);
     position: relative;
     z-index: 10;
+    transition: background 0.5s ease, border-color 0.5s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-brand {
@@ -71,7 +165,7 @@ body::before {
 }
 
 .navbar-brand:hover {
-    color: var(--primary-green);
+    color: var(--primary-color);
 }
 
 .brand-text {
@@ -88,7 +182,7 @@ body::before {
 }
 
 .nav-link:hover {
-    color: var(--primary-green);
+    color: var(--primary-color);
 }
 
 .nav-link::after {
@@ -99,8 +193,8 @@ body::before {
     transform: translateX(-50%) scaleX(0);
     width: 80%;
     height: 2px;
-    background: linear-gradient(90deg, var(--primary-green), var(--accent-teal));
-    box-shadow: 0 0 8px var(--primary-green);
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-1));
+    box-shadow: 0 0 8px var(--primary-color);
     transition: transform 0.3s ease;
 }
 
@@ -139,15 +233,15 @@ body::before {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary-green-dark) 0%, var(--primary-green) 50%, var(--accent-teal) 100%);
-    color: var(--white);
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4), var(--shadow-glow);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 50%, var(--accent-1) 100%);
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px var(--glow-color), var(--shadow-glow);
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-emerald) 50%, var(--accent-teal) 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-2) 50%, var(--accent-1) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5), 0 0 30px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 6px 20px var(--glow-color), 0 0 30px var(--glow-color);
 }
 
 .btn-primary:active {
@@ -155,17 +249,17 @@ body::before {
 }
 
 .btn-outline-primary {
-    border: 2px solid var(--primary-green);
-    color: var(--primary-green);
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
     background-color: transparent;
-    box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+    box-shadow: 0 0 10px var(--glow-color);
 }
 
 .btn-outline-primary:hover {
-    background: linear-gradient(135deg, var(--primary-green-dark) 0%, var(--primary-green) 50%, var(--accent-teal) 100%);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 50%, var(--accent-1) 100%);
+    color: #FFFFFF;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4), 0 0 20px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 4px 12px var(--glow-color), 0 0 20px var(--glow-color);
 }
 
 
@@ -200,11 +294,11 @@ body::before {
 }
 
 .card {
-    background-color: var(--dark-card-bg);
+    background-color: var(--bg-card);
     border: 2px solid transparent;
     background-image:
-        linear-gradient(var(--dark-card-bg), var(--dark-card-bg)),
-        linear-gradient(135deg, var(--primary-green-dark), var(--primary-green), var(--accent-teal));
+        linear-gradient(var(--bg-card), var(--bg-card)),
+        linear-gradient(135deg, var(--primary-dark), var(--primary-color), var(--accent-1));
     background-origin: border-box;
     background-clip: padding-box, border-box;
     border-radius: var(--border-radius);
@@ -214,19 +308,19 @@ body::before {
 }
 
 .card:hover {
-    box-shadow: 0 12px 40px rgba(34, 197, 94, 0.3), 0 0 40px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 12px 40px var(--glow-color), 0 0 40px var(--glow-color);
     transform: translateY(-2px);
 }
 
 .card-title {
     font-size: 1.75rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--primary-green), var(--accent-teal));
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-1));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 1.5rem;
-    filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.3));
+    filter: drop-shadow(0 0 10px var(--glow-color));
 }
 
 
@@ -244,16 +338,16 @@ body::before {
     border-radius: 10px;
     font-size: 0.95rem;
     transition: var(--transition);
-    background-color: rgba(15, 15, 15, 0.8);
-    color: #FFFFFF !important;
+    background-color: var(--form-input-bg);
+    color: var(--text-primary) !important;
 }
 
 .form-control:focus {
-    border-color: var(--primary-green);
-    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2), 0 0 15px rgba(34, 197, 94, 0.3);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px var(--glow-color), 0 0 15px var(--glow-color);
     outline: none;
-    background-color: rgba(20, 20, 20, 0.9);
-    color: #FFFFFF !important;
+    background-color: var(--form-input-focus-bg);
+    color: var(--text-primary) !important;
 }
 
 .form-control::placeholder {
@@ -262,15 +356,15 @@ body::before {
 
 
 a {
-    color: var(--primary-green);
+    color: var(--primary-color);
     transition: var(--transition);
     font-weight: 500;
 }
 
 a:hover {
-    color: var(--accent-teal);
+    color: var(--accent-1);
     text-decoration: underline;
-    text-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    text-shadow: 0 0 8px var(--glow-color);
 }
 
 
@@ -323,6 +417,75 @@ input:-webkit-autofill:focus,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 30px rgba(15, 15, 15, 0.8) inset !important;
+    -webkit-box-shadow: 0 0 0 30px var(--form-input-bg) inset !important;
     -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+
+/* Theme Toggle Styles */
+.theme-toggle-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    background: var(--bg-card);
+    padding: 0.25rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.25rem;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.theme-toggle-btn .theme-icon {
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--border-color);
+    transform: scale(1.1);
+}
+
+.theme-toggle-btn:hover .theme-icon {
+    transform: rotate(15deg);
+}
+
+.theme-toggle-btn.active {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+    box-shadow: 0 2px 8px var(--glow-color);
+    transform: scale(1.05);
+}
+
+.theme-toggle-btn.active .theme-icon {
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+.theme-toggle-btn.active:hover {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-1));
+}
+
+@keyframes iconPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
 }

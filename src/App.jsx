@@ -9,6 +9,22 @@ function AppContent() {
     const navigate = useNavigate()
     const location = useLocation()
 
+    // Theme state management
+    const [theme, setTheme] = useState(() => {
+        // Initialize from localStorage or default to 'dark-green'
+        return localStorage.getItem('cleanstreet-theme') || 'dark-green'
+    })
+
+    // Apply theme to document root
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme)
+        localStorage.setItem('cleanstreet-theme', theme)
+    }, [theme])
+
+    const handleThemeChange = (newTheme) => {
+        setTheme(newTheme)
+    }
+
     const showLogin = () => {
         navigate('/')
     }
@@ -34,7 +50,12 @@ function AppContent() {
 
     return (
         <>
-            <Navbar showLogin={showLogin} showSignup={showSignup} />
+            <Navbar
+                showLogin={showLogin}
+                showSignup={showSignup}
+                currentTheme={theme}
+                onThemeChange={handleThemeChange}
+            />
             <div className="main-content">
                 <Routes>
                     <Route path="/" element={<Login showSignup={showSignup} />} />
