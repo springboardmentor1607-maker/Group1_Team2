@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Dark Green Theme (Default) */
 :root,
 [data-theme="dark-green"] {
@@ -119,13 +123,15 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: var(--gradient-bg);
     color: var(--text-primary);
     min-height: 100vh;
     position: relative;
-    transition: background 0.5s ease, color 0.5s ease;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     animation: themeSwitch 0.5s ease;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
 }
 
 body::before {
@@ -142,6 +148,13 @@ body::before {
     pointer-events: none;
     z-index: 0;
     transition: opacity 0.5s ease;
+    animation: backgroundFloat 20s ease-in-out infinite;
+}
+
+@keyframes backgroundFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-10px) rotate(1deg); }
+    66% { transform: translateY(5px) rotate(-0.5deg); }
 }
 
 
@@ -450,42 +463,428 @@ select:-webkit-autofill:focus {
     min-height: 40px;
 }
 
-.theme-toggle-btn .theme-icon {
+.theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
     font-size: 1.25rem;
-    transition: transform 0.3s ease;
+    min-width: 40px;
+    min-height: 40px;
 }
 
 .theme-toggle-btn:hover {
     background: var(--border-color);
-    transform: scale(1.1);
-}
-
-.theme-toggle-btn:hover .theme-icon {
-    transform: rotate(15deg);
+    transform: scale(1.03);
 }
 
 .theme-toggle-btn.active {
     background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
     box-shadow: 0 2px 8px var(--glow-color);
-    transform: scale(1.05);
-}
-
-.theme-toggle-btn.active .theme-icon {
-    animation: iconPulse 2s ease-in-out infinite;
+    transform: scale(1.03);
 }
 
 .theme-toggle-btn.active:hover {
     background: linear-gradient(135deg, var(--primary-color), var(--accent-1));
 }
 
-@keyframes iconPulse {
+/* ===== MODERN ENHANCEMENTS ===== */
 
-    0%,
-    100% {
-        transform: scale(1);
-    }
+/* Glassmorphism Components */
+.glass-card {
+    /* slightly darker glass for better contrast */
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 40px rgba(2, 6, 23, 0.35);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-    50% {
-        transform: scale(1.1);
+.glass-card:hover {
+    background: rgba(255, 255, 255, 0.09);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 48px rgba(2, 6, 23, 0.45);
+}
+
+/* Sidebar compact badge style (small 'icon') */
+.sidebar-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: white;
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+    box-shadow: 0 6px 20px rgba(2,6,23,0.35);
+}
+
+/* Slightly darker sidebar when collapsed to improve contrast */
+@media (min-width: 1024px) {
+    .lg\:w-16.bg-white\/5.dark\:bg-black\/70 {
+        background-color: rgba(0,0,0,0.68) !important;
+        backdrop-filter: blur(8px);
     }
+}
+
+/* Modern Button Styles */
+.btn-modern {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(145deg, var(--primary-color), var(--primary-hover));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 12px;
+}
+
+.btn-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-modern:hover::before {
+    left: 100%;
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.btn-modern:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced Input Fields */
+.input-modern {
+    position: relative;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-primary); /* ensure input text is readable in both themes */
+}
+
+.input-modern::placeholder {
+    color: var(--text-muted);
+    opacity: 0.9;
+}
+
+.input-modern:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.18);
+    outline: none;
+}
+
+/* Profile: force all text to the green theme color */
+.force-light,
+.force-light * {
+    color: var(--primary-color) !important;
+}
+
+/* Ensure inputs, placeholders and common profile elements inherit green text */
+.force-light input,
+.force-light textarea,
+.force-light select,
+.force-light .input-modern,
+.force-light .profile-input,
+.force-light .profile-value,
+.force-light label,
+.force-light p,
+.force-light h1,
+.force-light h2,
+.force-light h3,
+.force-light h4,
+.force-light h5,
+.force-light h6,
+.force-light .btn,
+.force-light .btn-modern,
+.force-light .glass-card {
+    color: var(--primary-color) !important;
+}
+
+.force-light input::placeholder,
+.force-light textarea::placeholder,
+.force-light ::placeholder,
+.force-light .profile-input::placeholder {
+    color: rgba(34,197,94,0.8) !important;
+}
+
+/* Keep backgrounds and borders as-is; only text color is forced to green */
+
+/* Buttons in profile: set button text to black for readability */
+.force-light .btn,
+.force-light .btn-modern,
+.force-light .profile-btn-primary,
+.force-light .profile-btn-secondary,
+.force-light button {
+    color: #000000 !important;
+}
+
+.force-light .btn svg,
+.force-light .btn-modern svg,
+.force-light button svg {
+    fill: #000000 !important;
+    stroke: #000000 !important;
+}
+
+
+
+/* Loading Animation */
+.spinner-modern {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Card Hover Effects */
+.card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.card-hover:hover::before {
+    opacity: 1;
+}
+
+/* Floating Animation */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.float-animation {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse Effect */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+/* Text Shimmer Effect */
+@keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+}
+
+.text-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background-size: 200px 100%;
+    background-repeat: no-repeat;
+    animation: shimmer 2s infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+/* Gradient Text */
+.gradient-text {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-1));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Modern Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-1));
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, var(--primary-hover), var(--accent-2));
+}
+
+/* Neon Glow Effect */
+.neon-glow {
+    box-shadow: 
+        0 0 5px var(--primary-color),
+        0 0 10px var(--primary-color),
+        0 0 15px var(--primary-color),
+        0 0 20px var(--primary-color);
+    animation: neonPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes neonPulse {
+    from { box-shadow: 
+        0 0 5px var(--primary-color),
+        0 0 10px var(--primary-color),
+        0 0 15px var(--primary-color),
+        0 0 20px var(--primary-color); }
+    to { box-shadow: 
+        0 0 2px var(--primary-color),
+        0 0 5px var(--primary-color),
+        0 0 8px var(--primary-color),
+        0 0 12px var(--primary-color); }
+}
+
+/* Modern Form Styling */
+.form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-primary);
+    padding: 0 8px;
+    color: var(--text-muted);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.form-input:focus + .form-label,
+.form-input:not(:placeholder-shown) + .form-label {
+    top: 0;
+    font-size: 0.75rem;
+    color: var(--primary-color);
+}
+
+/* Page Transition */
+.page-transition {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Grid Enhancement */
+.grid-auto-fit {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+    .grid-auto-fit {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* Interactive Elements */
+.interactive-element {
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interactive-element:hover {
+    transform: scale(1.05);
+}
+
+.interactive-element:active {
+    transform: scale(0.95);
+}
+
+/* Theme Transition Class */
+.theme-transition {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* Enhanced focus states */
+*:focus {
+    outline: none;
+}
+
+*:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Selection styling */
+::selection {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Smooth scrolling for all elements */
+html {
+    scroll-behavior: smooth;
 }
