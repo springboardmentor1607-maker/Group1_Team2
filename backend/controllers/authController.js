@@ -1,5 +1,4 @@
-const { pool } = require('../config/db');
-
+const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -9,31 +8,25 @@ exports.register = async (req, res) => {
     try {
         const { name, email, password, location, role } = req.body;
 
-        // Check existing user
-        const existing = await pool.query(
-            "SELECT * FROM users WHERE email=$1",
-            [email]
-        );
+        const existing = await User.findByEmail(email);
 
-        if (existing.rows.length > 0) {
+        if (existing) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Insert user
-        const result = await pool.query(
-            `INSERT INTO users (name,email,password,location,role)
-             VALUES ($1,$2,$3,$4,$5)
-             RETURNING id, role`,
-            [name, email, hashedPassword, location || '', role || 'citizen']
-        );
+        // Creating user
+        const user = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+            location,
+            role
+        });
 
-        const user = result.rows[0];
-
-        // Create JWT
+        //JWT
         const token = jwt.sign(
             { user: { id: user.id, role: user.role } },
             process.env.JWT_SECRET || 'secretkey',
@@ -54,16 +47,11 @@ exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const result = await pool.query(
-            "SELECT * FROM users WHERE email=$1",
-            [email]
-        );
+        const user = await User.findByEmail(email);
 
-        if (result.rows.length === 0) {
+        if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
-
-        const user = result.rows[0];
 
         const isMatch = await bcrypt.compare(password, user.password);
 
