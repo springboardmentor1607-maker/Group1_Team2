@@ -1,4 +1,4 @@
 function Settings() {
-  return <h2 style={{ color: "white" }}>Settings Page</h2>;
+  return <h2 className="text-dark p-4">Settings Page</h2>;
 }
 export default Settings;

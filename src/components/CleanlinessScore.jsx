@@ -7,8 +7,8 @@ const CircularProgress = ({ value, size = 120, strokeWidth = 10 }) => {
     const offset = circumference - (value / 100) * circumference;
 
     return (
-        <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-            <svg width={size} height={size} className="transform -rotate-90">
+        <div className="position-relative d-flex align-items-center justify-content-center" style={{ width: size, height: size }}>
+            <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
                 <circle
                     cx={size / 2}
                     cy={size / 2}
@@ -16,7 +16,7 @@ const CircularProgress = ({ value, size = 120, strokeWidth = 10 }) => {
                     stroke="currentColor"
                     strokeWidth={strokeWidth}
                     fill="transparent"
-                    className="text-gray-200 dark:text-gray-700"
+                    className="text-secondary opacity-25"
                 />
                 <motion.circle
                     initial={{ strokeDashoffset: circumference }}
@@ -30,12 +30,12 @@ const CircularProgress = ({ value, size = 120, strokeWidth = 10 }) => {
                     fill="transparent"
                     strokeDasharray={circumference}
                     strokeLinecap="round"
-                    className="text-primary-500"
+                    className="text-primary"
                 />
             </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold text-gray-900 dark:text-white">{value}%</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">Clean</span>
+            <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                <span className="fs-2 fw-bold text-body">{value}%</span>
+                <span className="small text-body-secondary text-uppercase fw-semibold">Clean</span>
             </div>
         </div>
     );
@@ -47,11 +47,11 @@ export default function CleanlinessScore({ score }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.8 }}
-            className="bg-white dark:bg-dark-card p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 h-full flex flex-col items-center justify-center"
+            className="card border-0 shadow-lg p-4 rounded-xl h-100 d-flex flex-column align-items-center justify-content-center"
         >
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6 self-start">Cleanliness Score</h3>
+            <h3 className="fs-5 fw-semibold text-body mb-4 align-self-start">Cleanliness Score</h3>
             <CircularProgress value={score} />
-            <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-4 text-center small text-body-secondary">
                 Based on resolved complaints vs total reports in your area.
             </p>
         </motion.div>
