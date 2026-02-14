@@ -1,164 +1,28 @@
-import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
-import Navbar from './components/Navbar'
-import Login from './components/Login'
-import Signup from './components/Signup'
-import DashboardLayout from './components/DashboardLayout'
-import Dashboard from './pages/Dashboard'
-import Profile from './pages/Profile'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import DashboardLayout from './components/DashboardLayout';
 
-function AppContent() {
-    const navigate = useNavigate()
-    const location = useLocation()
-    
-    // Authentication state
-    const [isAuthenticated, setIsAuthenticated] = useState(() => {
-        return localStorage.getItem('isAuthenticated') === 'true'
-    })
-
-    // Theme state management
-    const [theme, setTheme] = useState(() => {
-        return localStorage.getItem('cleanstreet-theme') || 'dark-green'
-    })
-
-    // Apply theme to document root with enhanced body styling
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme)
-        localStorage.setItem('cleanstreet-theme', theme)
-        
-        // Add smooth transition class to body for theme switching
-        document.body.classList.add('theme-transition')
-    }, [theme])
-
-    const handleThemeChange = (newTheme) => {
-        setTheme(newTheme)
-    }
-
-    const handleLogin = () => {
-        setIsAuthenticated(true)
-        localStorage.setItem('isAuthenticated', 'true')
-        navigate('/dashboard')
-    }
-
-    const handleLogout = () => {
-        setIsAuthenticated(false)
-        localStorage.removeItem('isAuthenticated')
-        navigate('/')
-    }
-
-    const showLogin = () => {
-        navigate('/')
-    }
-
-    const showSignup = () => {
-        navigate('/signup')
-    }
-
-    // Keyboard shortcuts
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.key === 'l' && !e.target.matches('input, textarea')) {
-                showLogin()
-            }
-            if (e.key === 'r' && !e.target.matches('input, textarea')) {
-                showSignup()
-            }
-        }
-
-        document.addEventListener('keydown', handleKeyDown)
-        return () => document.removeEventListener('keydown', handleKeyDown)
-    }, [])
-
-    // Protected route wrapper
-    const ProtectedRoute = ({ children }) => {
-        return isAuthenticated ? children : <Navigate to="/" replace />
-    }
-
-    // Public route wrapper (redirect to dashboard if already logged in)
-    const PublicRoute = ({ children }) => {
-        return !isAuthenticated ? children : <Navigate to="/dashboard" replace />
-    }
-
-    return (
-        <>
-            {/* Show navbar for auth pages, dashboard layout handles its own navbar */}
-            {!isAuthenticated && (
-                <Navbar
-                    showLogin={showLogin}
-                    showSignup={showSignup}
-                    currentTheme={theme}
-                    onThemeChange={handleThemeChange}
-                />
-            )}
-            
-            <div className="main-content">
-                <Routes>
-                    {/* Public routes */}
-                    <Route 
-                        path="/" 
-                        element={
-                            <PublicRoute>
-                                <Login showSignup={showSignup} onLogin={handleLogin} />
-                            </PublicRoute>
-                        } 
-                    />
-                    <Route 
-                        path="/signup" 
-                        element={
-                            <PublicRoute>
-                                <Signup showLogin={showLogin} onLogin={handleLogin} />
-                            </PublicRoute>
-                        } 
-                    />
-                    
-                    {/* Protected routes */}
-                    <Route 
-                        path="/dashboard" 
-                        element={
-                            <ProtectedRoute>
-                                <DashboardLayout 
-                                    onLogout={handleLogout}
-                                    currentTheme={theme}
-                                    onThemeChange={handleThemeChange}
-                                >
-                                    <Dashboard />
-                                </DashboardLayout>
-                            </ProtectedRoute>
-                        } 
-                    />
-                    <Route 
-                        path="/profile" 
-                        element={
-                            <ProtectedRoute>
-                                <DashboardLayout 
-                                    onLogout={handleLogout}
-                                    currentTheme={theme}
-                                    onThemeChange={handleThemeChange}
-                                >
-                                    <Profile />
-                                </DashboardLayout>
-                            </ProtectedRoute>
-                        } 
-                    />
-                    
-                    {/* Default redirect */}
-                    <Route 
-                        path="*" 
-                        element={<Navigate to={isAuthenticated ? "/dashboard" : "/"} replace />} 
-                    />
-                </Routes>
-            </div>
-        </>
-    )
-}
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import Complaints from './pages/Complaints';
+import MapView from './pages/MapView';
+import Settings from './pages/Settings';
 
 function App() {
-    return (
-        <Router>
-            <AppContent />
-        </Router>
-    )
+  return (
+    <Router>
+      <DashboardLayout>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/complaints" element={<Complaints />} />
+          <Route path="/map" element={<MapView />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </DashboardLayout>
+    </Router>
+  );
 }
 
-export default App
+export default App;
