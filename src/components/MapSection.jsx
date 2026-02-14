@@ -20,9 +20,9 @@ export default function MapSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="bg-white dark:bg-dark-card p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8 h-[300px] sm:h-[350px] lg:h-[400px]"
+            className="bg-white dark:bg-dark-card p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 mb-8 h-[400px]"
         >
-            <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4">Complaint Map View</h3>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Complaint Map View</h3>
             <div className="h-full w-full rounded-lg overflow-hidden z-0 relative">
                 <MapContainer center={position} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%', zIndex: 0 }}>
                     <TileLayer

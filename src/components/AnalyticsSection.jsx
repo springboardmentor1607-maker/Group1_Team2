@@ -7,10 +7,10 @@ const ChartCard = ({ title, children, delay }) => (
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay, duration: 0.5 }}
-        className="bg-white dark:bg-dark-card p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700"
+        className="bg-white dark:bg-dark-card p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700"
     >
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 sm:mb-6">{title}</h3>
-        <div className="h-48 sm:h-56 lg:h-64 w-full">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6">{title}</h3>
+        <div className="h-64 w-full">
             {children}
         </div>
     </motion.div>
@@ -18,7 +18,7 @@ const ChartCard = ({ title, children, delay }) => (
 
 export default function AnalyticsSection({ distribution, weekly }) {
     return (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <ChartCard title="Complaint Status Distribution" delay={0.5}>
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>

@@ -5,6 +5,7 @@ import MapSection from '../components/MapSection';
 import RecentActivity from '../components/RecentActivity';
 import CleanlinessScore from '../components/CleanlinessScore';
 import { statsData, complaintDistribution, weeklyActivity, recentActivities } from '../data/mockData';
+import { Plus, List, Map as MapIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Dashboard() {
@@ -25,100 +26,60 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto page-transition px-4 sm:px-6 lg:px-8">
-            {/* Header Section with Enhanced Styling */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-                <motion.div
-                    initial={{ x: -50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ duration: 0.6 }}
-                >
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold gradient-text mb-2">Welcome Back, Citizen!</h1>
-                    <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Here's what's happening in your neighborhood today.</p>
-                </motion.div>
+        <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome Back, Citizen!</h1>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1">Here's what's happening in your neighborhood today.</p>
+                </div>
 
-                <motion.div
-                    initial={{ x: 50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    className="flex gap-2"
-                >
-                    <button className="btn-modern flex items-center px-4 sm:px-6 py-2 sm:py-3 text-white rounded-xl transition-all duration-300 shadow-lg neon-glow text-sm sm:text-base w-full sm:w-auto justify-center">
+                <div className="flex gap-2">
+                    <button className="flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors shadow-sm">
+                        <Plus className="w-4 h-4 mr-2" />
                         Report Issue
                     </button>
-                </motion.div>
+                </div>
             </div>
 
-            {/* Enhanced Layout with Motion */}
-            <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-            >
-                <StatsSection stats={statsData} />
-            </motion.div>
+            <StatsSection stats={statsData} />
 
-            <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-            >
-                <AnalyticsSection distribution={complaintDistribution} weekly={weeklyActivity} />
-            </motion.div>
+            <AnalyticsSection distribution={complaintDistribution} weekly={weeklyActivity} />
 
-            <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8"
-            >
-                <div className="lg:col-span-2 card-hover order-1 lg:order-1">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <div className="lg:col-span-2">
                     <MapSection />
                 </div>
-                <div className="space-y-4 sm:space-y-6 lg:space-y-8 order-2 lg:order-2">
-                    <motion.div className="card-hover" whileHover={{ scale: 1.02 }}>
-                        <CleanlinessScore score={78} />
-                    </motion.div>
-                    <motion.div className="card-hover" whileHover={{ scale: 1.02 }}>
-                        <RecentActivity activities={recentActivities} />
-                    </motion.div>
+                <div className="space-y-8">
+                    <CleanlinessScore score={78} />
+                    <RecentActivity activities={recentActivities} />
                 </div>
-            </motion.div>
+            </div>
 
-            {/* Quick Actions Mobile/Bottom with Enhanced Styling */}
+            {/* Quick Actions Mobile/Bottom */}
             <motion.div
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.6 }}
-                className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6 lg:hidden"
+                transition={{ delay: 1 }}
+                className="grid grid-cols-3 gap-4 lg:hidden"
             >
-                <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="glass-card p-4 sm:p-6 rounded-xl text-center border border-white/20 card-hover"
-                >
-                    <div className="mx-auto w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-2 sm:mb-3 shadow-lg">
+                <button className="p-4 bg-white dark:bg-dark-card rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-700">
+                    <div className="mx-auto w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-2">
+                        <List className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <span className="text-xs sm:text-sm font-semibold text-gray-300">View All</span>
-                </motion.button>
-                <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="glass-card p-4 sm:p-6 rounded-xl text-center border border-white/20 card-hover"
-                >
-                    <div className="mx-auto w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mb-2 sm:mb-3 shadow-lg">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">View All</span>
+                </button>
+                <button className="p-4 bg-white dark:bg-dark-card rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-700">
+                    <div className="mx-auto w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-2">
+                        <MapIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <span className="text-xs sm:text-sm font-semibold text-gray-300">Map View</span>
-                </motion.button>
-                <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="glass-card p-4 sm:p-6 rounded-xl text-center border border-white/20 card-hover neon-glow col-span-2 sm:col-span-1"
-                >
-                    <div className="mx-auto w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center mb-2 sm:mb-3 shadow-lg">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Map View</span>
+                </button>
+                <button className="p-4 bg-white dark:bg-dark-card rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-700">
+                    <div className="mx-auto w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mb-2">
+                        <Plus className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                     </div>
-                    <span className="text-xs sm:text-sm font-semibold text-gray-300">Report</span>
-                </motion.button>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Report</span>
+                </button>
             </motion.div>
         </div>
     );
