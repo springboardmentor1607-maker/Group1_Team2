@@ -3,22 +3,24 @@ import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, 
 import { motion } from 'framer-motion';
 
 const ChartCard = ({ title, children, delay }) => (
-    <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay, duration: 0.5 }}
-        className="bg-white dark:bg-dark-card p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700"
-    >
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6">{title}</h3>
-        <div className="h-64 w-full">
-            {children}
-        </div>
-    </motion.div>
+    <div className="col-12 col-lg-6">
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay, duration: 0.5 }}
+            className="card border-0 shadow-lg p-4 rounded-xl h-100"
+        >
+            <h3 className="fs-5 fw-semibold text-body mb-4">{title}</h3>
+            <div className="w-100 h-64">
+                {children}
+            </div>
+        </motion.div>
+    </div>
 );
 
 export default function AnalyticsSection({ distribution, weekly }) {
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="row g-4 mb-4">
             <ChartCard title="Complaint Status Distribution" delay={0.5}>
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -53,7 +55,7 @@ export default function AnalyticsSection({ distribution, weekly }) {
                             cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
                             contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
                         />
-                        <Bar dataKey="complaints" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="complaints" fill="#0d6efd" radius={[4, 4, 0, 0]} />
                     </BarChart>
                 </ResponsiveContainer>
             </ChartCard>

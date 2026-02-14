@@ -1,26 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Bootstrap imported in main.jsx */
 
-@layer base {
-  body {
-    @apply bg-gray-50 text-gray-900 font-sans antialiased transition-colors duration-200;
-  }
-  .dark body {
-    @apply bg-dark-bg text-dark-text;
-  }
-}
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   @apply bg-gray-300 rounded-full hover:bg-gray-400;
 }
+
 .dark ::-webkit-scrollbar-thumb {
   @apply bg-gray-700 hover:bg-gray-600;
 }

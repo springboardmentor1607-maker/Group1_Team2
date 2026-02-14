@@ -15,7 +15,8 @@ import { cn } from '../lib/utils';
 import { motion } from 'framer-motion';
 import { NavLink, useLocation } from "react-router-dom";
 
-const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
+/* ===================== SIDEBAR ===================== */
+const Sidebar = ({ isOpen, closeSidebar }) => {
     const menuItems = [
         { icon: Home, label: 'Dashboard', path: '/dashboard' },
         { icon: FileText, label: 'Complaints', path: '/complaints' },
@@ -27,29 +28,42 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
     return (
         <motion.aside
             className={cn(
-                "fixed left-0 top-0 z-40 h-screen bg-white dark:bg-dark-card border-r border-gray-200 dark:border-gray-700 transition-all duration-300",
-                isOpen ? "w-64" : "w-0 lg:w-20"
+                "position-fixed start-0 top-0 z-40 h-100 bg-card border-end",
+                isOpen ? "w-64" : "w-20"
             )}
             animate={{ width: isOpen ? 256 : 80 }}
         >
-            {/* Logo */}
-            <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
-                <h1 className={cn(
-                    "text-2xl font-bold text-primary-600 dark:text-primary-400 overflow-hidden whitespace-nowrap",
-                    !isOpen && "lg:hidden"
-                )}>
-                    CleanStreet
-                </h1>
-
-                {!isOpen && (
-                    <span className="hidden lg:block text-2xl font-bold text-primary-600">
-                        CS
-                    </span>
-                )}
+            {/* ===== LOGO ===== */}
+            <div className="d-flex align-items-center justify-content-center h-16 border-bottom">
+                <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#22C55E" />
+                            <stop offset="100%" stopColor="#14B8A6" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="32" height="32" rx="6" fill="url(#logoGradient)" />
+                    <rect x="6" y="18" width="4" height="8" fill="white" />
+                    <rect x="11" y="15" width="4" height="11" fill="white" />
+                    <rect x="16" y="17" width="4" height="9" fill="white" />
+                    <rect x="21" y="19" width="4" height="7" fill="white" />
+                    <rect
+                        x="13"
+                        y="13"
+                        width="2"
+                        height="8"
+                        rx="1"
+                        fill="white"
+                        transform="rotate(-45 14 14)"
+                    />
+                    <circle cx="20" cy="8" r="1.5" fill="white" />
+                    <circle cx="24" cy="10" r="1" fill="white" />
+                    <circle cx="18" cy="11" r="1" fill="white" />
+                </svg>
             </div>
 
-            {/* Menu */}
-            <nav className="p-4 space-y-2">
+            {/* ===== MENU ===== */}
+            <nav className="p-3 d-flex flex-column gap-2">
                 {menuItems.map((item, index) => (
                     <NavLink
                         key={index}
@@ -57,149 +71,89 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
                         onClick={closeSidebar}
                         className={({ isActive }) =>
                             cn(
-                                "flex items-center w-full p-3 rounded-lg transition-colors group",
-                                isActive
-                                    ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400"
-                                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                "nav-link d-flex align-items-center p-3 rounded text-decoration-none transition-colors",
+                                isActive ? "active" : "text-body-secondary"
                             )
                         }
                     >
-                        <item.icon className="w-6 h-6 flex-shrink-0" />
-
-                        <span className={cn(
-                            "ml-3 font-medium whitespace-nowrap overflow-hidden transition-all duration-300",
-                            !isOpen && "lg:opacity-0 lg:w-0"
-                        )}>
-                            {item.label}
-                        </span>
+                        <item.icon className="w-6 h-6" />
+                        {isOpen && <span className="ms-3">{item.label}</span>}
                     </NavLink>
                 ))}
             </nav>
 
-            {/* Logout */}
-            <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 dark:border-gray-700">
-                <button className="flex items-center w-full p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
-                    <LogOut className="w-6 h-6 flex-shrink-0" />
-                    <span className={cn(
-                        "ml-3 font-medium whitespace-nowrap overflow-hidden",
-                        !isOpen && "lg:hidden"
-                    )}>
-                        Logout
-                    </span>
+            {/* ===== LOGOUT ===== */}
+            <div className="position-absolute bottom-0 w-100 p-3 border-top">
+                <button className="d-flex align-items-center w-100 p-3 text-danger btn btn-link text-decoration-none rounded nav-link">
+                    <LogOut className="w-6 h-6" />
+                    {isOpen && <span className="ms-3">Logout</span>}
                 </button>
             </div>
         </motion.aside>
     );
 };
 
+/* ===================== HEADER ===================== */
 const Header = ({ toggleSidebar, sidebarOpen }) => {
     const { theme, toggleTheme } = useTheme();
     const location = useLocation();
 
     const getTitle = () => {
         switch (location.pathname) {
-            case '/dashboard':
-                return 'Dashboard Overview';
-            case '/profile':
-                return 'Profile';
-            case '/complaints':
-                return 'Complaints';
-            case '/map':
-                return 'Map View';
-            case '/settings':
-                return 'Settings';
-            default:
-                return '';
+            case '/dashboard': return 'Dashboard Overview';
+            case '/profile': return 'Profile';
+            case '/complaints': return 'Complaints';
+            case '/map': return 'Map View';
+            case '/settings': return 'Settings';
+            default: return '';
         }
     };
 
     return (
         <header
             className={cn(
-                "h-16 bg-white dark:bg-dark-card border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-6 fixed top-0 right-0 z-30 transition-all duration-300",
+                "h-16 bg-card border-bottom d-flex align-items-center justify-content-between px-3 position-fixed top-0 end-0 z-30 transition-all",
                 sidebarOpen ? "lg:left-64" : "lg:left-20"
             )}
         >
-            <div className="flex items-center">
-                <button
-                    onClick={toggleSidebar}
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden"
-                >
-                    <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-                </button>
+            <button onClick={toggleSidebar} className="btn p-2 d-lg-none text-body">
+                <Menu />
+            </button>
 
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white ml-2 lg:ml-0">
-                    {getTitle()}
-                </h2>
-            </div>
+            <h2 className="fs-4 fw-semibold m-0 text-body">{getTitle()}</h2>
 
-            <div className="flex items-center gap-4">
-                <button
-                    onClick={toggleTheme}
-                    className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
-                >
-                    {theme === 'light'
-                        ? <Moon className="w-5 h-5" />
-                        : <Sun className="w-5 h-5" />}
-                </button>
-
-                <NavLink to="/profile">
-                    <div className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-700 cursor-pointer">
-                        <div className="text-right hidden sm:block">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                John Doe
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                Citizen
-                            </p>
-                        </div>
-
-                        <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                            <User className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-                        </div>
-                    </div>
-                </NavLink>
-            </div>
+            <button onClick={toggleTheme} className="btn text-body">
+                {theme === 'light' ? <Moon /> : <Sun />}
+            </button>
         </header>
     );
 };
 
+/* ===================== LAYOUT ===================== */
 export default function DashboardLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-    const toggleSidebar = () => setSidebarOpen(prev => !prev);
-    const closeSidebar = () => setSidebarOpen(false);
-
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-dark-bg transition-colors duration-200">
+        <div className="min-h-screen bg-body">
             <Sidebar
                 isOpen={sidebarOpen}
-                toggleSidebar={toggleSidebar}
-                closeSidebar={closeSidebar}
+                closeSidebar={() => setSidebarOpen(false)}
             />
 
             <Header
-                toggleSidebar={toggleSidebar}
+                toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
                 sidebarOpen={sidebarOpen}
             />
 
-            <div
+            {/* ✅ PERFECT SPACING */}
+            <main
                 className={cn(
-                    "transition-all duration-300 pt-16 min-h-screen flex flex-col",
+                    "pt-28 px-4 transition-all",
                     sidebarOpen ? "lg:ml-64" : "lg:ml-20"
                 )}
             >
-                <main className="flex-1 p-4 lg:p-6 overflow-x-hidden">
-                    {children}
-                </main>
-            </div>
-
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-                    onClick={closeSidebar}
-                />
-            )}
+                {children}
+            </main>
         </div>
     );
 }
