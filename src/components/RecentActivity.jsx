@@ -3,11 +3,10 @@ import { motion } from 'framer-motion';
 
 const ActivityItem = ({ type, message, time }) => {
     return (
-        <div className="flex items-start space-x-2 sm:space-x-3 p-2 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors">
-            <div className="mt-0.5"></div>
-            <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-medium text-gray-800 dark:text-gray-200 break-words">{message}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{time}</p>
+        <div className="d-flex align-items-start p-2 p-sm-3 rounded hover-bg-light">
+            <div className="flex-grow-1 min-w-0">
+                <p className="small fw-medium text-break mb-1">{message}</p>
+                <p className="smaller text-muted">{time}</p>
             </div>
         </div>
     );
@@ -19,15 +18,15 @@ export default function RecentActivity({ activities }) {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.8 }}
-            className="bg-white dark:bg-dark-card p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 h-full"
+            className="card shadow-lg border p-3 p-sm-4 h-100"
         >
-            <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4">Recent Activity</h3>
-            <div className="space-y-1">
+            <h3 className="card-title fs-6 fs-sm-5 fw-semibold mb-3 mb-sm-4">Recent Activity</h3>
+            <div className="vstack gap-1">
                 {activities.map((activity) => (
                     <ActivityItem key={activity.id} {...activity} />
                 ))}
             </div>
-            <button className="w-full mt-3 sm:mt-4 py-2 text-xs sm:text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
+            <button className="btn btn-link w-100 mt-3 mt-sm-4 py-2 text-primary small fw-medium">
                 View All Activity
             </button>
         </motion.div>

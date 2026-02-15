@@ -20,10 +20,11 @@ export default function MapSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="bg-white dark:bg-dark-card p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8 h-[300px] sm:h-[350px] lg:h-[400px]"
+            className="card shadow-lg border p-3 p-sm-4 p-lg-5 mb-4 mb-sm-5"
+            style={{ height: '300px' }}
         >
-            <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 sm:mb-4">Complaint Map View</h3>
-            <div className="h-full w-full rounded-lg overflow-hidden z-0 relative">
+            <h3 className="card-title fs-6 fs-sm-5 fw-semibold mb-3 mb-sm-4">Complaint Map View</h3>
+            <div className="h-100 w-100 rounded overflow-hidden position-relative" style={{ zIndex: 0 }}>
                 <MapContainer center={position} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%', zIndex: 0 }}>
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
