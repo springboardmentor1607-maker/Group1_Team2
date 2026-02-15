@@ -4,15 +4,16 @@ This is Team 2's integrated full-stack application combining authentication and 
 
 ## Team Members & Contributions
 
-- **Aman-Raj**: Backend development (Node.js/Express, MongoDB, Authentication API)
+- **Aman-Raj**: Backend development (Node.js/Express, Authentication API)
 - **Ansel**: Frontend authentication components (Login/Signup, Navbar, Theme system) 
 - **Krishika**: Frontend dashboard components (Analytics, Maps, Charts with Tailwind CSS)
+- **eshwar**:database(postgresql)
 
 ## Project Structure
 
 ### Backend (Node.js/Express)
 - Authentication system with JWT
-- MongoDB database integration
+- postgresql database integration
 - RESTful API endpoints
 - Located in `/backend` directory
 
@@ -36,7 +37,7 @@ This is Team 2's integrated full-stack application combining authentication and 
 
 **Backend:**
 - Node.js with Express
-- MongoDB with Mongoose
+- supabase for postgresql 
 - JWT for authentication
 - bcryptjs for password hashing
 
