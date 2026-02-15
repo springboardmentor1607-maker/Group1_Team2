@@ -1,256 +1,229 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
-function Signup({ showLogin, onLogin }) {
+function Signup({ showLogin }) {
     const [formData, setFormData] = useState({
         fullName: '',
         username: '',
         email: '',
         phone: '',
         password: '',
-        location: '',
         role: 'user'
     })
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState('')
+
+    const [passwordValidation, setPasswordValidation] = useState({
+        minLength: false,
+        hasCapital: false,
+        hasSpecial: false
+    })
+
+    const [isPasswordValid, setIsPasswordValid] = useState(false)
+    const [passwordFocused, setPasswordFocused] = useState(false)
+
+    const [errors, setErrors] = useState({
+        fullName: '',
+        username: '',
+        email: '',
+        phone: '',
+        password: ''
+    })
+
+    useEffect(() => {
+        const password = formData.password
+        const validation = {
+            minLength: password.length >= 8,
+            hasCapital: /[A-Z]/.test(password),
+            hasSpecial: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+        }
+        setPasswordValidation(validation)
+        setIsPasswordValid(validation.minLength && validation.hasCapital && validation.hasSpecial)
+    }, [formData.password])
 
     const handleChange = (e) => {
+        const { name, value } = e.target
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [name]: value
         })
+        // Clear error when user starts typing
+        if (errors[name]) {
+            setErrors({
+                ...errors,
+                [name]: ''
+            })
+        }
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault()
-        setError('')
-        setIsLoading(true)
 
-        const { fullName, username, email, phone, password, location } = formData
+        const { fullName, username, email, phone, password } = formData
+        const newErrors = {}
 
         // Validation
-        if (!fullName || !email || !password) {
-            setError('Please fill in all required fields')
-            setIsLoading(false)
-            return
+        if (!fullName) {
+            newErrors.fullName = 'Full name is required'
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(email)) {
-            setError('Please enter a valid email address')
-            setIsLoading(false)
-            return
+        if (!username) {
+            newErrors.username = 'Username is required'
         }
 
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters long')
-            setIsLoading(false)
-            return
+        if (!email) {
+            newErrors.email = 'Email is required'
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            if (!emailRegex.test(email)) {
+                newErrors.email = 'Please enter a valid email address'
+            }
         }
 
-        if (phone) {
+        if (!phone) {
+            newErrors.phone = 'Phone number is required'
+        } else {
             const cleanPhone = phone.replace(/\D/g, '')
             if (cleanPhone.length < 10) {
-                setError('Please enter a valid phone number')
-                setIsLoading(false)
-                return
+                newErrors.phone = 'Please enter a valid phone number (at least 10 digits)'
             }
         }
 
-        try {
-            const response = await fetch('http://localhost:3001/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    name: fullName, 
-                    email, 
-                    password, 
-                    location: location || 'Not specified',
-                    role: formData.role 
-                }),
-            })
-
-            const data = await response.json()
-
-            if (response.ok) {
-                // Store token
-                localStorage.setItem('token', data.token)
-                alert('Registration successful! Logging you in...')
-                onLogin() // Call the onLogin callback
-            } else {
-                setError(data.message || 'Registration failed')
+        if (!password) {
+            newErrors.password = 'Password is required'
+        } else {
+            // Password validation: min 8 chars, 1 capital letter, 1 special character
+            const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/
+            if (!passwordRegex.test(password)) {
+                newErrors.password = 'Password must contain at least 8 characters, 1 capital letter, and 1 special character'
             }
-        } catch (err) {
-            console.error('Registration error:', err)
-            setError('Network error. Please check if the backend server is running.')
-        } finally {
-            setIsLoading(false)
         }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors)
+            return
+        }
+
+        console.log('Registration attempt:', formData)
+        alert('Registration successful! (This would redirect to dashboard)')
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-8 relative">
-            {/* Floating Background Elements - Hidden on mobile */}
-            <div className="hidden md:block absolute top-5 lg:top-10 right-5 lg:right-10 w-48 lg:w-64 h-48 lg:h-64 bg-accent-1/10 rounded-full blur-3xl animate-pulse delay-500"></div>
-            <div className="hidden md:block absolute bottom-5 lg:bottom-10 left-5 lg:left-10 w-60 lg:w-80 h-60 lg:h-80 bg-primary-500/10 rounded-full blur-3xl animate-pulse delay-1500"></div>
-            
-            <div className="w-full max-w-md sm:max-w-lg relative z-10">
-                <div className="glass-card p-6 sm:p-8 rounded-xl sm:rounded-2xl border border-white/20 backdrop-blur-xl shadow-2xl">
-                    <div className="text-center mb-8">
-                        <div className="mx-auto w-12 sm:w-16 h-12 sm:h-16 bg-gradient-to-br from-accent-1 to-primary-500 rounded-full flex items-center justify-center mb-4 float-animation">
+        <div className="auth-card">
+            <div className="card">
+                <div className="card-body">
+                    <h2 className="card-title text-center mb-4">Register for CleanStreet</h2>
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-3">
+                            <label htmlFor="signupFullName" className="form-label">Full Name</label>
+                            <input
+                                type="text"
+                                className={`form-control ${errors.fullName ? 'is-invalid' : ''}`}
+                                id="signupFullName"
+                                name="fullName"
+                                placeholder="Enter your full name"
+                                value={formData.fullName}
+                                onChange={handleChange}
+                            />
+                            {errors.fullName && <div className="text-danger small mt-1">{errors.fullName}</div>}
                         </div>
-                        <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-2">Join CleanStreet</h2>
-                        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Create your account to start making a difference</p>
-                    </div>
-                    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-                            <div className="space-y-2">
-                                <label htmlFor="signupFullName" className="block text-sm font-semibold text-gray-300 mb-2">
-                                    Full Name *
-                                </label>
-                                <div className="relative group">
-                                    <input
-                                        type="text"
-                                        className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-black/20 border-2 border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:bg-black/30 transition-all duration-300 group-hover:border-gray-500 text-sm sm:text-base"
-                                        id="signupFullName"
-                                        name="fullName"
-                                        placeholder="Enter your full name"
-                                        value={formData.fullName}
-                                        onChange={handleChange}
-                                        disabled={isLoading}
-                                        required
-                                    />
-                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-accent-1/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label htmlFor="signupRole" className="block text-sm font-semibold text-gray-300 mb-2">
-                                    Role *
-                                </label>
-                                <div className="relative group">
-                                    <select
-                                        className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-black/20 border-2 border-gray-600/50 rounded-xl text-white focus:outline-none focus:border-primary-500 focus:bg-black/30 transition-all duration-300 group-hover:border-gray-500 text-sm sm:text-base"
-                                        id="signupRole"
-                                        name="role"
-                                        value={formData.role}
-                                        onChange={handleChange}
-                                        disabled={isLoading}
-                                    >
-                                        <option value="citizen" className="bg-gray-800">Citizen</option>
-                                        <option value="volunteer" className="bg-gray-800">Volunteer</option>
-                                        <option value="admin" className="bg-gray-800">Admin</option>
-                                    </select>
-                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-accent-1/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                                </div>
-                            </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="signupUsername" className="form-label">Username</label>
+                            <input
+                                type="text"
+                                className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+                                id="signupUsername"
+                                name="username"
+                                placeholder="Choose a username"
+                                value={formData.username}
+                                onChange={handleChange}
+                            />
+                            {errors.username && <div className="text-danger small mt-1">{errors.username}</div>}
                         </div>
-                        <div className="space-y-2">
-                            <label htmlFor="signupEmail" className="block text-sm font-semibold text-gray-300 mb-2">
-                                Email Address *
-                            </label>
-                            <div className="relative group">
-                                <input
-                                    type="email"
-                                    className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-black/20 border-2 border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:bg-black/30 transition-all duration-300 group-hover:border-gray-500 text-sm sm:text-base"
-                                    id="signupEmail"
-                                    name="email"
-                                    placeholder="your.email@example.com"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    disabled={isLoading}
-                                    required
-                                />
-                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-accent-1/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                            </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="signupEmail" className="form-label">Email</label>
+                            <input
+                                type="email"
+                                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                                id="signupEmail"
+                                name="email"
+                                placeholder="Enter your email"
+                                value={formData.email}
+                                onChange={handleChange}
+                            />
+                            {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
                         </div>
-                        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-                            <div className="space-y-2">
-                                <label htmlFor="signupPhone" className="block text-sm font-semibold text-gray-300 mb-2">
-                                    Phone Number <span className="text-gray-500">(Optional)</span>
-                                </label>
-                                <div className="relative group">
-                                    <input
-                                        type="tel"
-                                        className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-black/20 border-2 border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:bg-black/30 transition-all duration-300 group-hover:border-gray-500 text-sm sm:text-base"
-                                        id="signupPhone"
-                                        name="phone"
-                                        placeholder="+91 98765 43210"
-                                        value={formData.phone}
-                                        onChange={handleChange}
-                                        disabled={isLoading}
-                                    />
-                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-accent-1/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label htmlFor="signupLocation" className="block text-sm font-semibold text-gray-300 mb-2">
-                                    Location <span className="text-gray-500">(Optional)</span>
-                                </label>
-                                <div className="relative group">
-                                    <input
-                                        type="text"
-                                        className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-black/20 border-2 border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:bg-black/30 transition-all duration-300 group-hover:border-gray-500 text-sm sm:text-base"
-                                        id="signupLocation"
-                                        name="location"
-                                        placeholder="Mumbai, Maharashtra"
-                                        value={formData.location}
-                                        onChange={handleChange}
-                                        disabled={isLoading}
-                                    />
-                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-accent-1/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                                </div>
-                            </div>
+                        <div className="mb-3">
+                            <label htmlFor="signupRole" className="form-label">Role</label>
+                            <select
+                                className="form-control"
+                                id="signupRole"
+                                name="role"
+                                value={formData.role}
+                                onChange={handleChange}
+                            >
+                                <option value="user">User</option>
+                                <option value="volunteer">Volunteer</option>
+                                <option value="admin">Admin</option>
+                            </select>
                         </div>
-                        <div className="space-y-2">
-                            <label htmlFor="signupPassword" className="block text-sm font-semibold text-gray-300 mb-2">
-                                Password *
-                            </label>
-                            <div className="relative group">
-                                <input
-                                    type="password"
-                                    className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-black/20 border-2 border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:bg-black/30 transition-all duration-300 group-hover:border-gray-500 text-sm sm:text-base"
-                                    id="signupPassword"
-                                    name="password"
-                                    placeholder="Create a secure password (min 6 characters)"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    disabled={isLoading}
-                                    required
-                                />
-                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-accent-1/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                            </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="signupPhone" className="form-label">Phone Number</label>
+                            <input
+                                type="tel"
+                                className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
+                                id="signupPhone"
+                                name="phone"
+                                placeholder="Enter your phone number"
+                                value={formData.phone}
+                                onChange={handleChange}
+                            />
+                            {errors.phone && <div className="text-danger small mt-1">{errors.phone}</div>}
                         </div>
-                        {error && (
-                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-3 py-2.5 rounded-lg text-sm" role="alert">
-                                {error}
-                            </div>
-                        )}
-                        <button 
-                            type="submit" 
-                            className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-semibold py-2.5 sm:py-3 px-4 rounded-lg transition-colors focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed text-sm sm:text-base" 
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <div className="flex items-center justify-center">
-                                    <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                    Creating Account...
+
+                        <div className="mb-4">
+                            <label htmlFor="signupPassword" className="form-label">Password</label>
+                            <input
+                                type="password"
+                                className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                                id="signupPassword"
+                                name="password"
+                                placeholder="Create a password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                onFocus={() => setPasswordFocused(true)}
+                                onBlur={() => setPasswordFocused(false)}
+                            />
+                            {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
+                            {passwordFocused && (
+                                <div className="mt-2">
+                                    <small className={passwordValidation.minLength ? 'text-success' : 'text-danger'}>
+                                        {passwordValidation.minLength ? '✓' : '✗'} At least 8 characters
+                                    </small>
+                                    <br />
+                                    <small className={passwordValidation.hasCapital ? 'text-success' : 'text-danger'}>
+                                        {passwordValidation.hasCapital ? '✓' : '✗'} At least 1 capital letter
+                                    </small>
+                                    <br />
+                                    <small className={passwordValidation.hasSpecial ? 'text-success' : 'text-danger'}>
+                                        {passwordValidation.hasSpecial ? '✓' : '✗'} At least 1 special character (!@#$%^&*...)
+                                    </small>
                                 </div>
-                            ) : (
-                                'Create Account'
                             )}
+                        </div>
+                        <button
+                            type="submit"
+                            className="btn btn-primary w-100 mb-3"
+                        >
+                            Register
                         </button>
-                        <div className="text-center pt-2">
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <div className="text-center">
+                            <small className="text-muted">
                                 Already have an account?{' '}
-                                <button 
-                                    type="button"
-                                    className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors"
-                                    onClick={showLogin}
-                                >
-                                    Sign In
-                                </button>
-                            </p>
+                                <a href="#" className="text-decoration-none" onClick={(e) => { e.preventDefault(); showLogin(); }}>
+                                    Login
+                                </a>
+                            </small>
                         </div>
                     </form>
                 </div>
