@@ -4,16 +4,17 @@ function ThemeToggle({ currentTheme, onThemeChange }) {
     const isLightMode = currentTheme === 'light'
 
     const toggleTheme = () => {
-        const newTheme = isLightMode ? 'dark-green' : 'light'
+        const newTheme = isLightMode ? 'dark' : 'light'
         onThemeChange(newTheme)
     }
 
     return (
         <button
-            className="theme-toggle-btn single-toggle"
+            className="btn btn-outline-secondary border-0 rounded-circle p-2"
             onClick={toggleTheme}
             title={`Switch to ${isLightMode ? 'dark' : 'light'} mode`}
             aria-label={`Switch to ${isLightMode ? 'dark' : 'light'} mode`}
+            style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
             {isLightMode ? (
                 // Moon icon for dark mode

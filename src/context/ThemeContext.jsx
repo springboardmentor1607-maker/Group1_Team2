@@ -3,13 +3,15 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+    const [theme, setTheme] = useState(() => {
+        return localStorage.getItem('bs-theme') || 'light';
+    });
 
     useEffect(() => {
         const root = window.document.documentElement;
-        root.classList.remove('light', 'dark');
-        root.classList.add(theme);
-        localStorage.setItem('theme', theme);
+        // Set Bootstrap's data-bs-theme attribute
+        root.setAttribute('data-bs-theme', theme);
+        localStorage.setItem('bs-theme', theme);
     }, [theme]);
 
     const toggleTheme = () => {
