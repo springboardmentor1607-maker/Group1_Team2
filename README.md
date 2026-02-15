@@ -13,7 +13,7 @@ This is Team 2's integrated full-stack application combining authentication and 
 
 ### Backend (Node.js/Express)
 - Authentication system with JWT
-- MongoDB database integration
+- postgresql database integration
 - RESTful API endpoints
 - Located in `/backend` directory
 
@@ -37,7 +37,7 @@ This is Team 2's integrated full-stack application combining authentication and 
 
 **Backend:**
 - Node.js with Express
-- MongoDB with Mongoose
+- supabase for postgresql 
 - JWT for authentication
 - bcryptjs for password hashing
 
