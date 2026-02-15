@@ -11,19 +11,19 @@ const StatCard = ({ title, value, icon: Icon, color, delay }) => (
             rotateY: 5,
             transition: { duration: 0.3 }
         }}
-        className="glass-card p-6 rounded-xl shadow-2xl border border-white/20 card-hover relative overflow-hidden"
+        className="card glass-card p-4 p-sm-5 rounded shadow border card-hover position-relative overflow-hidden"
     >
         {/* Background Gradient Effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+        <div className="position-absolute top-0 start-0 w-100 h-100 bg-gradient opacity-10 pe-none"></div>
         
-        <div className="flex items-center justify-between relative z-10">
+        <div className="d-flex align-items-center justify-content-between position-relative">
             <div>
-                <p className="text-sm font-medium text-gray-400 mb-1">{title}</p>
+                <p className="small fw-medium text-muted mb-1">{title}</p>
                 <motion.p 
                     initial={{ scale: 0.5 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: delay + 0.2, type: "spring" }}
-                    className="text-4xl font-bold gradient-text"
+                    className="display-4 fw-bold gradient-text"
                 >
                     {value}
                 </motion.p>
@@ -32,9 +32,10 @@ const StatCard = ({ title, value, icon: Icon, color, delay }) => (
                 initial={{ rotate: 0 }}
                 animate={{ rotate: 360 }}
                 transition={{ delay: delay + 0.3, duration: 0.8 }}
-                className={`p-4 rounded-full ${color} shadow-xl relative`}
+                className={`p-3 p-sm-4 rounded-circle ${color} shadow position-relative`}
+                style={{ width: '60px', height: '60px' }}
             >
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent"></div>
+                <div className="position-absolute top-0 start-0 w-100 h-100 rounded-circle bg-gradient opacity-25"></div>
             </motion.div>
         </div>
 
@@ -43,7 +44,8 @@ const StatCard = ({ title, value, icon: Icon, color, delay }) => (
             initial={{ width: 0 }}
             animate={{ width: "100%" }}
             transition={{ delay: delay + 0.5, duration: 0.8 }}
-            className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary-500 to-accent-1 rounded-full"
+            className="position-absolute bottom-0 start-0 bg-gradient rounded"
+            style={{ height: '4px' }}
         ></motion.div>
     </motion.div>
 );
@@ -52,16 +54,18 @@ export default function StatsSection({ stats }) {
     if (!stats) return null;
 
     const data = [
-        { title: 'Total Complaints', value: stats.total, color: 'bg-blue-500', delay: 0.1 },
-        { title: 'Pending', value: stats.pending, color: 'bg-amber-500', delay: 0.2 },
-        { title: 'In Progress', value: stats.inProgress, color: 'bg-purple-500', delay: 0.3 },
-        { title: 'Resolved', value: stats.resolved, color: 'bg-emerald-500', delay: 0.4 },
+        { title: 'Total Complaints', value: stats.total, color: 'bg-primary', delay: 0.1 },
+        { title: 'Pending', value: stats.pending, color: 'bg-warning', delay: 0.2 },
+        { title: 'In Progress', value: stats.inProgress, color: 'bg-info', delay: 0.3 },
+        { title: 'Resolved', value: stats.resolved, color: 'bg-success', delay: 0.4 },
     ];
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="row g-3 g-sm-4 mb-4 mb-sm-5">
             {data.map((item, index) => (
-                <StatCard key={index} {...item} />
+                <div key={index} className="col-12 col-sm-6 col-lg-3">
+                    <StatCard {...item} />
+                </div>
             ))}
         </div>
     );

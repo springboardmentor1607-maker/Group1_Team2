@@ -7,10 +7,10 @@ const ChartCard = ({ title, children, delay }) => (
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay, duration: 0.5 }}
-        className="bg-white dark:bg-dark-card p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700"
+        className="card shadow-lg border p-3 p-sm-4 p-lg-5"
     >
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 sm:mb-6">{title}</h3>
-        <div className="h-48 sm:h-56 lg:h-64 w-full">
+        <h3 className="card-title fs-6 fs-sm-5 fw-semibold mb-3 mb-sm-4">{title}</h3>
+        <div className="w-100" style={{ height: '200px' }}>
             {children}
         </div>
     </motion.div>
@@ -18,7 +18,7 @@ const ChartCard = ({ title, children, delay }) => (
 
 export default function AnalyticsSection({ distribution, weekly }) {
     return (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
+        <div className="row g-3 g-sm-4 mb-4 mb-sm-5">
             <ChartCard title="Complaint Status Distribution" delay={0.5}>
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -42,9 +42,11 @@ export default function AnalyticsSection({ distribution, weekly }) {
                         <Legend layout="vertical" verticalAlign="middle" align="right" />
                     </PieChart>
                 </ResponsiveContainer>
-            </ChartCard>
+                </ChartCard>
+            </div>
 
-            <ChartCard title="Weekly Complaints Activity" delay={0.6}>
+            <div className="col-12 col-xl-6">
+                <ChartCard title="Weekly Complaints Activity" delay={0.6}>
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={weekly}>
                         <XAxis dataKey="day" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
@@ -56,7 +58,8 @@ export default function AnalyticsSection({ distribution, weekly }) {
                         <Bar dataKey="complaints" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                     </BarChart>
                 </ResponsiveContainer>
-            </ChartCard>
+                </ChartCard>
+            </div>
         </div>
     );
 }

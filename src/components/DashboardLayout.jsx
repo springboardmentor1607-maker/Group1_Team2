@@ -23,6 +23,198 @@ const Sidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
     return (
         <motion.aside
             className={cn(
+                "position-fixed start-0 top-0 glass-card bg-white bg-opacity-10 border-end border-white border-opacity-20 backdrop-blur h-100 transition-all",
+                isOpen ? "sidebar-open" : "sidebar-closed"
+            )}
+            style={{ zIndex: 1040, width: isOpen ? '256px' : window.innerWidth >= 992 ? '64px' : '0' }}
+            initial={false}
+        >
+            <div className="d-flex align-items-center justify-content-between border-bottom border-white border-opacity-10 px-3" style={{ height: '64px' }}>
+                <div className="d-flex align-items-center gap-3 min-w-0">
+                    <h1 className={cn("fs-4 fw-bold gradient-text text-truncate", !isOpen && "d-none d-lg-block")}>
+                        CleanStreet
+                    </h1>
+                    {!isOpen && <span className="d-none d-lg-block fs-4 fw-bold gradient-text">CS</span>}
+                </div>
+            </div>
+
+            <nav className="p-2 p-sm-4">
+                {menuItems.map((item, index) => {
+                    const isActive = location.pathname === item.path;
+                    return (
+                        <motion.button
+                            key={index}
+                            onClick={() => navigate(item.path)}
+                            whileHover={{ scale: 1.05, x: 5 }}
+                            whileTap={{ scale: 0.95 }}
+                            className={cn(
+                                "d-flex align-items-center w-100 p-2 p-sm-3 rounded mb-2 border-0 position-relative overflow-hidden",
+                                isActive
+                                    ? "bg-gradient text-white border border-primary neon-glow"
+                                    : "text-secondary bg-transparent hover-bg-light"
+                            )}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            {isActive && (
+                                <motion.div
+                                    layoutId="activeTab"
+                                    className="position-absolute top-0 start-0 w-100 h-100 bg-gradient opacity-25 rounded"
+                                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                />
+                            )}
+
+                            <div className={cn(
+                                "flex-shrink-0 rounded d-flex align-items-center justify-content-center me-3",
+                                isActive ? "bg-gradient text-white" : "bg-secondary bg-opacity-25"
+                            )}
+                            style={{ width: '32px', height: '32px' }}>
+                                {item.icon ? (
+                                    (() => {
+                                        const Icon = item.icon;
+                                        return <Icon className="icon-size" aria-hidden="true" style={{ width: '20px', height: '20px' }} />
+                                    })()
+                                ) : (
+                                    <span className="text-uppercase small fw-bold">{item.label.charAt(0)}</span>
+                                )}
+                            </div>
+
+                            <span className={cn("fw-medium text-nowrap", !isOpen && "d-none d-lg-inline")}>{item.label}</span>
+                        </motion.button>
+                    );
+                })}
+            </nav>
+
+            <div className="position-absolute bottom-0 w-100 p-2 p-sm-4 border-top">
+                <div className={cn("d-flex align-items-center gap-3 px-2 py-2 rounded mb-3", !isOpen && "justify-content-lg-center")}>
+                    <div className="rounded-circle bg-gradient d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style={{ width: '40px', height: '40px', fontSize: '14px' }}>
+                        {initials}
+                    </div>
+                    <div className={cn("min-w-0", !isOpen && "d-none d-lg-block")}>
+                        <p className="small fw-medium text-white text-truncate mb-0">{user?.name || 'User'}</p>
+                        <p className="smaller text-muted text-truncate mb-0">{ user?.role || 'Citizen'}</p>
+                    </div>
+                </div>
+
+                <button 
+                    onClick={onLogout}
+                    className="d-flex align-items-center w-100 p-2 p-sm-3 text-danger bg-transparent border-0 rounded"
+                >
+                    <span className={cn("ms-2 ms-sm-3 fw-medium text-nowrap", !isOpen && "d-none d-lg-inline")}>
+                        Logout
+                    </span>
+                </button>
+            </div>
+        </motion.aside>
+    );
+};
+
+const Header = ({ toggleSidebar, user }) => {
+    const { theme, toggleTheme } = useTheme();
+    const location = useLocation();
+    
+    const getPageTitle = () => {
+        switch (location.pathname) {
+            case '/dashboard':
+                return 'Dashboard Overview';
+            case '/profile':
+                return 'My Profile';
+            case '/complaints':
+                return 'Complaints';
+            case '/map':
+                return 'Map View';
+            case '/settings':
+                return 'Settings';
+            default:
+                return 'CleanStreet';
+        }
+    };
+
+    return (
+        <header className="bg-white border-bottom d-flex align-items-center justify-content-between px-3 px-sm-4 px-lg-6 position-fixed top-0 end-0 start-0 transition-all" style={{ height: '64px', zIndex: 1030 }}>
+            <div className="d-flex align-items-center min-w-0 flex-grow-1">
+                <button onClick={toggleSidebar} className="btn btn-light rounded d-lg-none p-2">
+                    ☰
+                </button>
+                <h2 className="fs-5 fw-semibold text-truncate ms-2 ms-lg-0 mb-0">{getPageTitle()}</h2>
+            </div>
+
+            <div className="d-flex align-items-center gap-2 gap-sm-4 flex-shrink-0">
+                <button
+                    onClick={toggleTheme}
+                    className="btn btn-light rounded-circle p-2"
+                >
+                    {theme === 'light' ? '🌙' : '☀️'}
+                </button>
+
+                <div className="d-flex align-items-center gap-2 gap-sm-3 ps-2 ps-sm-4 border-start">
+                    <div className="text-end d-none d-sm-block">
+                        <p className="small fw-medium text-truncate mb-0" style={{ maxWidth: '150px' }}>{user?.name || 'User'}</p>
+                        <p className="smaller text-muted text-capitalize mb-0">{user?.role || 'Citizen'}</p>
+                    </div>
+                    <div className="rounded-circle bg-primary bg-opacity-25 d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '40px', height: '40px' }}>
+                        {(user?.name || 'U')[0]}
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
+};
+
+export default function DashboardLayout({ children, onLogout, currentTheme, onThemeChange }) {
+    const [sidebarOpen, setSidebarOpen] = React.useState(false);
+    const [user, setUser] = React.useState(null);
+
+    React.useEffect(() => {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            try {
+                setUser(JSON.parse(userData));
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+            }
+        }
+    }, []);
+
+    return (
+        <div className="min-vh-100 bg-light transition-colors">
+            <Sidebar isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} onLogout={onLogout} user={user} />
+
+            <div className="transition-all d-flex flex-column min-vh-100" style={{ paddingTop: '64px', marginLeft: window.innerWidth >= 992 ? '64px' : '0' }}>
+                <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} user={user} />
+                <main className="flex-grow-1 p-3 p-sm-4 p-lg-6 overflow-hidden">
+                    {children}
+                </main>
+            </div>
+
+            {sidebarOpen && (
+                <div
+                    className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-lg-none"
+                    style={{ zIndex: 1030 }}
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+        </div>
+    );
+}
+
+const Sidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const menuItems = [
+        { label: 'Dashboard', path: '/dashboard', icon: Home },
+        { label: 'Complaints', path: '/complaints', icon: FileText },
+        { label: 'Map View', path: '/map', icon: MapPin },
+        { label: 'Profile', path: '/profile', icon: User },
+        { label: 'Settings', path: '/settings', icon: Settings },
+    ];
+
+    const initials = (user?.name || 'U').split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
+
+
+    return (
+        <motion.aside
+            className={cn(
                 "fixed left-0 top-0 z-40 h-screen glass-card bg-white/5 dark:bg-black/70 border-r border-white/20 dark:border-gray-700 backdrop-blur-xl transition-all duration-300",
                 isOpen ? "w-64" : "w-0 lg:w-16 xl:w-20"
             )}
