@@ -19,16 +19,13 @@ function AppContent() {
 
     // Theme state management
     const [theme, setTheme] = useState(() => {
-        return localStorage.getItem('cleanstreet-theme') || 'dark-green'
+        return localStorage.getItem('bs-theme') || 'light'
     })
 
-    // Apply theme to document root with enhanced body styling
+    // Apply theme to document root with Bootstrap's data-bs-theme attribute
     useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme)
-        localStorage.setItem('cleanstreet-theme', theme)
-        
-        // Add smooth transition class to body for theme switching
-        document.body.classList.add('theme-transition')
+        document.documentElement.setAttribute('data-bs-theme', theme)
+        localStorage.setItem('bs-theme', theme)
     }, [theme])
 
     const handleThemeChange = (newTheme) => {

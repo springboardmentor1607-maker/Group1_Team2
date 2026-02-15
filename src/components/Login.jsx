@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 
-function Login({ showSignup }) {
+function Login({ showSignup, onLogin }) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState('')
     const [errors, setErrors] = useState({
         email: '',
         password: ''
@@ -41,34 +43,52 @@ function Login({ showSignup }) {
         }
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
+        setError('')
+        setIsLoading(true)
 
         const newErrors = {}
 
         // Validation
-        if (!email) {
-            newErrors.email = 'Email is required'
-        } else {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-            if (!emailRegex.test(email)) {
-                newErrors.email = 'Please enter a valid email address'
-            }
-        }
-
-        if (!password) {
-            newErrors.password = 'Password is required'
-        } else if (!isPasswordValid) {
-            newErrors.password = 'Password must meet all requirements'
-        }
-
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors)
+        if (!email || !password) {
+            setError('Please fill in all fields')
+            setIsLoading(false)
             return
         }
 
-        console.log('Login attempt:', { email, password })
-        alert('Login successful! (This would redirect to dashboard)')
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address')
+            setIsLoading(false)
+            return
+        }
+
+        try {
+            const response = await fetch('http://localhost:3001/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            })
+
+            const data = await response.json()
+
+            if (response.ok) {
+                // Store token and user data
+                localStorage.setItem('token', data.token)
+                localStorage.setItem('user', JSON.stringify(data.user))
+                onLogin() // Call the onLogin callback
+            } else {
+                setError(data.message || 'Login failed')
+            }
+        } catch (err) {
+            console.error('Login error:', err)
+            setError('Network error. Please check if the backend server is running.')
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -76,6 +96,11 @@ function Login({ showSignup }) {
             <div className="card">
                 <div className="card-body">
                     <h2 className="card-title text-center mb-4">Login to CleanStreet</h2>
+                    {error && (
+                        <div className="alert alert-danger" role="alert">
+                            {error}
+                        </div>
+                    )}
                     <form onSubmit={handleSubmit}>
                         <div className="mb-3">
                             <label htmlFor="loginEmail" className="form-label">Email</label>
@@ -118,7 +143,9 @@ function Login({ showSignup }) {
                                 </div>
                             )}
                         </div>
-                        <button type="submit" className="btn btn-primary w-100 mb-3">Login</button>
+                        <button type="submit" className="btn btn-primary w-100 mb-3" disabled={isLoading}>
+                            {isLoading ? 'Logging in...' : 'Login'}
+                        </button>
                         <div className="text-center">
                             <small className="text-muted">
                                 Don't have an account?{' '}
