@@ -4,9 +4,10 @@ This is Team 2's integrated full-stack application combining authentication and 
 
 ## Team Members & Contributions
 
-- **Aman-Raj**: Backend development (Node.js/Express, MongoDB, Authentication API)
+- **Aman-Raj**: Backend development (Node.js/Express, Authentication API)
 - **Ansel**: Frontend authentication components (Login/Signup, Navbar, Theme system) 
 - **Krishika**: Frontend dashboard components (Analytics, Maps, Charts with Tailwind CSS)
+- **eshwar**:database(postgresql)
 
 ## Project Structure
 
