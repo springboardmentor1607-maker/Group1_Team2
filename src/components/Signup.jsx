@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom';
 
-function Signup({ showLogin }) {
+function Signup({ onLogin }) {
     const [formData, setFormData] = useState({
         fullName: '',
         username: '',
@@ -9,6 +10,7 @@ function Signup({ showLogin }) {
         password: '',
         role: 'user'
     })
+    const navigate = useNavigate();
 
     const [passwordValidation, setPasswordValidation] = useState({
         minLength: false,
@@ -102,7 +104,12 @@ function Signup({ showLogin }) {
         }
 
         console.log('Registration attempt:', formData)
-        alert('Registration successful! (This would redirect to dashboard)')
+
+        // Simulate successful registration and login
+        if (onLogin) {
+            onLogin();
+            navigate('/dashboard');
+        }
     }
 
     return (
@@ -220,9 +227,9 @@ function Signup({ showLogin }) {
                         <div className="text-center">
                             <small className="text-muted">
                                 Already have an account?{' '}
-                                <a href="#" className="text-decoration-none" onClick={(e) => { e.preventDefault(); showLogin(); }}>
+                                <Link to="/login" className="text-decoration-none">
                                     Login
-                                </a>
+                                </Link>
                             </small>
                         </div>
                     </form>
