@@ -1,77 +1,28 @@
-import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import Navbar from './components/Navbar'
-import Login from './components/Login'
-import Signup from './components/Signup'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import DashboardLayout from './components/DashboardLayout';
 
-function AppContent() {
-    const navigate = useNavigate()
-    const location = useLocation()
-
-    // Theme state management
-    const [theme, setTheme] = useState(() => {
-        // Initialize from localStorage or default to 'dark-green'
-        return localStorage.getItem('cleanstreet-theme') || 'dark-green'
-    })
-
-    // Apply theme to document root
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme)
-        localStorage.setItem('cleanstreet-theme', theme)
-    }, [theme])
-
-    const handleThemeChange = (newTheme) => {
-        setTheme(newTheme)
-    }
-
-    const showLogin = () => {
-        navigate('/')
-    }
-
-    const showSignup = () => {
-        navigate('/signup')
-    }
-
-    // Keyboard shortcuts
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.key === 'l' && !e.target.matches('input, textarea')) {
-                showLogin()
-            }
-            if (e.key === 'r' && !e.target.matches('input, textarea')) {
-                showSignup()
-            }
-        }
-
-        document.addEventListener('keydown', handleKeyDown)
-        return () => document.removeEventListener('keydown', handleKeyDown)
-    }, [])
-
-    return (
-        <>
-            <Navbar
-                showLogin={showLogin}
-                showSignup={showSignup}
-                currentTheme={theme}
-                onThemeChange={handleThemeChange}
-            />
-            <div className="main-content">
-                <Routes>
-                    <Route path="/" element={<Login showSignup={showSignup} />} />
-                    <Route path="/signup" element={<Signup showLogin={showLogin} />} />
-                </Routes>
-            </div>
-        </>
-    )
-}
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import Complaints from './pages/Complaints';
+import MapView from './pages/MapView';
+import Settings from './pages/Settings';
 
 function App() {
-    return (
-        <Router>
-            <AppContent />
-        </Router>
-    )
+  return (
+    <Router>
+      <DashboardLayout>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/complaints" element={<Complaints />} />
+          <Route path="/map" element={<MapView />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </DashboardLayout>
+    </Router>
+  );
 }
 
-export default App
+export default App;
