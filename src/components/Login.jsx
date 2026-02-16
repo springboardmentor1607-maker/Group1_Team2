@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom';
 
-function Login({ showSignup }) {
+function Login({ onLogin }) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [errors, setErrors] = useState({
         email: '',
         password: ''
     })
+    const navigate = useNavigate();
 
     const [passwordValidation, setPasswordValidation] = useState({
         minLength: false,
@@ -68,7 +70,12 @@ function Login({ showSignup }) {
         }
 
         console.log('Login attempt:', { email, password })
-        alert('Login successful! (This would redirect to dashboard)')
+
+        // Simulate successful login
+        if (onLogin) {
+            onLogin();
+            navigate('/dashboard');
+        }
     }
 
     return (
@@ -122,9 +129,9 @@ function Login({ showSignup }) {
                         <div className="text-center">
                             <small className="text-muted">
                                 Don't have an account?{' '}
-                                <a href="#" className="text-decoration-none" onClick={(e) => { e.preventDefault(); showSignup(); }}>
+                                <Link to="/signup" className="text-decoration-none">
                                     Register
-                                </a>
+                                </Link>
                             </small>
                         </div>
                     </form>

@@ -9,14 +9,16 @@ import {
     Map as MapIcon,
     Settings,
     LogOut,
-    User
+    User,
+    Plus
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion } from 'framer-motion';
 import { NavLink, useLocation } from "react-router-dom";
+import ChatWidget from './ChatWidget';
 
 /* ===================== SIDEBAR ===================== */
-const Sidebar = ({ isOpen, closeSidebar }) => {
+const Sidebar = ({ isOpen, closeSidebar, onLogout }) => {
     const menuItems = [
         { icon: Home, label: 'Dashboard', path: '/dashboard' },
         { icon: FileText, label: 'Complaints', path: '/complaints' },
@@ -84,7 +86,10 @@ const Sidebar = ({ isOpen, closeSidebar }) => {
 
             {/* ===== LOGOUT ===== */}
             <div className="position-absolute bottom-0 w-100 p-3 border-top">
-                <button className="d-flex align-items-center w-100 p-3 text-danger btn btn-link text-decoration-none rounded nav-link">
+                <button
+                    onClick={onLogout}
+                    className="d-flex align-items-center w-100 p-3 text-danger btn btn-link text-decoration-none rounded nav-link"
+                >
                     <LogOut className="w-6 h-6" />
                     {isOpen && <span className="ms-3">Logout</span>}
                 </button>
@@ -116,21 +121,36 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
                 sidebarOpen ? "lg:left-64" : "lg:left-20"
             )}
         >
-            <button onClick={toggleSidebar} className="btn p-2 d-lg-none text-body">
-                <Menu />
-            </button>
+            <div className="d-flex align-items-center gap-3">
+                <button onClick={toggleSidebar} className="btn p-2 d-lg-none text-body">
+                    <Menu />
+                </button>
 
-            <h2 className="fs-4 fw-semibold m-0 text-body">{getTitle()}</h2>
+                <h2 className="fs-4 fw-semibold m-0 text-body">{getTitle()}</h2>
+            </div>
 
-            <button onClick={toggleTheme} className="btn text-body">
-                {theme === 'light' ? <Moon /> : <Sun />}
-            </button>
+            <div className="d-flex align-items-center gap-3">
+                <button
+                    className="btn btn-primary d-flex align-items-center shadow-sm"
+                    style={{
+                        background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)',
+                        border: 'none'
+                    }}
+                >
+                    <Plus className="w-4 h-4 me-2" />
+                    Report Issue
+                </button>
+
+                <button onClick={toggleTheme} className="btn text-body">
+                    {theme === 'light' ? <Moon /> : <Sun />}
+                </button>
+            </div>
         </header>
     );
 };
 
 /* ===================== LAYOUT ===================== */
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout({ children, onLogout }) {
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
     return (
@@ -138,6 +158,7 @@ export default function DashboardLayout({ children }) {
             <Sidebar
                 isOpen={sidebarOpen}
                 closeSidebar={() => setSidebarOpen(false)}
+                onLogout={onLogout}
             />
 
             <Header
@@ -154,6 +175,9 @@ export default function DashboardLayout({ children }) {
             >
                 {children}
             </main>
+
+            {/* Chat Widget Fixed to Bottom Right */}
+            <ChatWidget />
         </div>
     );
 }

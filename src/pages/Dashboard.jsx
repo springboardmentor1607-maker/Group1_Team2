@@ -42,16 +42,9 @@ export default function Dashboard() {
                     <h1 className="fw-bold text-body">
                         Welcome Back, Citizen!
                     </h1>
-                    <p className="text-body-secondary mt-1">
-                        Here's what's happening in your neighborhood today.
-                    </p>
                 </div>
 
                 {/* RIGHT ACTION BUTTON */}
-                <button className="btn btn-primary d-flex align-items-center shadow-sm">
-                    <Plus className="w-4 h-4 me-2" />
-                    Report Issue
-                </button>
             </div>
 
             <StatsSection stats={statsData} />
