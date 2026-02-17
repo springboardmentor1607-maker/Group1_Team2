@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom';
 
-function Signup({ showLogin, onLogin }) {
+function Signup({ onLogin }) {
     const [formData, setFormData] = useState({
         fullName: '',
         username: '',
@@ -9,9 +10,7 @@ function Signup({ showLogin, onLogin }) {
         password: '',
         role: 'user'
     })
-
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState('')
+    const navigate = useNavigate();
 
     const [passwordValidation, setPasswordValidation] = useState({
         minLength: false,
@@ -21,6 +20,14 @@ function Signup({ showLogin, onLogin }) {
 
     const [isPasswordValid, setIsPasswordValid] = useState(false)
     const [passwordFocused, setPasswordFocused] = useState(false)
+
+    const [errors, setErrors] = useState({
+        fullName: '',
+        username: '',
+        email: '',
+        phone: '',
+        password: ''
+    })
 
     useEffect(() => {
         const password = formData.password
@@ -40,70 +47,68 @@ function Signup({ showLogin, onLogin }) {
             [name]: value
         })
         // Clear error when user starts typing
-        if (error) {
-            setError('')
+        if (errors[name]) {
+            setErrors({
+                ...errors,
+                [name]: ''
+            })
         }
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault()
-        setError('')
-        setIsLoading(true)
 
         const { fullName, username, email, phone, password } = formData
         const newErrors = {}
 
         // Validation
-        if (!fullName || !username || !email || !phone || !password) {
-            setError('Please fill in all fields')
-            setIsLoading(false)
-            return
+        if (!fullName) {
+            newErrors.fullName = 'Full name is required'
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(email)) {
-            setError('Please enter a valid email address')
-            setIsLoading(false)
-            return
+        if (!username) {
+            newErrors.username = 'Username is required'
         }
 
-        if (!isPasswordValid) {
-            setError('Password must meet all requirements')
-            setIsLoading(false)
-            return
-        }
-
-        try {
-            const response = await fetch('http://localhost:3001/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: fullName,
-                    username,
-                    email,
-                    phone,
-                    password,
-                    role: formData.role
-                }),
-            })
-
-            const data = await response.json()
-
-            if (response.ok) {
-                // Store token and user data
-                localStorage.setItem('token', data.token)
-                localStorage.setItem('user', JSON.stringify(data.user))
-                onLogin() // Call the onLogin callback
-            } else {
-                setError(data.message || 'Registration failed')
+        if (!email) {
+            newErrors.email = 'Email is required'
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            if (!emailRegex.test(email)) {
+                newErrors.email = 'Please enter a valid email address'
             }
-        } catch (err) {
-            console.error('Registration error:', err)
-            setError('Network error. Please check if the backend server is running.')
-        } finally {
-            setIsLoading(false)
+        }
+
+        if (!phone) {
+            newErrors.phone = 'Phone number is required'
+        } else {
+            const cleanPhone = phone.replace(/\D/g, '')
+            if (cleanPhone.length < 10) {
+                newErrors.phone = 'Please enter a valid phone number (at least 10 digits)'
+            }
+        }
+
+        if (!password) {
+            newErrors.password = 'Password is required'
+        } else {
+            // Password validation: min 8 chars, 1 capital letter, 1 special character
+            const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/
+            if (!passwordRegex.test(password)) {
+                newErrors.password = 'Password must contain at least 8 characters, 1 capital letter, and 1 special character'
+            }
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors)
+            return
+        }
+
+        console.log('Registration attempt:', formData)
+
+        // Simulate successful registration and login
+        if (onLogin) {
+            onLogin();
+            navigate('/dashboard');
         }
     }
 
@@ -112,49 +117,47 @@ function Signup({ showLogin, onLogin }) {
             <div className="card">
                 <div className="card-body">
                     <h2 className="card-title text-center mb-4">Register for CleanStreet</h2>
-                    {error && (
-                        <div className="alert alert-danger" role="alert">
-                            {error}
-                        </div>
-                    )}
                     <form onSubmit={handleSubmit}>
                         <div className="mb-3">
                             <label htmlFor="signupFullName" className="form-label">Full Name</label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className={`form-control ${errors.fullName ? 'is-invalid' : ''}`}
                                 id="signupFullName"
                                 name="fullName"
                                 placeholder="Enter your full name"
                                 value={formData.fullName}
                                 onChange={handleChange}
                             />
+                            {errors.fullName && <div className="text-danger small mt-1">{errors.fullName}</div>}
                         </div>
 
                         <div className="mb-3">
                             <label htmlFor="signupUsername" className="form-label">Username</label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className={`form-control ${errors.username ? 'is-invalid' : ''}`}
                                 id="signupUsername"
                                 name="username"
                                 placeholder="Choose a username"
                                 value={formData.username}
                                 onChange={handleChange}
                             />
+                            {errors.username && <div className="text-danger small mt-1">{errors.username}</div>}
                         </div>
 
                         <div className="mb-3">
                             <label htmlFor="signupEmail" className="form-label">Email</label>
                             <input
                                 type="email"
-                                className="form-control"
+                                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
                                 id="signupEmail"
                                 name="email"
                                 placeholder="Enter your email"
                                 value={formData.email}
                                 onChange={handleChange}
                             />
+                            {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
                         </div>
                         <div className="mb-3">
                             <label htmlFor="signupRole" className="form-label">Role</label>
@@ -175,20 +178,21 @@ function Signup({ showLogin, onLogin }) {
                             <label htmlFor="signupPhone" className="form-label">Phone Number</label>
                             <input
                                 type="tel"
-                                className="form-control"
+                                className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
                                 id="signupPhone"
                                 name="phone"
                                 placeholder="Enter your phone number"
                                 value={formData.phone}
                                 onChange={handleChange}
                             />
+                            {errors.phone && <div className="text-danger small mt-1">{errors.phone}</div>}
                         </div>
 
                         <div className="mb-4">
                             <label htmlFor="signupPassword" className="form-label">Password</label>
                             <input
                                 type="password"
-                                className="form-control"
+                                className={`form-control ${errors.password ? 'is-invalid' : ''}`}
                                 id="signupPassword"
                                 name="password"
                                 placeholder="Create a password"
@@ -197,6 +201,7 @@ function Signup({ showLogin, onLogin }) {
                                 onFocus={() => setPasswordFocused(true)}
                                 onBlur={() => setPasswordFocused(false)}
                             />
+                            {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
                             {passwordFocused && (
                                 <div className="mt-2">
                                     <small className={passwordValidation.minLength ? 'text-success' : 'text-danger'}>
@@ -216,16 +221,15 @@ function Signup({ showLogin, onLogin }) {
                         <button
                             type="submit"
                             className="btn btn-primary w-100 mb-3"
-                            disabled={isLoading}
                         >
-                            {isLoading ? 'Registering...' : 'Register'}
+                            Register
                         </button>
                         <div className="text-center">
                             <small className="text-muted">
                                 Already have an account?{' '}
-                                <a href="#" className="text-decoration-none" onClick={(e) => { e.preventDefault(); showLogin(); }}>
+                                <Link to="/login" className="text-decoration-none">
                                     Login
-                                </a>
+                                </Link>
                             </small>
                         </div>
                     </form>

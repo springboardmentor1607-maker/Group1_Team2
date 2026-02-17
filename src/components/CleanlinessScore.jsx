@@ -5,14 +5,9 @@ const CircularProgress = ({ value, size = 120, strokeWidth = 10 }) => {
     const radius = (size - strokeWidth) / 2;
     const circumference = radius * 2 * Math.PI;
     const offset = circumference - (value / 100) * circumference;
-    
-    // Responsive sizing
-    const responsiveSize = typeof window !== 'undefined' && window.innerWidth < 640 ? 100 : size;
-    const responsiveStrokeWidth = typeof window !== 'undefined' && window.innerWidth < 640 ? 8 : strokeWidth;
-    const responsiveRadius = (responsiveSize - responsiveStrokeWidth) / 2;
 
     return (
-        <div className="position-relative d-flex align-items-center justify-content-center" style={{ width: responsiveSize, height: responsiveSize }}>
+        <div className="position-relative d-flex align-items-center justify-content-center" style={{ width: size, height: size }}>
             <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
                 <circle
                     cx={size / 2}
@@ -39,8 +34,8 @@ const CircularProgress = ({ value, size = 120, strokeWidth = 10 }) => {
                 />
             </svg>
             <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center">
-                <span className="display-4 fw-bold" style={{ color: 'var(--bs-body-color)' }}>{value}%</span>
-                <span className="small text-uppercase fw-semibold" style={{ color: 'var(--bs-secondary-color)' }}>Clean</span>
+                <span className="fs-2 fw-bold text-body">{value}%</span>
+                <span className="small text-body-secondary text-uppercase fw-semibold">Clean</span>
             </div>
         </div>
     );
@@ -52,13 +47,11 @@ export default function CleanlinessScore({ score }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.8 }}
-            className="card shadow-lg border p-4 h-100 d-flex flex-column align-items-center justify-content-center bg-card"
+            className="card border-0 shadow-lg p-4 rounded-xl h-100 d-flex flex-column align-items-center justify-content-center"
         >
-            <h3 className="card-title fs-5 fw-semibold mb-4 align-self-start" style={{ color: 'var(--bs-body-color)' }}>Cleanliness Score</h3>
-            <div className="flex-grow-1 d-flex align-items-center justify-content-center">
-                <CircularProgress value={score} />
-            </div>
-            <p className="mt-3 text-center small mb-0" style={{ color: 'var(--bs-secondary-color)' }}>
+            <h3 className="fs-5 fw-semibold text-body mb-4 align-self-start">Cleanliness Score</h3>
+            <CircularProgress value={score} />
+            <p className="mt-4 text-center small text-body-secondary">
                 Based on resolved complaints vs total reports in your area.
             </p>
         </motion.div>

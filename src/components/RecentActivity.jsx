@@ -1,14 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { CheckCircle, AlertCircle, Clock, Info } from 'lucide-react';
 
 const ActivityItem = ({ type, message, time }) => {
+    const getIcon = () => {
+        switch (type) {
+            case 'resolved': return <CheckCircle className="w-5 h-5 text-success" />;
+            case 'new': return <AlertCircle className="w-5 h-5 text-danger" />;
+            case 'in-progress': return <Clock className="w-5 h-5 text-primary" />;
+            default: return <Info className="w-5 h-5 text-secondary" />;
+        }
+    };
+
     return (
-        <div className="d-flex align-items-start p-2 p-sm-3 rounded" style={{ backgroundColor: 'transparent' }}
-             onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--hover-item-bg)'}
-             onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>
-            <div className="flex-grow-1 min-w-0">
-                <p className="small fw-medium text-break mb-1" style={{ color: 'var(--bs-body-color)' }}>{message}</p>
-                <p className="smaller" style={{ color: 'var(--bs-secondary-color)' }}>{time}</p>
+        <div className="d-flex align-items-start gap-3 p-3 hover-bg-adaptive rounded transition-colors">
+            <div className="mt-1">{getIcon()}</div>
+            <div>
+                <p className="small fw-medium text-body mb-1">{message}</p>
+                <p className="small text-body-secondary m-0">{time}</p>
             </div>
         </div>
     );
@@ -20,25 +29,17 @@ export default function RecentActivity({ activities }) {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.8 }}
-            className="card shadow-lg border p-4 h-100 bg-card"
+            className="card border-0 shadow-lg p-4 rounded-xl h-100"
         >
-            <h3 className="card-title fs-5 fw-semibold mb-4 d-flex align-items-center" style={{ color: 'var(--bs-body-color)' }}>
-                <i className="bi bi-clock-history me-2" style={{ fontSize: '1.2rem' }}></i>
-                Recent Activity
-            </h3>
-            <div className="flex-grow-1 overflow-hidden">
-                <div className="d-flex flex-column" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                    {activities.map((activity) => (
-                        <ActivityItem key={activity.id} {...activity} />
-                    ))}
-                </div>
+            <h3 className="fs-5 fw-semibold text-body mb-4">Recent Activity</h3>
+            <div className="d-flex flex-column gap-1">
+                {activities.map((activity) => (
+                    <ActivityItem key={activity.id} {...activity} />
+                ))}
             </div>
-            <div className="mt-3 pt-3 border-top" style={{ borderColor: 'var(--bs-border-color)' }}>
-                <button className="btn btn-outline-primary w-100 py-2 rounded-3 small fw-medium">
-                    <i className="bi bi-arrow-right me-2"></i>
-                    View All Activity
-                </button>
-            </div>
+            <button className="btn btn-link w-100 mt-3 text-primary text-decoration-none fw-medium">
+                View All Activity
+            </button>
         </motion.div>
     );
 }

@@ -1,21 +1,29 @@
-import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
-import Navbar from './components/Navbar'
-import Login from './components/Login'
-import Signup from './components/Signup'
-import DashboardLayout from './components/DashboardLayout'
-import Dashboard from './pages/Dashboard'
-import Profile from './pages/Profile'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import DashboardLayout from './components/DashboardLayout';
+import AuthLayout from './layouts/AuthLayout';
+import Login from './components/Login';
+import Signup from './components/Signup';
 
-function AppContent() {
-    const navigate = useNavigate()
-    const location = useLocation()
-    
-    // Authentication state
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import Complaints from './pages/Complaints';
+import MapView from './pages/MapView';
+import Settings from './pages/Settings';
+
+// Protected Route Component
+const ProtectedRoute = ({ isAuthenticated, children }) => {
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+    return children;
+};
+
+function App() {
+    // Initialize auth state from localStorage to persist login across refreshes
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
-        return localStorage.getItem('isAuthenticated') === 'true'
-    })
+        return localStorage.getItem('isAuthenticated') === 'true';
+    });
 
     // Theme state management
     const [theme, setTheme] = useState(() => {
@@ -33,129 +41,72 @@ function AppContent() {
     }
 
     const handleLogin = () => {
-        setIsAuthenticated(true)
-        localStorage.setItem('isAuthenticated', 'true')
-        navigate('/dashboard')
-    }
+        setIsAuthenticated(true);
+        localStorage.setItem('isAuthenticated', 'true');
+    };
 
     const handleLogout = () => {
-        setIsAuthenticated(false)
-        localStorage.removeItem('isAuthenticated')
-        navigate('/')
-    }
+        setIsAuthenticated(false);
+        localStorage.removeItem('isAuthenticated');
+    };
 
-    const showLogin = () => {
-        navigate('/')
-    }
-
-    const showSignup = () => {
-        navigate('/signup')
-    }
-
-    // Keyboard shortcuts
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.key === 'l' && !e.target.matches('input, textarea')) {
-                showLogin()
-            }
-            if (e.key === 'r' && !e.target.matches('input, textarea')) {
-                showSignup()
-            }
-        }
-
-        document.addEventListener('keydown', handleKeyDown)
-        return () => document.removeEventListener('keydown', handleKeyDown)
-    }, [])
-
-    // Protected route wrapper
-    const ProtectedRoute = ({ children }) => {
-        return isAuthenticated ? children : <Navigate to="/" replace />
-    }
-
-    // Public route wrapper (redirect to dashboard if already logged in)
-    const PublicRoute = ({ children }) => {
-        return !isAuthenticated ? children : <Navigate to="/dashboard" replace />
-    }
-
-    return (
-        <>
-            {/* Show navbar for auth pages, dashboard layout handles its own navbar */}
-            {!isAuthenticated && (
-                <Navbar
-                    showLogin={showLogin}
-                    showSignup={showSignup}
-                    currentTheme={theme}
-                    onThemeChange={handleThemeChange}
-                />
-            )}
-            
-            <div className="main-content">
-                <Routes>
-                    {/* Public routes */}
-                    <Route 
-                        path="/" 
-                        element={
-                            <PublicRoute>
-                                <Login showSignup={showSignup} onLogin={handleLogin} />
-                            </PublicRoute>
-                        } 
-                    />
-                    <Route 
-                        path="/signup" 
-                        element={
-                            <PublicRoute>
-                                <Signup showLogin={showLogin} onLogin={handleLogin} />
-                            </PublicRoute>
-                        } 
-                    />
-                    
-                    {/* Protected routes */}
-                    <Route 
-                        path="/dashboard" 
-                        element={
-                            <ProtectedRoute>
-                                <DashboardLayout 
-                                    onLogout={handleLogout}
-                                    currentTheme={theme}
-                                    onThemeChange={handleThemeChange}
-                                >
-                                    <Dashboard />
-                                </DashboardLayout>
-                            </ProtectedRoute>
-                        } 
-                    />
-                    <Route 
-                        path="/profile" 
-                        element={
-                            <ProtectedRoute>
-                                <DashboardLayout 
-                                    onLogout={handleLogout}
-                                    currentTheme={theme}
-                                    onThemeChange={handleThemeChange}
-                                >
-                                    <Profile />
-                                </DashboardLayout>
-                            </ProtectedRoute>
-                        } 
-                    />
-                    
-                    {/* Default redirect */}
-                    <Route 
-                        path="*" 
-                        element={<Navigate to={isAuthenticated ? "/dashboard" : "/"} replace />} 
-                    />
-                </Routes>
-            </div>
-        </>
-    )
-}
-
-function App() {
     return (
         <Router>
-            <AppContent />
+            <Routes>
+                {/* Public Routes */}
+                <Route
+                    path="/login"
+                    element={
+                        isAuthenticated ? (
+                            <Navigate to="/dashboard" replace />
+                        ) : (
+                            <AuthLayout subtitle="Welcome Back, Citizen!">
+                                <Login onLogin={handleLogin} />
+                            </AuthLayout>
+                        )
+                    }
+                />
+                <Route
+                    path="/signup"
+                    element={
+                        isAuthenticated ? (
+                            <Navigate to="/dashboard" replace />
+                        ) : (
+                            <AuthLayout subtitle="Join Your Community Today">
+                                <Signup onLogin={handleLogin} />
+                            </AuthLayout>
+                        )
+                    }
+                />
+
+                {/* Redirect Root to Login or Dashboard */}
+                <Route
+                    path="/"
+                    element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
+                />
+
+                {/* Protected Dashboard Routes */}
+                <Route
+                    path="/*"
+                    element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated}>
+                            <DashboardLayout onLogout={handleLogout}>
+                                <Routes>
+                                    <Route path="/dashboard" element={<Dashboard />} />
+                                    <Route path="/profile" element={<Profile />} />
+                                    <Route path="/complaints" element={<Complaints />} />
+                                    <Route path="/map" element={<MapView />} />
+                                    <Route path="/settings" element={<Settings />} />
+                                    {/* Catch all inside dashboard to redirect to dashboard home */}
+                                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                                </Routes>
+                            </DashboardLayout>
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
         </Router>
-    )
+    );
 }
 
-export default App
+export default App;

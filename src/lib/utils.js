@@ -1,5 +1,3 @@
-import { clsx } from "clsx";
-
 export function cn(...inputs) {
-    return clsx(inputs);
+    return inputs.filter(Boolean).join(" ");
 }

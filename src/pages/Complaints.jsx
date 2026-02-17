@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+function Complaints() {
+  return <h2 className="text-dark p-4">Complaints Page</h2>;
+=======
 import React from 'react';
 import { motion } from 'framer-motion';
 
@@ -96,5 +100,6 @@ function Complaints() {
             </motion.div>
         </div>
     );
+>>>>>>> main
 }
 export default Complaints;

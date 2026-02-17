@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom';
 
-function Login({ showSignup, onLogin }) {
+function Login({ onLogin }) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState('')
     const [errors, setErrors] = useState({
         email: '',
         password: ''
     })
+    const navigate = useNavigate();
 
     const [passwordValidation, setPasswordValidation] = useState({
         minLength: false,
@@ -43,51 +43,38 @@ function Login({ showSignup, onLogin }) {
         }
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault()
-        setError('')
-        setIsLoading(true)
 
         const newErrors = {}
 
         // Validation
-        if (!email || !password) {
-            setError('Please fill in all fields')
-            setIsLoading(false)
-            return
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(email)) {
-            setError('Please enter a valid email address')
-            setIsLoading(false)
-            return
-        }
-
-        try {
-            const response = await fetch('http://localhost:3001/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            })
-
-            const data = await response.json()
-
-            if (response.ok) {
-                // Store token and user data
-                localStorage.setItem('token', data.token)
-                localStorage.setItem('user', JSON.stringify(data.user))
-                onLogin() // Call the onLogin callback
-            } else {
-                setError(data.message || 'Login failed')
+        if (!email) {
+            newErrors.email = 'Email is required'
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            if (!emailRegex.test(email)) {
+                newErrors.email = 'Please enter a valid email address'
             }
-        } catch (err) {
-            console.error('Login error:', err)
-            setError('Network error. Please check if the backend server is running.')
-        } finally {
-            setIsLoading(false)
+        }
+
+        if (!password) {
+            newErrors.password = 'Password is required'
+        } else if (!isPasswordValid) {
+            newErrors.password = 'Password must meet all requirements'
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors)
+            return
+        }
+
+        console.log('Login attempt:', { email, password })
+
+        // Simulate successful login
+        if (onLogin) {
+            onLogin();
+            navigate('/dashboard');
         }
     }
 
@@ -96,11 +83,6 @@ function Login({ showSignup, onLogin }) {
             <div className="card">
                 <div className="card-body">
                     <h2 className="card-title text-center mb-4">Login to CleanStreet</h2>
-                    {error && (
-                        <div className="alert alert-danger" role="alert">
-                            {error}
-                        </div>
-                    )}
                     <form onSubmit={handleSubmit}>
                         <div className="mb-3">
                             <label htmlFor="loginEmail" className="form-label">Email</label>
@@ -143,15 +125,13 @@ function Login({ showSignup, onLogin }) {
                                 </div>
                             )}
                         </div>
-                        <button type="submit" className="btn btn-primary w-100 mb-3" disabled={isLoading}>
-                            {isLoading ? 'Logging in...' : 'Login'}
-                        </button>
+                        <button type="submit" className="btn btn-primary w-100 mb-3">Login</button>
                         <div className="text-center">
                             <small className="text-muted">
                                 Don't have an account?{' '}
-                                <a href="#" className="text-decoration-none" onClick={(e) => { e.preventDefault(); showSignup(); }}>
+                                <Link to="/signup" className="text-decoration-none">
                                     Register
-                                </a>
+                                </Link>
                             </small>
                         </div>
                     </form>
