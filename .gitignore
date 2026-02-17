@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+=======
+>>>>>>> local-krishika
 # Logs
 logs
 *.log
@@ -7,9 +16,16 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+<<<<<<< HEAD
+# Build outputs
+dist/
+dist-ssr/
+build/
+=======
 node_modules
 dist
 dist-ssr
+>>>>>>> local-krishika
 *.local
 
 # Editor directories and files
@@ -22,3 +38,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+<<<<<<< HEAD
+
+# Temporary files
+*.tmp
+=======
+>>>>>>> local-krishika
