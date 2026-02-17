@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+function Settings() {
+  return <h2 className="text-dark p-4">Settings Page</h2>;
+=======
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -104,5 +108,6 @@ function Settings() {
             </motion.div>
         </div>
     );
+>>>>>>> main
 }
 export default Settings;

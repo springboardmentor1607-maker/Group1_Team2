@@ -1,15 +1,15 @@
-# Group1_Team2 - CleanStreet Application
+# React + Vite
 
-This is Team 2's integrated full-stack application combining authentication and dashboard functionality.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Team Members & Contributions
+Currently, two official plugins are available:
 
 - **Aman-Raj**: Backend development (Node.js/Express, Authentication API)
 - **Ansel**: Frontend authentication components (Login/Signup, Navbar, Theme system) 
 - **Krishika**: Frontend dashboard components (Analytics, Maps, Charts with Tailwind CSS)
 - **eshwar**:database(postgresql)
 
-## Project Structure
+## React Compiler
 
 ### Backend (Node.js/Express)
 - Authentication system with JWT
@@ -17,12 +17,7 @@ This is Team 2's integrated full-stack application combining authentication and 
 - RESTful API endpoints
 - Located in `/backend` directory
 
-### Frontend (React + Vite)
-- Modern React application with routing
-- Authentication flow (Login/Signup)
-- Dashboard with analytics and maps
-- Theme switching capability
-- Responsive design with Tailwind CSS and Bootstrap
+## Expanding the ESLint configuration
 
 ## Technology Stack
 
@@ -75,3 +70,4 @@ This is Team 2's integrated full-stack application combining authentication and 
 - **API Integration**: Frontend connects to backend for data
 
 This integrated application demonstrates full-stack development with modern web technologies.
+>>>>>>> main
