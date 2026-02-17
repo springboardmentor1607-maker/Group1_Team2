@@ -25,6 +25,21 @@ function App() {
         return localStorage.getItem('isAuthenticated') === 'true';
     });
 
+    // Theme state management
+    const [theme, setTheme] = useState(() => {
+        return localStorage.getItem('bs-theme') || 'light'
+    })
+
+    // Apply theme to document root with Bootstrap's data-bs-theme attribute
+    useEffect(() => {
+        document.documentElement.setAttribute('data-bs-theme', theme)
+        localStorage.setItem('bs-theme', theme)
+    }, [theme])
+
+    const handleThemeChange = (newTheme) => {
+        setTheme(newTheme)
+    }
+
     const handleLogin = () => {
         setIsAuthenticated(true);
         localStorage.setItem('isAuthenticated', 'true');
