@@ -70,4 +70,3 @@ Currently, two official plugins are available:
 - **API Integration**: Frontend connects to backend for data
 
 This integrated application demonstrates full-stack development with modern web technologies.
->>>>>>> main
