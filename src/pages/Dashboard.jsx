@@ -4,21 +4,45 @@ import AnalyticsSection from '../components/AnalyticsSection';
 import MapSection from '../components/MapSection';
 import RecentActivity from '../components/RecentActivity';
 import CleanlinessScore from '../components/CleanlinessScore';
-import {
-    statsData,
-    complaintDistribution,
-    weeklyActivity,
-    recentActivities
-} from '../data/mockData';
 import { Plus, List, Map as MapIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { api } from '../lib/api';
 
 export default function Dashboard() {
     const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        total: 0,
+        pending: 0,
+        inProgress: 0,
+        resolved: 0
+    });
+    const [activities, setActivities] = useState([]);
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1000);
-        return () => clearTimeout(timer);
+        const fetchDashboardData = async () => {
+            try {
+                // Fetch stats
+                const statsData = await api.get('/complaints/stats');
+                setStats({
+                    total: statsData.stats?.total || 0,
+                    pending: statsData.stats?.pending || 0,
+                    inProgress: statsData.stats?.in_progress || 0,
+                    resolved: statsData.stats?.resolved || 0
+                });
+                setActivities(statsData.recent || []);
+
+                // Fetch user profile
+                const profileData = await api.get('/auth/profile');
+                setUser(profileData.user);
+            } catch (err) {
+                console.error('Error fetching dashboard data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
     }, []);
 
     if (loading) {
@@ -40,18 +64,22 @@ export default function Dashboard() {
                 {/* LEFT TEXT ONLY (NO LOGO HERE) */}
                 <div>
                     <h1 className="fw-bold text-body">
-                        Welcome Back, Citizen!
+                        Welcome Back, {user ? user.name : 'Citizen'}!
                     </h1>
                 </div>
 
                 {/* RIGHT ACTION BUTTON */}
             </div>
 
-            <StatsSection stats={statsData} />
+            <StatsSection stats={stats} />
 
             <AnalyticsSection
-                distribution={complaintDistribution}
-                weekly={weeklyActivity}
+                distribution={[
+                    { name: 'Pending', value: stats.pending, color: '#f59e0b' },
+                    { name: 'Progress', value: stats.inProgress, color: '#3b82f6' },
+                    { name: 'Resolved', value: stats.resolved, color: '#10b981' },
+                ]}
+                weekly={[]} // Weekly data can be implemented later
             />
 
             <div className="row g-4 mb-4">
@@ -59,8 +87,20 @@ export default function Dashboard() {
                     <MapSection />
                 </div>
                 <div className="col-lg-4 d-flex flex-column gap-4">
-                    <CleanlinessScore score={78} />
-                    <RecentActivity activities={recentActivities} />
+                    <CleanlinessScore score={Math.round((stats.resolved / (stats.total || 1)) * 100)} />
+                    <RecentActivity activities={(activities || []).map(a => {
+                        let statusText = (a.status || 'Pending');
+                        if (statusText === 'In Progress') statusText = 'Progress';
+
+                        return {
+                            id: a.id,
+                            type: statusText.toLowerCase().replace(' ', '-'),
+                            statusText: statusText,
+                            category: a.type || 'Other',
+                            message: a.title || 'Untitled Issue',
+                            time: a.created_at ? new Date(a.created_at).toLocaleDateString() : 'N/A'
+                        };
+                    })} />
                 </div>
             </div>
 

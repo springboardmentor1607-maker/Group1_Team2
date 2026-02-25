@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
 
 function Signup({ onLogin }) {
     const [formData, setFormData] = useState({
@@ -105,11 +106,33 @@ function Signup({ onLogin }) {
 
         console.log('Registration attempt:', formData)
 
-        // Simulate successful registration and login
-        if (onLogin) {
-            onLogin();
-            navigate('/dashboard');
-        }
+        const registerUser = async () => {
+            try {
+                // Map fullName to name for backend
+                const { fullName, email, password, role, phone } = formData;
+                const response = await api.post('/auth/register', {
+                    name: fullName,
+                    email,
+                    password,
+                    role,
+                    phone
+                });
+
+                // Store token and auth state
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('isAuthenticated', 'true');
+
+                if (onLogin) {
+                    onLogin();
+                }
+                navigate('/dashboard');
+            } catch (err) {
+                console.error('Registration error:', err);
+                setErrors({ ...errors, email: 'Registration failed. Email might already be in use.' });
+            }
+        };
+
+        registerUser();
     }
 
     return (

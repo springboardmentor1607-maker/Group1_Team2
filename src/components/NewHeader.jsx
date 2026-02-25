@@ -7,7 +7,7 @@ import { Menu, Sun, Moon, Search, Bell, ChevronDown } from 'lucide-react';
 const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
     const { theme, toggleTheme } = useTheme();
     const location = useLocation();
-    
+
     const getPageTitle = () => {
         switch (location.pathname) {
             case '/dashboard':
@@ -18,6 +18,8 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                 return 'Complaints';
             case '/map':
                 return 'Map View';
+            case '/report-issue':
+                return 'Report a Civic Issue';
             case '/settings':
                 return 'Settings';
             default:
@@ -35,6 +37,8 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                 return 'View and manage citizen complaints';
             case '/map':
                 return 'Interactive city map with real-time data';
+            case '/report-issue':
+                return 'Help us keep the city clean by reporting issues';
             case '/settings':
                 return 'Customize your preferences';
             default:
@@ -45,8 +49,8 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
     return (
         <motion.header
             className="bg-card position-fixed top-0 end-0 border-bottom shadow-sm d-flex align-items-center justify-content-between px-4 py-3"
-            style={{ 
-                height: '70px', 
+            style={{
+                height: '70px',
                 zIndex: 1020,
                 left: `${sidebarWidth}px`,
                 borderColor: 'var(--bs-border-color)',
@@ -58,8 +62,8 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
             {/* Left Section - Menu & Title */}
             <div className="d-flex align-items-center min-w-0 flex-grow-1">
                 {/* Mobile Menu Toggle */}
-                <motion.button 
-                    onClick={toggleSidebar} 
+                <motion.button
+                    onClick={toggleSidebar}
                     className="btn btn-light rounded-3 p-2 me-3 d-lg-none border-0"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -70,7 +74,7 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
 
                 {/* Page Title & Description */}
                 <div className="min-w-0 flex-grow-1">
-                    <motion.h1 
+                    <motion.h1
                         className="fs-4 fw-bold mb-0"
                         style={{ color: 'var(--bs-body-color)' }}
                         initial={{ opacity: 0, x: -20 }}
@@ -79,7 +83,7 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                     >
                         {getPageTitle()}
                     </motion.h1>
-                    <motion.p 
+                    <motion.p
                         className="mb-0 small d-none d-sm-block"
                         style={{ color: 'var(--bs-secondary-color)' }}
                         initial={{ opacity: 0 }}
@@ -111,7 +115,7 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                     style={{ backgroundColor: 'var(--hover-item-bg)' }}
                 >
                     <Bell size={18} />
-                    <span 
+                    <span
                         className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                         style={{ fontSize: '10px' }}
                     >
@@ -131,17 +135,17 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                 </motion.button>
 
                 {/* Divider */}
-                <div 
-                    className="d-none d-sm-block" 
-                    style={{ 
-                        width: '1px', 
-                        height: '30px', 
-                        backgroundColor: 'var(--bs-border-color)' 
+                <div
+                    className="d-none d-sm-block"
+                    style={{
+                        width: '1px',
+                        height: '30px',
+                        backgroundColor: 'var(--bs-border-color)'
                     }}
                 />
 
                 {/* User Profile */}
-                <motion.div 
+                <motion.div
                     className="d-flex align-items-center gap-3 cursor-pointer"
                     whileHover={{ scale: 1.02 }}
                     style={{ cursor: 'pointer' }}
@@ -157,10 +161,10 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                     </div>
 
                     {/* Avatar */}
-                    <div 
+                    <div
                         className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
-                        style={{ 
-                            width: '42px', 
+                        style={{
+                            width: '42px',
                             height: '42px',
                             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                             fontSize: '14px'

@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-function Settings() {
-  return <h2 className="text-dark p-4">Settings Page</h2>;
-=======
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -39,11 +35,11 @@ function Settings() {
                                             <small className="text-muted">Receive updates via email</small>
                                         </div>
                                         <div className="form-check form-switch">
-                                            <input 
-                                                className="form-check-input" 
-                                                type="checkbox" 
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
                                                 checked={notifications.email}
-                                                onChange={(e) => setNotifications({...notifications, email: e.target.checked})}
+                                                onChange={(e) => setNotifications({ ...notifications, email: e.target.checked })}
                                                 style={{ cursor: 'pointer' }}
                                             />
                                         </div>
@@ -54,11 +50,11 @@ function Settings() {
                                             <small className="text-muted">Get push notifications</small>
                                         </div>
                                         <div className="form-check form-switch">
-                                            <input 
-                                                className="form-check-input" 
-                                                type="checkbox" 
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
                                                 checked={notifications.push}
-                                                onChange={(e) => setNotifications({...notifications, push: e.target.checked})}
+                                                onChange={(e) => setNotifications({ ...notifications, push: e.target.checked })}
                                                 style={{ cursor: 'pointer' }}
                                             />
                                         </div>
@@ -69,11 +65,11 @@ function Settings() {
                                             <small className="text-muted">Receive text messages</small>
                                         </div>
                                         <div className="form-check form-switch">
-                                            <input 
-                                                className="form-check-input" 
-                                                type="checkbox" 
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
                                                 checked={notifications.sms}
-                                                onChange={(e) => setNotifications({...notifications, sms: e.target.checked})}
+                                                onChange={(e) => setNotifications({ ...notifications, sms: e.target.checked })}
                                                 style={{ cursor: 'pointer' }}
                                             />
                                         </div>
@@ -108,6 +104,5 @@ function Settings() {
             </motion.div>
         </div>
     );
->>>>>>> main
 }
 export default Settings;
