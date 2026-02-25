@@ -158,3 +158,83 @@ exports.updateProfile = async (req, res) => {
 // Middleware export
 exports.verifyToken = verifyToken;
 
+// Admin: Get all users
+exports.getAllUsers = async (req, res) => {
+    try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                message: 'Access denied. Admin privileges required.' 
+            });
+        }
+
+        const users = await User.findAll();
+        
+        // Remove password from response
+        const safeUsers = users.map(user => {
+            const { password, ...safeUser } = user;
+            return safeUser;
+        });
+
+        res.json({
+            success: true,
+            users: safeUsers
+        });
+    } catch (error) {
+        console.error('Get all users error:', error);
+        res.status(500).json({ 
+            message: 'Server error while fetching users' 
+        });
+    }
+};
+
+// Admin: Update user role
+exports.updateUserRole = async (req, res) => {
+    try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                message: 'Access denied. Admin privileges required.' 
+            });
+        }
+
+        const { user_id, role } = req.body;
+
+        if (!user_id || !role) {
+            return res.status(400).json({ 
+                message: 'User ID and role are required' 
+            });
+        }
+
+        // Validate role
+        const validRoles = ['citizen', 'volunteer', 'admin'];
+        if (!validRoles.includes(role)) {
+            return res.status(400).json({ 
+                message: 'Invalid role. Must be: citizen, volunteer, or admin' 
+            });
+        }
+
+        const updatedUser = await User.updateRole(user_id, role);
+        
+        if (!updatedUser) {
+            return res.status(404).json({ 
+                message: 'User not found' 
+            });
+        }
+
+        // Remove password from response
+        const { password, ...safeUser } = updatedUser;
+
+        res.json({
+            success: true,
+            message: 'User role updated successfully',
+            user: safeUser
+        });
+    } catch (error) {
+        console.error('Update user role error:', error);
+        res.status(500).json({ 
+            message: 'Server error while updating user role' 
+        });
+    }
+};
+

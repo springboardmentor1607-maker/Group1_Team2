@@ -1,6 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, getProfile, updateProfile, verifyToken } = require('../controllers/authController');
+const { 
+    register, 
+    login, 
+    getProfile, 
+    updateProfile, 
+    verifyToken, 
+    getAllUsers, 
+    updateUserRole 
+} = require('../controllers/authController');
 
 console.log("AUTH ROUTES WORKING");
 
@@ -14,5 +22,9 @@ router.get('/test', (req, res) => {
 // Protected routes
 router.get('/profile', verifyToken, getProfile);
 router.put('/profile', verifyToken, updateProfile);
+
+// Admin only routes
+router.get('/admin/users', verifyToken, getAllUsers);
+router.put('/admin/users/role', verifyToken, updateUserRole);
 
 module.exports = router;
