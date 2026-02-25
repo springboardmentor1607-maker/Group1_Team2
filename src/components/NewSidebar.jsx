@@ -9,6 +9,7 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
 
     const menuItems = [
         { label: 'Dashboard', path: '/dashboard', icon: Home },
+        { label: 'Report Issue', path: '/report-issue', icon: AlertTriangle },
         { label: 'Complaints', path: '/complaints', icon: FileText },
         { label: 'Map View', path: '/map', icon: MapPin },
         { label: 'Profile', path: '/profile', icon: User },
@@ -22,8 +23,8 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
             {/* Sidebar */}
             <motion.aside
                 className="sidebar position-fixed top-0 start-0 h-100 shadow-lg d-flex flex-column"
-                style={{ 
-                    zIndex: 1040, 
+                style={{
+                    zIndex: 1040,
                     width: isOpen ? '280px' : '80px',
                     borderRight: '1px solid var(--bs-border-color)',
                     transition: 'width 0.3s ease',
@@ -32,21 +33,21 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                 initial={false}
             >
                 {/* Logo Section */}
-                <div 
+                <div
                     className="d-flex align-items-center px-4 py-3 border-bottom"
-                    style={{ 
-                        height: '70px', 
+                    style={{
+                        height: '70px',
                         backgroundColor: 'var(--bs-body-bg)',
                         borderColor: 'var(--bs-border-color)'
                     }}
                 >
                     <div className="d-flex align-items-center">
-                        <div className="rounded-2 d-flex align-items-center justify-content-center me-3" 
-                             style={{ 
-                                 width: '40px', 
-                                 height: '40px', 
-                                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                             }}>
+                        <div className="rounded-2 d-flex align-items-center justify-content-center me-3"
+                            style={{
+                                width: '40px',
+                                height: '40px',
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                            }}>
                             <span className="text-white fw-bold fs-5">CS</span>
                         </div>
                         {isOpen && (
@@ -68,25 +69,24 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                         {menuItems.map((item, index) => {
                             const isActive = location.pathname === item.path;
                             const Icon = item.icon;
-                            
+
                             return (
                                 <motion.button
                                     key={index}
                                     onClick={() => navigate(item.path)}
                                     whileHover={{ scale: 1.02, x: 4 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className={`btn d-flex align-items-center w-100 text-start border-0 rounded-3 mb-2 p-3 position-relative ${
-                                        isActive 
-                                            ? 'nav-link active text-white' 
+                                    className={`btn d-flex align-items-center w-100 text-start border-0 rounded-3 mb-2 p-3 position-relative ${isActive
+                                            ? 'nav-link active text-white'
                                             : 'bg-transparent'
-                                    }`}
+                                        }`}
                                     style={{
-                                        background: isActive 
-                                            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                                        background: isActive
+                                            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                                             : 'transparent',
                                         color: !isActive ? 'var(--bs-body-color)' : 'white',
-                                        boxShadow: isActive 
-                                            ? '0 4px 12px rgba(102, 126, 234, 0.3)' 
+                                        boxShadow: isActive
+                                            ? '0 4px 12px rgba(102, 126, 234, 0.3)'
                                             : 'none',
                                         transition: 'all 0.3s ease'
                                     }}
@@ -101,8 +101,8 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                                         }
                                     }}
                                 >
-                                    <Icon 
-                                        size={20} 
+                                    <Icon
+                                        size={20}
                                         className={`${isOpen ? 'me-3' : ''} flex-shrink-0`}
                                         style={{ minWidth: '20px' }}
                                     />
@@ -130,18 +130,18 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                 </nav>
 
                 {/* User Section */}
-                <div className="p-3 border-top" style={{ 
+                <div className="p-3 border-top" style={{
                     backgroundColor: 'var(--bs-body-bg)',
                     borderColor: 'var(--bs-border-color)'
                 }}>
                     {/* User Profile */}
                     <div className={`d-flex align-items-center mb-3 p-3 rounded-3 shadow-sm ${!isOpen ? 'justify-content-center' : ''}`}
-                         style={{ backgroundColor: 'var(--card-bg)' }}>
-                        <div 
+                        style={{ backgroundColor: 'var(--card-bg)' }}>
+                        <div
                             className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                            style={{ 
-                                width: '44px', 
-                                height: '44px', 
+                            style={{
+                                width: '44px',
+                                height: '44px',
                                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                                 fontSize: '14px'
                             }}
@@ -149,7 +149,7 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                             {initials}
                         </div>
                         {isOpen && (
-                            <motion.div 
+                            <motion.div
                                 className="ms-3 min-w-0"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -161,7 +161,7 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                     </div>
 
                     {/* Logout Button */}
-                    <motion.button 
+                    <motion.button
                         onClick={onLogout}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}

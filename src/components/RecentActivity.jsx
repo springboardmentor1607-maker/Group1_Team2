@@ -2,22 +2,47 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, AlertCircle, Clock, Info } from 'lucide-react';
 
-const ActivityItem = ({ type, message, time }) => {
+const ActivityItem = ({ type, message, time, statusText, category }) => {
     const getIcon = () => {
         switch (type) {
             case 'resolved': return <CheckCircle className="w-5 h-5 text-success" />;
             case 'new': return <AlertCircle className="w-5 h-5 text-danger" />;
+            case 'progress': return <Clock className="w-5 h-5 text-primary" />;
             case 'in-progress': return <Clock className="w-5 h-5 text-primary" />;
+            case 'pending': return <Clock className="w-5 h-5 text-warning" />;
             default: return <Info className="w-5 h-5 text-secondary" />;
         }
     };
 
+    const getStatusColor = (status) => {
+        const s = (status || 'pending').toLowerCase();
+        if (s.includes('resolved')) return 'success';
+        if (s.includes('progress')) return 'primary';
+        return 'warning'; // Default to warning for pending
+    };
+
     return (
-        <div className="d-flex align-items-start gap-3 p-3 hover-bg-adaptive rounded transition-colors">
+        <div className="d-flex align-items-start gap-3 p-3 hover-bg-adaptive rounded transition-colors border-bottom border-light">
             <div className="mt-1">{getIcon()}</div>
-            <div>
-                <p className="small fw-medium text-body mb-1">{message}</p>
-                <p className="small text-body-secondary m-0">{time}</p>
+            <div className="flex-grow-1">
+                <div className="d-flex justify-content-between align-items-center mb-1">
+                    <div>
+                        <p className="small fw-semibold text-body mb-0">{message}</p>
+                        {category && (
+                            <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 mt-1" style={{ fontSize: '0.65rem' }}>
+                                {category.toUpperCase()}
+                            </span>
+                        )}
+                    </div>
+                    {statusText && (
+                        <span className={`badge rounded-pill bg-opacity-10 text-${getStatusColor(statusText)} bg-${getStatusColor(statusText)} small`} style={{ fontSize: '0.7rem' }}>
+                            {statusText}
+                        </span>
+                    )}
+                </div>
+                <div className="d-flex justify-content-between align-items-center">
+                    <p className="small text-body-secondary m-0" style={{ fontSize: '0.75rem' }}>{time}</p>
+                </div>
             </div>
         </div>
     );

@@ -1,32 +1,47 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Bot } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, Loader2 } from 'lucide-react';
+import { api } from '../lib/api';
 
 export default function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
     const [messages, setMessages] = useState([
         { id: 1, text: "Hello! I'm the CleanStreet Assistant. How can I help you today?", isBot: true }
     ]);
     const [inputValue, setInputValue] = useState("");
 
-    const handleSendMessage = (e) => {
+    const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!inputValue.trim()) return;
 
+        const userMsgText = inputValue;
         // Add user message
-        const newMessage = { id: Date.now(), text: inputValue, isBot: false };
+        const newMessage = { id: Date.now(), text: userMsgText, isBot: false };
         setMessages(prev => [...prev, newMessage]);
         setInputValue("");
+        setIsTyping(true);
 
-        // Simulate bot response
-        setTimeout(() => {
+        try {
+            const response = await api.post('/ai/chat', { message: userMsgText });
             const botResponse = {
                 id: Date.now() + 1,
-                text: "Thanks for reaching out! A CleanStreet representative will review your message shortly.",
+                text: response.text,
                 isBot: true
             };
             setMessages(prev => [...prev, botResponse]);
-        }, 1000);
+        } catch (err) {
+            console.error('Chat error:', err);
+            const errorText = err.response?.text || err.message || "Sorry, I'm having trouble connecting right now.";
+            const errorResponse = {
+                id: Date.now() + 1,
+                text: errorText,
+                isBot: true
+            };
+            setMessages(prev => [...prev, errorResponse]);
+        } finally {
+            setIsTyping(false);
+        }
     };
 
     return (
@@ -88,6 +103,14 @@ export default function ChatWidget() {
                                     </div>
                                 </div>
                             ))}
+                            {isTyping && (
+                                <div className="d-flex justify-content-start animate-pulse">
+                                    <div className="p-2 px-3 bg-secondary bg-opacity-10 rounded-pill d-flex align-items-center gap-2">
+                                        <Loader2 size={14} className="animate-spin text-primary" />
+                                        <span className="small text-muted" style={{ fontSize: '0.7rem' }}>AI is thinking...</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Input Area */}

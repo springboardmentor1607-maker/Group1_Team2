@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-function MapView() {
-  return <h2 className="text-dark p-4">Map View Page</h2>;
-=======
 import React from 'react';
 import { motion } from 'framer-motion';
 import MapSection from '../components/MapSection';
@@ -85,6 +81,5 @@ function MapView() {
             </motion.div>
         </div>
     );
->>>>>>> main
 }
 export default MapView;
