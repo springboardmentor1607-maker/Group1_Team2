@@ -2,11 +2,11 @@ const { pool } = require('../config/db');
 
 const User = {
 
-    async create({ name, email, password, location, role, profile_photo }) {
+    async create({ name, email, password, location, role, profile_photo, phone }) {
         const result = await pool.query(
-            `INSERT INTO users (name, email, password, location, role, profile_photo)
-             VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-            [name, email, password, location || '', role || 'citizen', profile_photo || '']
+            `INSERT INTO users (name, email, password, location, role, profile_photo, phone)
+             VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+            [name, email, password, location || '', role || 'citizen', profile_photo || '', phone || '']
         );
 
         return result.rows[0];
@@ -48,45 +48,6 @@ const User = {
 
     async findAll() {
         const result = await pool.query(`SELECT * FROM users`);
-        return result.rows;
-    },
-
-    async findVolunteers() {
-        const result = await pool.query(
-            `SELECT id, name, email, location, phone, created_at, updated_at 
-             FROM users WHERE role = 'volunteer' 
-             ORDER BY name`
-        );
-        return result.rows;
-    },
-
-    async findAdmins() {
-        const result = await pool.query(
-            `SELECT id, name, email, location, phone, created_at, updated_at 
-             FROM users WHERE role = 'admin' 
-             ORDER BY name`
-        );
-        return result.rows;
-    },
-
-    async updateRole(id, role) {
-        const result = await pool.query(
-            `UPDATE users 
-             SET role = $1, updated_at = CURRENT_TIMESTAMP
-             WHERE id = $2 
-             RETURNING *`,
-            [role, id]
-        );
-        return result.rows[0];
-    },
-
-    async getUsersByRole(role) {
-        const result = await pool.query(
-            `SELECT id, name, email, location, phone, role, created_at, updated_at 
-             FROM users WHERE role = $1 
-             ORDER BY name`,
-            [role]
-        );
         return result.rows;
     }
 

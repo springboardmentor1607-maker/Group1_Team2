@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import Complaints from './pages/Complaints';
 import MapView from './pages/MapView';
 import Settings from './pages/Settings';
+import ReportIssue from './pages/ReportIssue';
 
 // Protected Route Component
 const ProtectedRoute = ({ isAuthenticated, children }) => {
@@ -22,23 +23,10 @@ const ProtectedRoute = ({ isAuthenticated, children }) => {
 function App() {
     // Initialize auth state from localStorage to persist login across refreshes
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
-        return localStorage.getItem('isAuthenticated') === 'true';
+        const auth = localStorage.getItem('isAuthenticated') === 'true';
+        const hasToken = !!localStorage.getItem('token');
+        return auth && hasToken;
     });
-
-    // Theme state management
-    const [theme, setTheme] = useState(() => {
-        return localStorage.getItem('bs-theme') || 'light'
-    })
-
-    // Apply theme to document root with Bootstrap's data-bs-theme attribute
-    useEffect(() => {
-        document.documentElement.setAttribute('data-bs-theme', theme)
-        localStorage.setItem('bs-theme', theme)
-    }, [theme])
-
-    const handleThemeChange = (newTheme) => {
-        setTheme(newTheme)
-    }
 
     const handleLogin = () => {
         setIsAuthenticated(true);
@@ -48,6 +36,7 @@ function App() {
     const handleLogout = () => {
         setIsAuthenticated(false);
         localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('token');
     };
 
     return (
@@ -96,6 +85,7 @@ function App() {
                                     <Route path="/profile" element={<Profile />} />
                                     <Route path="/complaints" element={<Complaints />} />
                                     <Route path="/map" element={<MapView />} />
+                                    <Route path="/report-issue" element={<ReportIssue />} />
                                     <Route path="/settings" element={<Settings />} />
                                     {/* Catch all inside dashboard to redirect to dashboard home */}
                                     <Route path="*" element={<Navigate to="/dashboard" replace />} />
