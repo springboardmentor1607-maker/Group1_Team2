@@ -1,13 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, MapPin, FileText, User, Settings, LogOut } from 'lucide-react';
+import { Home, MapPin, FileText, User, Settings, LogOut, AlertTriangle, Shield } from 'lucide-react';
 
 const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const menuItems = [
+    const baseMenuItems = [
         { label: 'Dashboard', path: '/dashboard', icon: Home },
         { label: 'Report Issue', path: '/report-issue', icon: AlertTriangle },
         { label: 'Complaints', path: '/complaints', icon: FileText },
@@ -15,6 +15,11 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
         { label: 'Profile', path: '/profile', icon: User },
         { label: 'Settings', path: '/settings', icon: Settings },
     ];
+
+    // Add admin menu item if user is admin
+    const menuItems = user?.role === 'admin' 
+        ? [...baseMenuItems.slice(0, 5), { label: 'Admin Panel', path: '/admin', icon: Shield }, baseMenuItems[5]]
+        : baseMenuItems;
 
     const initials = (user?.name || 'U').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 

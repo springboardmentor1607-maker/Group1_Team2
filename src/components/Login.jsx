@@ -78,10 +78,23 @@ function Login({ onLogin }) {
                 // Store token and auth state
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('isAuthenticated', 'true');
+                
+                // Store user data including role
+                if (response.user) {
+                    localStorage.setItem('userRole', response.user.role);
+                    localStorage.setItem('userData', JSON.stringify(response.user));
+                }
+                
                 if (onLogin) {
                     onLogin();
                 }
-                navigate('/dashboard');
+                
+                // Redirect based on role
+                if (response.user && response.user.role === 'admin') {
+                    navigate('/admin');
+                } else {
+                    navigate('/dashboard');
+                }
             } catch (err) {
                 console.error('Login error:', err);
                 setErrors({ ...errors, password: 'Invalid email or password' });

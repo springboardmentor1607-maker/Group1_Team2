@@ -4,11 +4,13 @@ import AnalyticsSection from '../components/AnalyticsSection';
 import MapSection from '../components/MapSection';
 import RecentActivity from '../components/RecentActivity';
 import CleanlinessScore from '../components/CleanlinessScore';
-import { Plus, List, Map as MapIcon } from 'lucide-react';
+import { Plus, List, Map as MapIcon, AlertTriangle, Users, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 
 export default function Dashboard() {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         total: 0,
@@ -22,21 +24,37 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                // Fetch stats
-                const statsData = await api.get('/complaints/stats');
+                // Fetch stats and recent complaints
+                const [statsData, profileData] = await Promise.all([
+                    api.get('/complaints/stats'),
+                    api.get('/auth/profile')
+                ]);
+
                 setStats({
                     total: statsData.stats?.total || 0,
                     pending: statsData.stats?.pending || 0,
                     inProgress: statsData.stats?.in_progress || 0,
                     resolved: statsData.stats?.resolved || 0
                 });
-                setActivities(statsData.recent || []);
+                
+                // Transform recent complaints into activity format
+                const recentComplaints = statsData.recent || [];
+                const formattedActivities = recentComplaints.map(complaint => ({
+                    id: complaint.id,
+                    type: complaint.status?.toLowerCase() || 'pending',
+                    message: complaint.title,
+                    time: new Date(complaint.created_at).toLocaleDateString(),
+                    statusText: complaint.status || 'Pending',
+                    category: complaint.type
+                }));
 
-                // Fetch user profile
-                const profileData = await api.get('/auth/profile');
+                setActivities(formattedActivities);
                 setUser(profileData.user);
             } catch (err) {
                 console.error('Error fetching dashboard data:', err);
+                // Set fallback data instead of leaving empty
+                setStats({ total: 0, pending: 0, inProgress: 0, resolved: 0 });
+                setActivities([]);
             } finally {
                 setLoading(false);
             }
