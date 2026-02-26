@@ -11,6 +11,7 @@ import Complaints from './pages/Complaints';
 import MapView from './pages/MapView';
 import Settings from './pages/Settings';
 import ReportIssue from './pages/ReportIssue';
+import AdminDashboard from './pages/AdminDashboard';
 
 // Protected Route Component
 const ProtectedRoute = ({ isAuthenticated, children }) => {
@@ -37,6 +38,8 @@ function App() {
         setIsAuthenticated(false);
         localStorage.removeItem('isAuthenticated');
         localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userData');
     };
 
     return (
@@ -47,7 +50,10 @@ function App() {
                     path="/login"
                     element={
                         isAuthenticated ? (
-                            <Navigate to="/dashboard" replace />
+                            <Navigate 
+                                to={localStorage.getItem('userRole') === 'admin' ? '/admin' : '/dashboard'} 
+                                replace 
+                            />
                         ) : (
                             <AuthLayout subtitle="Welcome Back, Citizen!">
                                 <Login onLogin={handleLogin} />
@@ -59,7 +65,10 @@ function App() {
                     path="/signup"
                     element={
                         isAuthenticated ? (
-                            <Navigate to="/dashboard" replace />
+                            <Navigate 
+                                to={localStorage.getItem('userRole') === 'admin' ? '/admin' : '/dashboard'} 
+                                replace 
+                            />
                         ) : (
                             <AuthLayout subtitle="Join Your Community Today">
                                 <Signup onLogin={handleLogin} />
@@ -71,7 +80,16 @@ function App() {
                 {/* Redirect Root to Login or Dashboard */}
                 <Route
                     path="/"
-                    element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
+                    element={
+                        <Navigate 
+                            to={
+                                isAuthenticated 
+                                    ? (localStorage.getItem('userRole') === 'admin' ? '/admin' : '/dashboard')
+                                    : '/login'
+                            } 
+                            replace 
+                        />
+                    }
                 />
 
                 {/* Protected Dashboard Routes */}
@@ -87,6 +105,7 @@ function App() {
                                     <Route path="/map" element={<MapView />} />
                                     <Route path="/report-issue" element={<ReportIssue />} />
                                     <Route path="/settings" element={<Settings />} />
+                                    <Route path="/admin" element={<AdminDashboard />} />
                                     {/* Catch all inside dashboard to redirect to dashboard home */}
                                     <Route path="*" element={<Navigate to="/dashboard" replace />} />
                                 </Routes>

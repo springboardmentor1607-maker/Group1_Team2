@@ -162,7 +162,6 @@ exports.updateProfile = async (req, res) => {
 // Middleware export
 exports.verifyToken = verifyToken;
 
-<<<<<<< HEAD
 // Admin: Get all users
 exports.getAllUsers = async (req, res) => {
     try {
@@ -242,6 +241,3 @@ exports.updateUserRole = async (req, res) => {
         });
     }
 };
-
-=======
->>>>>>> Ansel

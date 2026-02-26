@@ -121,11 +121,20 @@ function Signup({ onLogin }) {
                 // Store token and auth state
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('isAuthenticated', 'true');
+                
+                // Store user role (from form selection)
+                localStorage.setItem('userRole', role);
 
                 if (onLogin) {
                     onLogin();
                 }
-                navigate('/dashboard');
+                
+                // Redirect based on role
+                if (role === 'admin') {
+                    navigate('/admin');
+                } else {
+                    navigate('/dashboard');
+                }
             } catch (err) {
                 console.error('Registration error:', err);
                 setErrors({ ...errors, email: 'Registration failed. Email might already be in use.' });

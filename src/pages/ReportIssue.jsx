@@ -72,6 +72,12 @@ const ReportIssue = () => {
                     </div>
                     <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center mt-4">
                         <button
+                            onClick={() => navigate('/complaints?view=my')}
+                            className="btn btn-success px-4 py-3 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2"
+                        >
+                            <FileVolume2 size={18} /> View My Complaints
+                        </button>
+                        <button
                             onClick={() => navigate('/dashboard')}
                             className="btn btn-primary px-4 py-3 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2"
                         >

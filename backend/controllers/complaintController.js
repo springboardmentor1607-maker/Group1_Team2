@@ -39,10 +39,21 @@ const createComplaint = async (req, res) => {
 
 const getAllComplaints = async (req, res) => {
     try {
-        const complaints = await Complaint.findAll();
+        const complaints = await Complaint.findAllWithDetails();
         res.json({ success: true, data: complaints });
     } catch (err) {
         console.error('Error in getAllComplaints:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+const getUserComplaints = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const complaints = await Complaint.findByUserIdWithDetails(userId);
+        res.json({ success: true, data: complaints });
+    } catch (err) {
+        console.error('Error in getUserComplaints:', err.message);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
@@ -68,8 +79,76 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
+const assignVolunteer = async (req, res) => {
+    try {
+        const { complaintId, volunteerId } = req.body;
+        
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Access denied. Admin privileges required.' 
+            });
+        }
+
+        const updatedComplaint = await Complaint.assignVolunteer(complaintId, volunteerId);
+        
+        if (!updatedComplaint) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Complaint not found' 
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Volunteer assigned successfully',
+            data: updatedComplaint
+        });
+    } catch (err) {
+        console.error('Error in assignVolunteer:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+const updateComplaintStatus = async (req, res) => {
+    try {
+        const { complaintId } = req.params;
+        const { status } = req.body;
+        
+        // Check if user is admin or volunteer
+        if (!['admin', 'volunteer'].includes(req.user.role)) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Access denied. Admin or volunteer privileges required.' 
+            });
+        }
+
+        const updatedComplaint = await Complaint.updateStatus(complaintId, status);
+        
+        if (!updatedComplaint) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Complaint not found' 
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Status updated successfully',
+            data: updatedComplaint
+        });
+    } catch (err) {
+        console.error('Error in updateComplaintStatus:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
 module.exports = {
     createComplaint,
     getAllComplaints,
-    getDashboardStats
+    getUserComplaints,
+    getDashboardStats,
+    assignVolunteer,
+    updateComplaintStatus
 };
