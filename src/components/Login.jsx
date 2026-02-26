@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
 
 function Login({ onLogin }) {
     const [email, setEmail] = useState('')
@@ -71,11 +72,23 @@ function Login({ onLogin }) {
 
         console.log('Login attempt:', { email, password })
 
-        // Simulate successful login
-        if (onLogin) {
-            onLogin();
-            navigate('/dashboard');
-        }
+        const loginUser = async () => {
+            try {
+                const response = await api.post('/auth/login', { email, password });
+                // Store token and auth state
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('isAuthenticated', 'true');
+                if (onLogin) {
+                    onLogin();
+                }
+                navigate('/dashboard');
+            } catch (err) {
+                console.error('Login error:', err);
+                setErrors({ ...errors, password: 'Invalid email or password' });
+            }
+        };
+
+        loginUser();
     }
 
     return (

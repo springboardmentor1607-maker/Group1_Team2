@@ -29,7 +29,7 @@ export default function StatsSection({ stats }) {
     const data = [
         { title: 'Total Complaints', value: stats.total, icon: FileText, color: 'bg-primary' },
         { title: 'Pending', value: stats.pending, icon: Clock, color: 'bg-warning' },
-        { title: 'In Progress', value: stats.inProgress, icon: RefreshCw, color: 'bg-info' },
+        { title: 'Progress', value: stats.inProgress, icon: RefreshCw, color: 'bg-info' },
         { title: 'Resolved', value: stats.resolved, icon: CheckCircle, color: 'bg-success' },
     ];
 

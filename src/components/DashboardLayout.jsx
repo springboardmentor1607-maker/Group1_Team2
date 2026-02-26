@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion } from 'framer-motion';
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import ChatWidget from './ChatWidget';
 
 /* ===================== SIDEBAR ===================== */
@@ -36,8 +36,8 @@ const Sidebar = ({ isOpen, closeSidebar, onLogout }) => {
             animate={{ width: isOpen ? 256 : 80 }}
         >
             {/* ===== LOGO ===== */}
-            <div className="d-flex align-items-center justify-content-center h-16 border-bottom">
-                <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
+            <div className="d-flex align-items-center justify-content-center gap-2 h-16 border-bottom overflow-hidden px-3">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="flex-shrink-0">
                     <defs>
                         <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stopColor="#22C55E" />
@@ -62,6 +62,15 @@ const Sidebar = ({ isOpen, closeSidebar, onLogout }) => {
                     <circle cx="24" cy="10" r="1" fill="white" />
                     <circle cx="18" cy="11" r="1" fill="white" />
                 </svg>
+                {isOpen && (
+                    <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="fw-bold fs-5 text-body text-nowrap"
+                    >
+                        CleanStreet
+                    </motion.span>
+                )}
             </div>
 
             {/* ===== MENU ===== */}
@@ -109,10 +118,14 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
             case '/profile': return 'Profile';
             case '/complaints': return 'Complaints';
             case '/map': return 'Map View';
+            case '/report-issue': return 'Report a Civic Issue';
             case '/settings': return 'Settings';
             default: return '';
         }
     };
+
+    const isReportPage = location.pathname === '/report-issue';
+    const navigate = useNavigate();
 
     return (
         <header
@@ -130,16 +143,19 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
             </div>
 
             <div className="d-flex align-items-center gap-3">
-                <button
-                    className="btn btn-primary d-flex align-items-center shadow-sm"
-                    style={{
-                        background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)',
-                        border: 'none'
-                    }}
-                >
-                    <Plus className="w-4 h-4 me-2" />
-                    Report Issue
-                </button>
+                {!isReportPage && (
+                    <button
+                        onClick={() => navigate('/report-issue')}
+                        className="btn btn-primary d-flex align-items-center shadow-sm"
+                        style={{
+                            background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)',
+                            border: 'none'
+                        }}
+                    >
+                        <Plus className="w-4 h-4 me-2" />
+                        Report Issue
+                    </button>
+                )}
 
                 <button onClick={toggleTheme} className="btn text-body">
                     {theme === 'light' ? <Moon /> : <Sun />}

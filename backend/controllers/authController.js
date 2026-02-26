@@ -5,16 +5,19 @@ const jwt = require('jsonwebtoken');
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
+        console.warn('AUTH FAILED: No token found in Authorization header');
         return res.status(401).json({ message: 'No token, authorization denied' });
     }
-    
+
     try {
+        console.log('Verifying token...');
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
         req.user = decoded.user;
         next();
     } catch (err) {
+        console.error('AUTH FAILED: Invalid token', err.message);
         res.status(401).json({ message: 'Token is not valid' });
     }
 };
@@ -23,7 +26,7 @@ const verifyToken = (req, res, next) => {
 // REGISTER
 exports.register = async (req, res) => {
     try {
-        const { name, email, password, location, role } = req.body;
+        const { name, email, password, location, role, phone } = req.body;
 
         const existing = await User.findByEmail(email);
 
@@ -40,7 +43,8 @@ exports.register = async (req, res) => {
             email,
             password: hashedPassword,
             location,
-            role
+            role,
+            phone
         });
 
         //JWT
@@ -94,11 +98,11 @@ exports.login = async (req, res) => {
 exports.getProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
-        
+
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        
+
         res.json({
             user: {
                 id: user.id,
@@ -121,7 +125,7 @@ exports.updateProfile = async (req, res) => {
     try {
         const { name, email, phone, location } = req.body;
         const userId = req.user.id;
-        
+
         // Check if email is being changed and if it already exists
         if (email) {
             const existingUser = await User.findByEmail(email);
@@ -129,14 +133,14 @@ exports.updateProfile = async (req, res) => {
                 return res.status(400).json({ message: 'Email already in use' });
             }
         }
-        
+
         const updatedUser = await User.updateProfile(userId, {
             name,
             email,
             phone: phone || '',
             location: location || ''
         });
-        
+
         res.json({
             message: 'Profile updated successfully',
             user: {
@@ -158,6 +162,7 @@ exports.updateProfile = async (req, res) => {
 // Middleware export
 exports.verifyToken = verifyToken;
 
+<<<<<<< HEAD
 // Admin: Get all users
 exports.getAllUsers = async (req, res) => {
     try {
@@ -238,3 +243,5 @@ exports.updateUserRole = async (req, res) => {
     }
 };
 
+=======
+>>>>>>> Ansel
