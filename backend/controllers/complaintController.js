@@ -14,6 +14,14 @@ const createComplaint = async (req, res) => {
             return res.status(401).json({ success: false, message: 'User not authenticated. Please log in again.' });
         }
 
+        // Only citizens can file complaints
+        if (req.user.role !== 'citizen') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Only citizens can file complaints. Volunteers and admins cannot create complaints.' 
+            });
+        }
+
         const complaint = await Complaint.create({
             user_id,
             title,
@@ -144,10 +152,31 @@ const updateComplaintStatus = async (req, res) => {
     }
 };
 
+const getVolunteerComplaints = async (req, res) => {
+    try {
+        const volunteerId = req.user.id;
+        
+        // Check if user is volunteer
+        if (req.user.role !== 'volunteer') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Access denied. Volunteer privileges required.' 
+            });
+        }
+
+        const complaints = await Complaint.findByVolunteerId(volunteerId);
+        res.json({ success: true, data: complaints });
+    } catch (err) {
+        console.error('Error in getVolunteerComplaints:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
 module.exports = {
     createComplaint,
     getAllComplaints,
     getUserComplaints,
+    getVolunteerComplaints,
     getDashboardStats,
     assignVolunteer,
     updateComplaintStatus

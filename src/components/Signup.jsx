@@ -9,7 +9,7 @@ function Signup({ onLogin }) {
         email: '',
         phone: '',
         password: '',
-        role: 'user'
+        role: 'citizen'
     })
     const navigate = useNavigate();
 
@@ -192,7 +192,7 @@ function Signup({ onLogin }) {
                             {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
                         </div>
                         <div className="mb-3">
-                            <label htmlFor="signupRole" className="form-label">Role</label>
+                            <label htmlFor="signupRole" className="form-label">I am registering as</label>
                             <select
                                 className="form-control"
                                 id="signupRole"
@@ -200,10 +200,11 @@ function Signup({ onLogin }) {
                                 value={formData.role}
                                 onChange={handleChange}
                             >
-                                <option value="user">User</option>
-                                <option value="volunteer">Volunteer</option>
-                                <option value="admin">Admin</option>
+                                <option value="citizen">Citizen (File complaints)</option>
+                                <option value="volunteer">Volunteer (Handle complaints)</option>
+                                <option value="admin">Admin (Manage system)</option>
                             </select>
+                            <small className="text-muted">Citizens file complaints. Volunteers update work progress. Admins manage the entire system.</small>
                         </div>
 
                         <div className="mb-3">

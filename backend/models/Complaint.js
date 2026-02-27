@@ -102,6 +102,34 @@ const Complaint = {
             ORDER BY c.created_at DESC
         `, [userId]);
         return result.rows;
+    },
+
+    async findByVolunteerId(volunteerId) {
+        const result = await pool.query(`
+            SELECT c.*, 
+                   u.name as user_name, u.email as user_email, u.phone as user_phone,
+                   v.name as volunteer_name
+            FROM complaints c
+            LEFT JOIN users u ON c.user_id = u.id
+            LEFT JOIN users v ON c.assigned_to = v.id
+            WHERE c.assigned_to = $1
+            ORDER BY 
+                CASE 
+                    WHEN c.status = 'In Progress' THEN 1
+                    WHEN c.status = 'Pending' THEN 2
+                    WHEN c.status = 'Resolved' THEN 3
+                    ELSE 4
+                END ASC,
+                CASE 
+                    WHEN c.priority = 'Critical' THEN 1
+                    WHEN c.priority = 'High' THEN 2
+                    WHEN c.priority = 'Medium' THEN 3
+                    WHEN c.priority = 'Low' THEN 4
+                    ELSE 5
+                END ASC,
+                c.created_at DESC
+        `, [volunteerId]);
+        return result.rows;
     }
 };
 

@@ -1,15 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { api } from "../lib/api";
 
 export default function Profile() {
   const [formData, setFormData] = useState({
-    fullName: "Demo User",
-    email: "demo@gmail.com",
-    phone: "9876543210",
-    location: "Coimbatore",
-    bio: "Citizen of CleanStreet",
+    fullName: "",
+    email: "",
+    phone: "",
+    location: "",
+    bio: "",
+    role: ""
   });
 
+  const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await api.get('/auth/profile');
+      const user = response.user;
+      
+      setFormData({
+        fullName: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        location: user.location || "",
+        bio: `${user.role.charAt(0).toUpperCase() + user.role.slice(1)} of CleanStreet`,
+        role: user.role || "citizen"
+      });
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+      setError('Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -18,13 +47,33 @@ export default function Profile() {
     });
   };
 
-  const handleSave = () => {
-    // Here you can later connect backend API
-    console.log("Saved Data:", formData);
+  const handleSave = async () => {
+    try {
+      await api.put('/auth/profile', {
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        location: formData.location
+      });
 
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setError('Failed to update profile');
+      setTimeout(() => setError(''), 3000);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="d-flex align-items-center justify-content-center vh-100">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
@@ -55,7 +104,7 @@ export default function Profile() {
               </p>
 
               <span className="mt-2 badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
-                Citizen
+                {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
               </span>
             </div>
           </div>
@@ -129,6 +178,12 @@ export default function Profile() {
             {saved && (
               <p className="mt-3 text-success fw-medium">
                 Profile updated successfully!
+              </p>
+            )}
+
+            {error && (
+              <p className="mt-3 text-danger fw-medium">
+                {error}
               </p>
             )}
           </div>

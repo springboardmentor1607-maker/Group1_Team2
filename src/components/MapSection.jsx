@@ -48,6 +48,11 @@ export default function MapSection({ onLocationSelect, showComplaints = true }) 
             }
         };
         fetchMapData();
+        
+        // Auto-refresh every 10 seconds to get latest updates
+        const interval = setInterval(fetchMapData, 10000);
+        
+        return () => clearInterval(interval);
     }, [showComplaints]);
 
     return (

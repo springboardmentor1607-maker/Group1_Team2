@@ -61,6 +61,11 @@ export default function Dashboard() {
         };
 
         fetchDashboardData();
+        
+        // Auto-refresh every 10 seconds to get latest updates
+        const interval = setInterval(fetchDashboardData, 10000);
+        
+        return () => clearInterval(interval);
     }, []);
 
     if (loading) {
