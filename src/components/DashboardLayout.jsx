@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import {
     Menu,
@@ -16,6 +16,8 @@ import { cn } from '../lib/utils';
 import { motion } from 'framer-motion';
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import ChatWidget from './ChatWidget';
+import NewSidebar from './NewSidebar';
+import { api } from '../lib/api';
 
 /* ===================== SIDEBAR ===================== */
 const Sidebar = ({ isOpen, closeSidebar, onLogout }) => {
@@ -167,27 +169,39 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
 
 /* ===================== LAYOUT ===================== */
 export default function DashboardLayout({ children, onLogout }) {
-    const [sidebarOpen, setSidebarOpen] = React.useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await api.get('/auth/profile');
+                setUser(response.user);
+            } catch (err) {
+                console.error('Error fetching user:', err);
+            }
+        };
+        fetchUser();
+    }, []);
 
     return (
         <div className="min-h-screen bg-body">
-            <Sidebar
+            <NewSidebar
                 isOpen={sidebarOpen}
-                closeSidebar={() => setSidebarOpen(false)}
-                onLogout={onLogout}
-            />
-
-            <Header
                 toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-                sidebarOpen={sidebarOpen}
+                onLogout={onLogout}
+                user={user}
             />
 
             {/* ✅ PERFECT SPACING */}
             <main
-                className={cn(
-                    "pt-28 px-4 transition-all",
-                    sidebarOpen ? "lg:ml-64" : "lg:ml-20"
-                )}
+                className="pt-3 px-4 transition-all"
+                style={{
+                    marginLeft: sidebarOpen ? '280px' : '80px',
+                    transition: 'margin-left 0.3s ease',
+                    paddingTop: '20px',
+                    minHeight: '100vh'
+                }}
             >
                 {children}
             </main>

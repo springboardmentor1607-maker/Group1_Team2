@@ -12,6 +12,7 @@ import MapView from './pages/MapView';
 import Settings from './pages/Settings';
 import ReportIssue from './pages/ReportIssue';
 import AdminDashboard from './pages/AdminDashboard';
+import VolunteerDashboard from './pages/VolunteerDashboard';
 
 // Protected Route Component
 const ProtectedRoute = ({ isAuthenticated, children }) => {
@@ -42,6 +43,13 @@ function App() {
         localStorage.removeItem('userData');
     };
 
+    const getDashboardRoute = () => {
+        const role = localStorage.getItem('userRole');
+        if (role === 'admin') return '/admin';
+        if (role === 'volunteer') return '/volunteer';
+        return '/dashboard';
+    };
+
     return (
         <Router>
             <Routes>
@@ -51,7 +59,7 @@ function App() {
                     element={
                         isAuthenticated ? (
                             <Navigate 
-                                to={localStorage.getItem('userRole') === 'admin' ? '/admin' : '/dashboard'} 
+                                to={getDashboardRoute()} 
                                 replace 
                             />
                         ) : (
@@ -66,7 +74,7 @@ function App() {
                     element={
                         isAuthenticated ? (
                             <Navigate 
-                                to={localStorage.getItem('userRole') === 'admin' ? '/admin' : '/dashboard'} 
+                                to={getDashboardRoute()} 
                                 replace 
                             />
                         ) : (
@@ -82,11 +90,7 @@ function App() {
                     path="/"
                     element={
                         <Navigate 
-                            to={
-                                isAuthenticated 
-                                    ? (localStorage.getItem('userRole') === 'admin' ? '/admin' : '/dashboard')
-                                    : '/login'
-                            } 
+                            to={isAuthenticated ? getDashboardRoute() : '/login'} 
                             replace 
                         />
                     }
@@ -100,14 +104,15 @@ function App() {
                             <DashboardLayout onLogout={handleLogout}>
                                 <Routes>
                                     <Route path="/dashboard" element={<Dashboard />} />
+                                    <Route path="/volunteer" element={<VolunteerDashboard />} />
                                     <Route path="/profile" element={<Profile />} />
                                     <Route path="/complaints" element={<Complaints />} />
                                     <Route path="/map" element={<MapView />} />
                                     <Route path="/report-issue" element={<ReportIssue />} />
                                     <Route path="/settings" element={<Settings />} />
                                     <Route path="/admin" element={<AdminDashboard />} />
-                                    {/* Catch all inside dashboard to redirect to dashboard home */}
-                                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                                    {/* Catch all inside dashboard to redirect based on role */}
+                                    <Route path="*" element={<Navigate to={getDashboardRoute()} replace />} />
                                 </Routes>
                             </DashboardLayout>
                         </ProtectedRoute>

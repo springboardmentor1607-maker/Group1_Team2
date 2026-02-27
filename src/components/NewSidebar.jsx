@@ -1,25 +1,49 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, MapPin, FileText, User, Settings, LogOut, AlertTriangle, Shield } from 'lucide-react';
+import { Home, MapPin, FileText, User, Settings, LogOut, AlertTriangle, Shield, ClipboardList, Moon, Sun } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { theme, toggleTheme } = useTheme();
 
-    const baseMenuItems = [
-        { label: 'Dashboard', path: '/dashboard', icon: Home },
-        { label: 'Report Issue', path: '/report-issue', icon: AlertTriangle },
-        { label: 'Complaints', path: '/complaints', icon: FileText },
-        { label: 'Map View', path: '/map', icon: MapPin },
-        { label: 'Profile', path: '/profile', icon: User },
-        { label: 'Settings', path: '/settings', icon: Settings },
-    ];
+    // Define menu items based on user role
+    const getMenuItems = () => {
+        const role = user?.role || localStorage.getItem('userRole');
 
-    // Add admin menu item if user is admin
-    const menuItems = user?.role === 'admin' 
-        ? [...baseMenuItems.slice(0, 5), { label: 'Admin Panel', path: '/admin', icon: Shield }, baseMenuItems[5]]
-        : baseMenuItems;
+        if (role === 'admin') {
+            return [
+                { label: 'Dashboard', path: '/dashboard', icon: Home },
+                { label: 'Admin Panel', path: '/admin', icon: Shield },
+                { label: 'Report Issue', path: '/report-issue', icon: AlertTriangle },
+                { label: 'Complaints', path: '/complaints', icon: FileText },
+                { label: 'Map View', path: '/map', icon: MapPin },
+                { label: 'Profile', path: '/profile', icon: User },
+                { label: 'Settings', path: '/settings', icon: Settings },
+            ];
+        } else if (role === 'volunteer') {
+            return [
+                { label: 'My Assignments', path: '/volunteer', icon: ClipboardList },
+                { label: 'Map View', path: '/map', icon: MapPin },
+                { label: 'Profile', path: '/profile', icon: User },
+                { label: 'Settings', path: '/settings', icon: Settings },
+            ];
+        } else {
+            // Citizen
+            return [
+                { label: 'Dashboard', path: '/dashboard', icon: Home },
+                { label: 'Report Issue', path: '/report-issue', icon: AlertTriangle },
+                { label: 'My Complaints', path: '/complaints', icon: FileText },
+                { label: 'Map View', path: '/map', icon: MapPin },
+                { label: 'Profile', path: '/profile', icon: User },
+                { label: 'Settings', path: '/settings', icon: Settings },
+            ];
+        }
+    };
+
+    const menuItems = getMenuItems();
 
     const initials = (user?.name || 'U').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 
@@ -164,6 +188,27 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                             </motion.div>
                         )}
                     </div>
+
+                    {/* Theme Toggle Button */}
+                    <motion.button
+                        onClick={toggleTheme}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`btn btn-outline-secondary w-100 d-flex align-items-center border-2 rounded-3 p-3 mb-2 ${!isOpen ? 'justify-content-center' : ''}`}
+                        style={{ transition: 'all 0.3s ease' }}
+                        title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+                    >
+                        {theme === 'light' ? <Moon size={20} className={`${isOpen ? 'me-3' : ''}`} /> : <Sun size={20} className={`${isOpen ? 'me-3' : ''}`} />}
+                        {isOpen && (
+                            <motion.span
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="fw-medium"
+                            >
+                                {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+                            </motion.span>
+                        )}
+                    </motion.button>
 
                     {/* Logout Button */}
                     <motion.button

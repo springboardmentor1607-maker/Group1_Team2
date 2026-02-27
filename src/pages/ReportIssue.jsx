@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, FileVolume2, AlertTriangle, Send, Map as MapIcon, Info, Plus } from 'lucide-react';
+import { MapPin, FileVolume2, AlertTriangle, Send, Map as MapIcon, Info, Plus, Ban } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MapSection from '../components/MapSection';
 import { api } from '../lib/api';
@@ -21,6 +21,54 @@ const ReportIssue = () => {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [isSuccess, setIsSuccess] = useState(false);
+    const [userRole, setUserRole] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const role = localStorage.getItem('userRole');
+        setUserRole(role);
+        setLoading(false);
+    }, []);
+
+    // Block non-citizens from accessing this page
+    if (loading) {
+        return (
+            <div className="d-flex align-items-center justify-content-center vh-100">
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (userRole && userRole !== 'citizen') {
+        return (
+            <div className="container-lg px-3 px-md-4 py-5 text-center">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="card border-0 shadow-lg p-5 rounded-4 mx-auto"
+                    style={{ maxWidth: '600px', background: 'var(--bg-card)' }}
+                >
+                    <div className="mb-4">
+                        <div className="bg-danger bg-opacity-10 p-4 rounded-circle d-inline-block mb-3">
+                            <Ban size={48} className="text-danger" />
+                        </div>
+                        <h2 className="fw-bold mb-3 text-danger">Access Restricted</h2>
+                        <p className="text-muted fs-5">
+                            Only citizens can file complaints. {userRole === 'volunteer' ? 'As a volunteer, you can view and update assigned complaints from your dashboard.' : 'As an admin, you can manage complaints from the admin dashboard.'}
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => navigate(userRole === 'admin' ? '/admin' : '/dashboard')}
+                        className="btn btn-primary px-4 py-3 rounded-pill fw-bold"
+                    >
+                        Go to Dashboard
+                    </button>
+                </motion.div>
+            </div>
+        );
+    }
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -131,7 +179,7 @@ const ReportIssue = () => {
                                     <div className="row g-4">
                                         {/* Issue Title */}
                                         <div className="col-12 col-md-6">
-                                            <label className="form-label fw-semibold text-body">Issue Title</label>
+                                            <label className="form-label fw-semibold" style={{ color: '#ef4444' }}>Issue Title</label>
                                             <div className="input-group">
                                                 <input
                                                     type="text"
@@ -147,7 +195,7 @@ const ReportIssue = () => {
 
                                         {/* Issue Type */}
                                         <div className="col-12 col-md-6">
-                                            <label className="form-label fw-semibold text-body">Issue Type</label>
+                                            <label className="form-label fw-semibold" style={{ color: '#ef4444' }}>Issue Type</label>
                                             <select
                                                 name="type"
                                                 className="form-select"
@@ -166,7 +214,7 @@ const ReportIssue = () => {
 
                                         {/* Priority Level */}
                                         <div className="col-12 col-md-6">
-                                            <label className="form-label fw-semibold text-body">Priority Level</label>
+                                            <label className="form-label fw-semibold" style={{ color: '#ef4444' }}>Priority Level</label>
                                             <select
                                                 name="priority"
                                                 className="form-select"
@@ -184,7 +232,7 @@ const ReportIssue = () => {
 
                                         {/* Address */}
                                         <div className="col-12 col-md-6">
-                                            <label className="form-label fw-semibold text-body">Address</label>
+                                            <label className="form-label fw-semibold" style={{ color: '#ef4444' }}>Address</label>
                                             <div className="input-group">
                                                 <span className="input-group-text bg-transparent border-end-0">
                                                     <MapPin size={18} className="text-muted" />
@@ -203,7 +251,7 @@ const ReportIssue = () => {
 
                                         {/* Nearby Landmark */}
                                         <div className="col-12">
-                                            <label className="form-label fw-semibold text-body">Nearby Landmark (Optional)</label>
+                                            <label className="form-label fw-semibold" style={{ color: '#ef4444' }}>Nearby Landmark (Optional)</label>
                                             <input
                                                 type="text"
                                                 name="landmark"
@@ -216,7 +264,7 @@ const ReportIssue = () => {
 
                                         {/* Description */}
                                         <div className="col-12">
-                                            <label className="form-label fw-semibold text-body">Description</label>
+                                            <label className="form-label fw-semibold" style={{ color: '#ef4444' }}>Description</label>
                                             <textarea
                                                 name="description"
                                                 className="form-control"
@@ -230,8 +278,8 @@ const ReportIssue = () => {
 
                                         {/* Map Location */}
                                         <div className="col-12">
-                                            <label className="form-label fw-semibold text-body d-flex align-items-center mb-3">
-                                                <MapIcon size={20} className="me-2 text-primary" />
+                                            <label className="form-label fw-semibold d-flex align-items-center mb-3" style={{ color: '#ef4444' }}>
+                                                <MapIcon size={20} className="me-2" style={{ color: '#ef4444' }} />
                                                 Location on Map
                                             </label>
                                             <div className="rounded-3 overflow-hidden border border-secondary border-opacity-10 shadow-sm" style={{ minHeight: '300px' }}>

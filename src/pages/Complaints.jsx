@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import StatsSection from '../components/StatsSection';
 import { MapPin, Clock, User, AlertTriangle, CheckCircle, RefreshCw, Filter, Users } from 'lucide-react';
+import '../styles/Complaints.css';
 
 function Complaints() {
     const navigate = useNavigate();
@@ -52,6 +53,32 @@ function Complaints() {
             }
         };
         fetchPageData();
+        
+        // Auto-refresh every 10 seconds to get latest updates
+        const interval = setInterval(() => {
+            // Don't show loading spinner on background refresh
+            const fetchWithoutLoading = async () => {
+                try {
+                    const complaintsEndpoint = viewMode === 'my' ? '/complaints/my-complaints' : '/complaints';
+                    const [complaintsRes, statsRes] = await Promise.all([
+                        api.get(complaintsEndpoint),
+                        api.get('/complaints/stats')
+                    ]);
+                    setComplaints(complaintsRes.data || []);
+                    setStats({
+                        total: statsRes.stats?.total || 0,
+                        pending: statsRes.stats?.pending || 0,
+                        inProgress: statsRes.stats?.in_progress || 0,
+                        resolved: statsRes.stats?.resolved || 0
+                    });
+                } catch (err) {
+                    console.error('Error refreshing complaints:', err);
+                }
+            };
+            fetchWithoutLoading();
+        }, 10000);
+        
+        return () => clearInterval(interval);
     }, [viewMode]);
 
     const handleViewModeChange = (mode) => {
@@ -82,7 +109,8 @@ function Complaints() {
             'medium': 'bg-info',
             'low': 'bg-success'
         };
-        return `badge ${priorityMap[p] || 'bg-info'} bg-opacity-25 text-dark small fw-normal`;
+        return `badge ${priorityMap[p] || 'bg-info'} bg-opacity-
+        5 text-dark small fw-normal`;
     };
 
     const getStatusIcon = (status) => {
@@ -107,7 +135,7 @@ function Complaints() {
 
     if (loading) {
         return (
-            <div className="container-lg px-3 px-md-4 py-3">
+            <div className="complaints-page container-lg px-3 px-md-4 py-3">
                 <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
                     <div className="text-center">
                         <div className="spinner-border text-primary" role="status">
@@ -121,7 +149,7 @@ function Complaints() {
     }
 
     return (
-        <div className="container-lg px-3 px-md-4 py-3">
+        <div className="complaints-page container-lg px-3 px-md-4 py-3">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -281,14 +309,26 @@ function Complaints() {
                                         </div>
 
                                         {complaint.description && (
-                                            <p className="text-muted small mb-3" style={{ 
-                                                display: '-webkit-box',
-                                                WebkitLineClamp: 2,
-                                                WebkitBoxOrient: 'vertical',
-                                                overflow: 'hidden'
+                                            <div style={{
+                                                background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%)',
+                                                padding: '0.875rem 1rem',
+                                                borderRadius: '12px',
+                                                border: '2px solid rgba(96, 165, 250, 0.4)',
+                                                marginBottom: '1rem',
+                                                boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)'
                                             }}>
-                                                {complaint.description}
-                                            </p>
+                                                <p className="text-muted small mb-0" style={{ 
+                                                    display: '-webkit-box',
+                                                    WebkitLineClamp: 2,
+                                                    WebkitBoxOrient: 'vertical',
+                                                    overflow: 'hidden',
+                                                    lineHeight: '1.6',
+                                                    color: '#dc2626',
+                                                    fontWeight: '500'
+                                                }}>
+                                                    {complaint.description}
+                                                </p>
+                                            </div>
                                         )}
 
                                         {/* Show location on map button */}

@@ -1,0 +1,625 @@
+/* Complaints Page Styling */
+
+/* Page Header */
+.complaints-header {
+    margin-bottom: 2rem;
+}
+
+/* Colorful Gradient Title for Light Mode */
+[data-theme="light"] .display-5 {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+/* Enhanced Complaint Cards */
+.complaints-page .card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+}
+
+/* Alternating card colors for better visual distinction */
+[data-theme="light"] .complaints-page .card {
+    background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-image: linear-gradient(135deg, #3b82f6, #8b5cf6) 1;
+    border-width: 2px;
+    border-style: solid;
+    border-left: 5px solid #3b82f6;
+}
+
+[data-theme="light"] .complaints-page .col-12:nth-child(odd) .card {
+    background: linear-gradient(135deg, #ffffff 0%, #fef7ff 100%);
+    border-image: linear-gradient(135deg, #8b5cf6, #ec4899) 1;
+    border-left-color: #8b5cf6;
+}
+
+[data-theme="light"] .complaints-page .col-12:nth-child(even) .card {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+    border-image: linear-gradient(135deg, #3b82f6, #06b6d4) 1;
+    border-left-color: #3b82f6;
+}
+
+[data-theme="light"] .complaints-page .col-12:nth-child(3n) .card {
+    border-left-color: #ec4899;
+}
+
+[data-theme="light"] .complaints-page .col-12:nth-child(4n) .card {
+    border-left-color: #10b981;
+}
+
+.complaints-page .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.08), transparent);
+    transition: left 0.6s ease;
+    z-index: 0;
+}
+
+.complaints-page .card:hover::before {
+    left: 100%;
+}
+
+.complaints-page .card-body {
+    position: relative;
+    z-index: 1;
+}
+
+.complaints-page .card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 16px 40px rgba(59, 130, 246, 0.2), 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-width: 2px;
+}
+
+[data-theme="light"] .complaints-page .col-12:nth-child(odd) .card:hover {
+    box-shadow: 0 16px 40px rgba(139, 92, 246, 0.25), 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .complaints-page .col-12:nth-child(even) .card:hover {
+    box-shadow: 0 16px 40px rgba(59, 130, 246, 0.25), 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .complaints-page .card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 2px solid rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="dark"] .complaints-page .card:hover {
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.6);
+    transform: translateY(-8px) scale(1.01);
+}
+
+/* Dark Mode Card Variations */
+[data-theme="dark"] .complaints-page .col-12:nth-child(odd) .card {
+    background: linear-gradient(135deg, #1e293b 0%, #1a1f35 100%);
+    border-image: linear-gradient(135deg, #8b5cf6, #ec4899) 1;
+    border-left: 5px solid #8b5cf6;
+}
+
+[data-theme="dark"] .complaints-page .col-12:nth-child(even) .card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f2744 100%);
+    border-image: linear-gradient(135deg, #3b82f6, #06b6d4) 1;
+    border-left: 5px solid #3b82f6;
+}
+
+[data-theme="dark"] .complaints-page .col-12:nth-child(3n) .card {
+    border-left-color: #ec4899;
+}
+
+[data-theme="dark"] .complaints-page .col-12:nth-child(4n) .card {
+    border-left-color: #10b981;
+}
+
+/* Dark Mode Badges - Enhanced Visibility */
+[data-theme="dark"] .complaints-page .badge.bg-primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 12px rgba(59, 130, 246, 0.5);
+}
+
+[data-theme="dark"] .complaints-page .badge.bg-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 12px rgba(245, 158, 11, 0.5);
+}
+
+[data-theme="dark"] .complaints-page .badge.bg-success {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 12px rgba(16, 185, 129, 0.5);
+}
+
+[data-theme="dark"] .complaints-page .badge.bg-info {
+    background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 12px rgba(6, 182, 212, 0.5);
+}
+
+[data-theme="dark"] .complaints-page .badge.bg-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 12px rgba(239, 68, 68, 0.5);
+}
+
+[data-theme="dark"] .complaints-page .badge.bg-secondary {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 12px rgba(139, 92, 246, 0.5);
+}
+
+/* Dark Mode Priority Badges */
+[data-theme="dark"] .complaints-page .badge.bg-danger.bg-opacity-25 {
+    background: linear-gradient(135deg, #7f1d1d, #991b1b) !important;
+    color: #fca5a5 !important;
+    font-weight: 700 !important;
+    border: 2px solid #dc2626;
+}
+
+[data-theme="dark"] .complaints-page .badge.bg-warning.bg-opacity-25 {
+    background: linear-gradient(135deg, #78350f, #92400e) !important;
+    color: #fcd34d !important;
+    font-weight: 700 !important;
+    border: 2px solid #f59e0b;
+}
+
+[data-theme="dark"] .complaints-page .badge.bg-info.bg-opacity-25 {
+    background: linear-gradient(135deg, #164e63, #155e75) !important;
+    color: #67e8f9 !important;
+    font-weight: 700 !important;
+    border: 2px solid #06b6d4;
+}
+
+[data-theme="dark"] .complaints-page .badge.bg-success.bg-opacity-25 {
+    background: linear-gradient(135deg, #064e3b, #065f46) !important;
+    color: #6ee7b7 !important;
+    font-weight: 700 !important;
+    border: 2px solid #10b981;
+}
+
+[data-theme="dark"] .complaints-page .badge.bg-primary.bg-opacity-10 {
+    background: linear-gradient(135deg, #1e3a8a, #1e40af) !important;
+    color: #93c5fd !important;
+    font-weight: 700 !important;
+    border: 2px solid #3b82f6;
+}
+
+[data-theme="dark"] .complaints-page .badge.bg-secondary.bg-opacity-10 {
+    background: linear-gradient(135deg, #5b21b6, #6d28d9) !important;
+    color: #c4b5fd !important;
+    font-weight: 700 !important;
+    border: 2px solid #8b5cf6;
+}
+
+/* Dark Mode Text Visibility */
+[data-theme="dark"] .complaints-page .card-body h5 {
+    color: #f8fafc !important;
+    font-weight: 700 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .complaints-page .card-body .text-muted {
+    color: #cbd5e1 !important;
+    font-weight: 500;
+}
+
+[data-theme="dark"] .complaints-page .card-body .small.text-muted {
+    color: #cbd5e1 !important;
+    font-weight: 500;
+}
+
+[data-theme="dark"] .complaints-page .card-body .small {
+    color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .complaints-page .card-body h4,
+[data-theme="dark"] .complaints-page .card-body h3,
+[data-theme="dark"] .complaints-page .card-body h2 {
+    color: #f8fafc !important;
+    font-weight: 700 !important;
+}
+
+[data-bs-theme="dark"] .complaints-page .card-body h5,
+[data-bs-theme="dark"] .complaints-page .card-body h4,
+[data-bs-theme="dark"] .complaints-page .card-body h3,
+[data-bs-theme="dark"] .complaints-page .card-body h2 {
+    color: #f8fafc !important;
+    font-weight: 700 !important;
+}
+
+[data-bs-theme="dark"] .complaints-page .card-body .text-muted {
+    color: #cbd5e1 !important;
+}
+
+[data-bs-theme="dark"] .complaints-page .card-body .small.text-muted {
+    color: #cbd5e1 !important;
+}
+
+[data-bs-theme="dark"] .complaints-page .small,
+[data-theme="dark"] .complaints-page .small {
+    color: #e2e8f0 !important;
+}
+
+/* Dark Mode Info Boxes */
+[data-theme="dark"] .complaints-page .card-body .d-flex.align-items-center.gap-2 {
+    background: rgba(59, 130, 246, 0.12);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="dark"] .complaints-page .card-body .d-flex.align-items-start.gap-2 {
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Dark Mode Button Styles */
+[data-theme="dark"] .complaints-page .btn-outline-primary {
+    border-color: #3b82f6;
+    color: #60a5fa;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="dark"] .complaints-page .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-color: #2563eb;
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Dark Mode Title */
+[data-theme="dark"] .display-5 {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+/* Description Box Styling for Dark Mode */
+[data-theme=\"dark\"] .complaints-page .card-body > div[style*=\"linear-gradient\"],
+[data-bs-theme=\"dark\"] .complaints-page .card-body > div[style*=\"linear-gradient\"] {
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.3) 0%, rgba(167, 139, 250, 0.3) 100%) !important;
+    border: 2px solid rgba(96, 165, 250, 0.6) !important;
+    box-shadow: 0 2px 12px rgba(59, 130, 246, 0.3) !important;
+}
+
+[data-theme=\"dark\"] .complaints-page .card-body > div p.text-muted,
+[data-bs-theme=\"dark\"] .complaints-page .card-body > div p.text-muted {
+    color: #fca5a5 !important;
+    font-weight: 500 !important;
+}
+/* Card Top Border Accent Always Visible */
+.complaints-page .card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+    opacity: 0.6;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.complaints-page .card:hover::after {
+    opacity: 1;
+    height: 6px;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+/* Colorful Badge System for Light Mode - Enhanced Contrast */
+[data-theme="light"] .complaints-page .badge.bg-primary {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 0.9rem;
+    letter-spacing: 0.02em;
+}
+
+[data-theme="light"] .complaints-page .badge.bg-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 0.9rem;
+    letter-spacing: 0.02em;
+}
+
+[data-theme="light"] .complaints-page .badge.bg-success {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 0.9rem;
+    letter-spacing: 0.02em;
+}
+
+[data-theme="light"] .complaints-page .badge.bg-info {
+    background: linear-gradient(135deg, #0891b2, #0e7490) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 10px rgba(8, 145, 178, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 0.9rem;
+    letter-spacing: 0.02em;
+}
+
+[data-theme="light"] .complaints-page .badge.bg-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 10px rgba(239, 68, 68, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 0.9rem;
+    letter-spacing: 0.02em;
+}
+
+[data-theme="light"] .complaints-page .badge.bg-secondary {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 10px rgba(124, 58, 237, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 0.9rem;
+    letter-spacing: 0.02em;
+}
+
+/* Colorful Opacity Badges for Priority - Enhanced Contrast */
+[data-theme="light"] .complaints-page .badge.bg-danger.bg-opacity-25 {
+    background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+    color: #b91c1c !important;
+    font-weight: 700 !important;
+    border: 2px solid #fca5a5;
+    padding: 0.4rem 0.8rem;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .complaints-page .badge.bg-warning.bg-opacity-25 {
+    background: linear-gradient(135deg, #fef3c7, #fde047) !important;
+    color: #b45309 !important;
+    font-weight: 700 !important;
+    border: 2px solid #fbbf24;
+    padding: 0.4rem 0.8rem;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .complaints-page .badge.bg-info.bg-opacity-25 {
+    background: linear-gradient(135deg, #cffafe, #67e8f9) !important;
+    color: #0e7490 !important;
+    font-weight: 700 !important;
+    border: 2px solid #22d3ee;
+    padding: 0.4rem 0.8rem;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .complaints-page .badge.bg-success.bg-opacity-25 {
+    background: linear-gradient(135deg, #d1fae5, #6ee7b7) !important;
+    color: #047857 !important;
+    font-weight: 700 !important;
+    border: 2px solid #34d399;
+    padding: 0.4rem 0.8rem;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .complaints-page .badge.bg-primary.bg-opacity-10 {
+    background: linear-gradient(135deg, #dbeafe, #93c5fd) !important;
+    color: #1e40af !important;
+    font-weight: 700 !important;
+    border: 2px solid #60a5fa;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .complaints-page .badge.bg-secondary.bg-opacity-10 {
+    background: linear-gradient(135deg, #e0e7ff, #a78bfa) !important;
+    color: #5b21b6 !important;
+    font-weight: 700 !important;
+    border: 2px solid #8b5cf6;
+    padding: 0.4rem 0.8rem;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* Enhanced Card Title */
+.complaints-page .card-body h5 {
+    color: var(--bs-body-color);
+    font-size: 1.35rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+}
+
+[data-theme="light"] .complaints-page .card-body h5 {
+    color: #0f172a;
+    font-weight: 800;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    letter-spacing: -0.02em;
+}
+
+/* Status Icons with Animation */
+.complaints-page .text-success,
+.complaints-page .text-info,
+.complaints-page .text-warning {
+    animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+[data-theme="light"] .complaints-page .text-success {
+    color: #10b981 !important;
+    filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3));
+}
+
+[data-theme="light"] .complaints-page .text-info {
+    color: #06b6d4 !important;
+    filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.3));
+}
+
+[data-theme="light"] .complaints-page .text-warning {
+    color: #f59e0b !important;
+    filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.3));
+}
+
+/* Enhanced Buttons */
+[data-theme="light"] .complaints-page .btn-outline-primary {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: linear-gradient(135deg, #ffffff, #f0f9ff);
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+[data-theme="light"] .complaints-page .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-color: #2563eb;
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+/* View Mode Toggle Buttons */
+[data-theme="light"] .btn-group .btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="light"] .btn-group .btn-outline-primary {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: white;
+}
+
+[data-theme="light"] .btn-group .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    border-color: #3b82f6;
+    color: #2563eb;
+}
+
+/* Report New Issue Button */
+[data-theme="light"] .btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-color: #10b981;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    font-weight: 600;
+}
+
+[data-theme="light"] .btn-success:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    border-color: #047857;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Empty State */
+.complaints-page .text-center .text-muted {
+    color: var(--bs-secondary-color);
+}
+
+[data-theme="light"] .complaints-page .text-center svg.text-muted {
+    color: #cbd5e1 !important;
+}
+
+/* Complaint Count */
+[data-theme="light"] .complaints-page > div > .text-muted {
+    color: #475569 !important;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Location Info */
+.complaints-page .small {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+[data-theme="light"] .complaints-page .card-body .text-muted {
+    color: #475569 !important;
+    font-weight: 500;
+}
+
+[data-theme="light"] .complaints-page .card-body .small.text-muted {
+    color: #64748b !important;
+}
+
+/* Date and location info with icons */
+[data-theme="light"] .complaints-page .card-body .d-flex.align-items-center.gap-2 {
+    background: rgba(59, 130, 246, 0.05);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem !important;
+}
+
+[data-theme="light"] .complaints-page .card-body .d-flex.align-items-start.gap-2 {
+    background: rgba(139, 92, 246, 0.05);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem !important;
+}
+
+/* Spinner Enhancement */
+[data-theme="light"] .spinner-border {
+    color: #3b82f6 !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .complaints-page .card {
+        margin-bottom: 1rem;
+    }
+    
+    [data-theme="light"] .display-5 {
+        font-size: 2rem !important;
+    }
+}
+
+/* Loading State */
+.complaints-page .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3rem;
+}
+
+/* Hover Effects for Interactive Elements */
+.complaints-page .card-body {
+    transition: all 0.3s ease;
+}
+
+/* Description Text */
+.complaints-page .card-body p {
+    line-height: 1.7;
+    color: #334155;
+    font-weight: 500;
+    background: rgba(241, 245, 249, 0.7);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border-left: 3px solid #3b82f6;
+}
+
+[data-theme="light"] .complaints-page .card-body p {
+    color: #1e293b;
+    background: linear-gradient(135deg, rgba(241, 245, 249, 0.8), rgba(248, 250, 252, 0.8));
+}
+
+[data-theme="dark"] .complaints-page .card-body p {
+    color: #cbd5e1;
+    background: rgba(30, 41, 59, 0.5);
+    border-left-color: #8b5cf6;

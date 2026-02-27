@@ -14,6 +14,30 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         fetchAdminData();
+        
+        // Auto-refresh every 10 seconds to get latest updates
+        const interval = setInterval(() => {
+            // Background refresh without loading spinner
+            const fetchWithoutLoading = async () => {
+                try {
+                    const [complaintsRes, usersRes, statsRes] = await Promise.all([
+                        api.get('/complaints'),
+                        api.get('/auth/admin/users'),
+                        api.get('/complaints/stats')
+                    ]);
+                    const volunteersList = usersRes.users?.filter(user => user.role === 'volunteer') || [];
+                    setComplaints(complaintsRes.data || []);
+                    setUsers(usersRes.users || []);
+                    setVolunteers(volunteersList);
+                    setStats(statsRes.stats || { total: 0, pending: 0, inProgress: 0, resolved: 0 });
+                } catch (err) {
+                    console.error('Error refreshing admin data:', err);
+                }
+            };
+            fetchWithoutLoading();
+        }, 10000);
+        
+        return () => clearInterval(interval);
     }, []);
 
     const fetchAdminData = async () => {
@@ -54,16 +78,6 @@ const AdminDashboard = () => {
         } catch (err) {
             console.error('Error assigning volunteer:', err);
             alert('Failed to assign volunteer');
-        }
-    };
-
-    const updateComplaintStatus = async (complaintId, status) => {
-        try {
-            await api.put(`/complaints/${complaintId}/status`, { status });
-            fetchAdminData(); // Refresh data
-        } catch (err) {
-            console.error('Error updating status:', err);
-            alert('Failed to update status');
         }
     };
 
@@ -239,16 +253,9 @@ const AdminDashboard = () => {
                                                                 </td>
                                                                 <td>{complaint.user_name || 'Unknown'}</td>
                                                                 <td>
-                                                                    <select 
-                                                                        className="form-select form-select-sm"
-                                                                        value={complaint.status || 'Pending'}
-                                                                        onChange={(e) => updateComplaintStatus(complaint.id, e.target.value)}
-                                                                        style={{ minWidth: '120px' }}
-                                                                    >
-                                                                        <option value="Pending">Pending</option>
-                                                                        <option value="In Progress">In Progress</option>
-                                                                        <option value="Resolved">Resolved</option>
-                                                                    </select>
+                                                                    <span className={getStatusBadge(complaint.status || 'Pending')}>
+                                                                        {complaint.status || 'Pending'}
+                                                                    </span>
                                                                 </td>
                                                                 <td>
                                                                     <select 
