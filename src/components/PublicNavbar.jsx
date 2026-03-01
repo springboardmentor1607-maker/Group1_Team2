@@ -25,8 +25,8 @@ const PublicNavbar = () => {
                         <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <defs>
                                 <linearGradient id="navLogoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#22C55E" />
-                                    <stop offset="100%" stopColor="#14B8A6" />
+                                    <stop offset="0%" stopColor="#0071e3" />
+                                    <stop offset="100%" stopColor="#32ade6" />
                                 </linearGradient>
                             </defs>
                             <rect width="32" height="32" rx="6" fill="url(#navLogoGradient)" />
@@ -70,7 +70,7 @@ const PublicNavbar = () => {
                             to="/login"
                             className="text-decoration-none fw-semibold"
                             style={{
-                                color: isLogin ? '#22C55E' : 'var(--text-primary)'
+                                color: isLogin ? '#0071e3' : 'var(--text-primary)'
                             }}
                         >
                             Login
@@ -79,8 +79,8 @@ const PublicNavbar = () => {
                             to="/signup"
                             className="btn btn-primary px-4 py-2 rounded-2 fw-semibold border-0"
                             style={{
-                                background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)',
-                                boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
+                                background: 'linear-gradient(135deg, #0071e3 0%, #32ade6 100%)',
+                                boxShadow: '0 4px 12px rgba(0, 113, 227, 0.3)',
                                 transition: 'all 0.2s ease'
                             }}
                         >

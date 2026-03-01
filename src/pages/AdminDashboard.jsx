@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Users, FileText, UserCheck, AlertTriangle, Settings, Eye, UserPlus } from 'lucide-react';
 import { api } from '../lib/api';
+import PageWrapper from '../components/PageWrapper';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({ total: 0, pending: 0, inProgress: 0, resolved: 0 });
@@ -14,7 +15,7 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         fetchAdminData();
-        
+
         // Auto-refresh every 10 seconds to get latest updates
         const interval = setInterval(() => {
             // Background refresh without loading spinner
@@ -36,7 +37,7 @@ const AdminDashboard = () => {
             };
             fetchWithoutLoading();
         }, 10000);
-        
+
         return () => clearInterval(interval);
     }, []);
 
@@ -51,7 +52,7 @@ const AdminDashboard = () => {
             console.log('Admin Data Loaded:');
             console.log('Total Users:', usersRes.users?.length || 0);
             console.log('Total Complaints:', complaintsRes.data?.length || 0);
-            
+
             const volunteersList = usersRes.users?.filter(user => user.role === 'volunteer') || [];
             console.log('Volunteers Found:', volunteersList.length);
             console.log('Volunteer Details:', volunteersList);
@@ -126,17 +127,17 @@ const AdminDashboard = () => {
     }
 
     return (
-        <div className="container-fluid px-3 px-md-4 py-3">
+        <PageWrapper className="container-fluid px-3 px-md-4 py-3">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
                 <div className="mb-4">
-                    <h1 className="display-5 fw-bold mb-2" style={{ 
-                        background: 'linear-gradient(135deg, var(--primary-color), var(--accent-1))', 
-                        WebkitBackgroundClip: 'text', 
-                        WebkitTextFillColor: 'transparent' 
+                    <h1 className="display-5 fw-bold mb-2" style={{
+                        background: 'linear-gradient(135deg, var(--primary-color), var(--accent-1))',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
                     }}>
                         <Settings className="me-3" size={48} />Admin Dashboard
                     </h1>
@@ -190,19 +191,19 @@ const AdminDashboard = () => {
                             <div className="card-header bg-white">
                                 <nav>
                                     <div className="nav nav-tabs" role="tablist">
-                                        <button 
+                                        <button
                                             className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
                                             onClick={() => setActiveTab('overview')}
                                         >
                                             <FileText size={16} className="me-2" />Complaints Overview
                                         </button>
-                                        <button 
+                                        <button
                                             className={`nav-link ${activeTab === 'users' ? 'active' : ''}`}
                                             onClick={() => setActiveTab('users')}
                                         >
                                             <Users size={16} className="me-2" />User Management
                                         </button>
-                                        <button 
+                                        <button
                                             className={`nav-link ${activeTab === 'volunteers' ? 'active' : ''}`}
                                             onClick={() => setActiveTab('volunteers')}
                                         >
@@ -258,7 +259,7 @@ const AdminDashboard = () => {
                                                                     </span>
                                                                 </td>
                                                                 <td>
-                                                                    <select 
+                                                                    <select
                                                                         className="form-select form-select-sm"
                                                                         value={complaint.assigned_to || ''}
                                                                         onChange={(e) => {
@@ -326,7 +327,7 @@ const AdminDashboard = () => {
                                                                 </td>
                                                                 <td>{user.location || 'Not specified'}</td>
                                                                 <td>
-                                                                    <select 
+                                                                    <select
                                                                         className="form-select form-select-sm"
                                                                         value={user.role}
                                                                         onChange={(e) => updateUserRole(user.id, e.target.value)}
@@ -402,8 +403,8 @@ const AdminDashboard = () => {
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Assign Volunteer</h5>
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     className="btn-close"
                                     onClick={() => setSelectedComplaint(null)}
                                 ></button>
@@ -412,7 +413,7 @@ const AdminDashboard = () => {
                                 <p><strong>Complaint:</strong> {selectedComplaint.title}</p>
                                 <p><strong>Current Status:</strong> {selectedComplaint.status || 'Pending'}</p>
                                 <p><strong>Current Assignee:</strong> {selectedComplaint.volunteer_name || 'Unassigned'}</p>
-                                
+
                                 <div className="mb-3">
                                     <label className="form-label">Select Volunteer:</label>
                                     <select className="form-select" id="volunteerSelect">
@@ -426,15 +427,15 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     className="btn btn-secondary"
                                     onClick={() => setSelectedComplaint(null)}
                                 >
                                     Cancel
                                 </button>
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     className="btn btn-primary"
                                     onClick={() => {
                                         const select = document.getElementById('volunteerSelect');
@@ -450,7 +451,7 @@ const AdminDashboard = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </PageWrapper>
     );
 };
 

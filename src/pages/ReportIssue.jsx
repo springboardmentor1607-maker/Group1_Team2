@@ -4,6 +4,7 @@ import { MapPin, FileVolume2, AlertTriangle, Send, Map as MapIcon, Info, Plus, B
 import { useNavigate } from 'react-router-dom';
 import MapSection from '../components/MapSection';
 import { api } from '../lib/api';
+import PageWrapper from '../components/PageWrapper';
 
 const ReportIssue = () => {
     const [formData, setFormData] = useState({
@@ -43,7 +44,7 @@ const ReportIssue = () => {
 
     if (userRole && userRole !== 'citizen') {
         return (
-            <div className="container-lg px-3 px-md-4 py-5 text-center">
+            <PageWrapper className="container-lg px-3 px-md-4 py-5 text-center">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -66,7 +67,7 @@ const ReportIssue = () => {
                         Go to Dashboard
                     </button>
                 </motion.div>
-            </div>
+            </PageWrapper>
         );
     }
 
@@ -104,7 +105,7 @@ const ReportIssue = () => {
 
     if (isSuccess) {
         return (
-            <div className="container-lg px-3 px-md-4 py-5 text-center">
+            <PageWrapper className="container-lg px-3 px-md-4 py-5 text-center">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -144,12 +145,12 @@ const ReportIssue = () => {
                         </button>
                     </div>
                 </motion.div>
-            </div>
+            </PageWrapper>
         );
     }
 
     return (
-        <div className="container-lg px-3 px-md-4 py-3">
+        <PageWrapper className="container-lg px-3 px-md-4 py-3">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -311,7 +312,7 @@ const ReportIssue = () => {
                     </div>
                 </form>
             </motion.div>
-        </div>
+        </PageWrapper>
     );
 };
 

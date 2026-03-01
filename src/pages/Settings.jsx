@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { Moon, Sun } from 'lucide-react';
+import PageWrapper from '../components/PageWrapper';
 
 function Settings() {
     const { theme, toggleTheme } = useTheme();
@@ -12,7 +13,7 @@ function Settings() {
     });
 
     return (
-        <div className="container-lg px-3 px-md-4 py-3">
+        <PageWrapper className="container-lg px-3 px-md-4 py-3">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -105,7 +106,7 @@ function Settings() {
                     </div>
                 </div>
             </motion.div>
-        </div>
+        </PageWrapper>
     );
 }
 export default Settings;

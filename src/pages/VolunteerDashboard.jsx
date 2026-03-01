@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ClipboardList, MapPin, Clock, CheckCircle2, AlertTriangle, User, Phone, Calendar } from 'lucide-react';
 import { api } from '../lib/api';
+import PageWrapper from '../components/PageWrapper';
 
 const VolunteerDashboard = () => {
     const [complaints, setComplaints] = useState([]);
@@ -11,7 +12,7 @@ const VolunteerDashboard = () => {
 
     useEffect(() => {
         fetchVolunteerComplaints();
-        
+
         // Auto-refresh every 10 seconds to get latest updates
         const interval = setInterval(() => {
             // Background refresh without affecting loading state
@@ -19,12 +20,12 @@ const VolunteerDashboard = () => {
                 try {
                     const response = await api.get('/complaints/volunteer-complaints');
                     setComplaints(response.data || []);
-                    
+
                     const total = response.data?.length || 0;
                     const pending = response.data?.filter(c => c.status === 'Pending')?.length || 0;
                     const inProgress = response.data?.filter(c => c.status === 'In Progress')?.length || 0;
                     const resolved = response.data?.filter(c => c.status === 'Resolved')?.length || 0;
-                    
+
                     setStats({ total, pending, inProgress, resolved });
                 } catch (err) {
                     console.error('Error refreshing volunteer complaints:', err);
@@ -32,7 +33,7 @@ const VolunteerDashboard = () => {
             };
             fetchWithoutLoading();
         }, 10000);
-        
+
         return () => clearInterval(interval);
     }, []);
 
@@ -40,13 +41,13 @@ const VolunteerDashboard = () => {
         try {
             const response = await api.get('/complaints/volunteer-complaints');
             setComplaints(response.data || []);
-            
+
             // Calculate stats
             const total = response.data?.length || 0;
             const pending = response.data?.filter(c => c.status === 'Pending')?.length || 0;
             const inProgress = response.data?.filter(c => c.status === 'In Progress')?.length || 0;
             const resolved = response.data?.filter(c => c.status === 'Resolved')?.length || 0;
-            
+
             setStats({ total, pending, inProgress, resolved });
         } catch (err) {
             console.error('Error fetching volunteer complaints:', err);
@@ -91,7 +92,7 @@ const VolunteerDashboard = () => {
     }
 
     return (
-        <div className="container-fluid px-3 px-md-4 py-3">
+        <PageWrapper className="container-fluid px-3 px-md-4 py-3">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -245,7 +246,7 @@ const VolunteerDashboard = () => {
                     </div>
                 </div>
             </motion.div>
-        </div>
+        </PageWrapper>
     );
 };
 

@@ -1,10 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import MapSection from '../components/MapSection';
+import PageWrapper from '../components/PageWrapper';
 
 function MapView() {
     return (
-        <div className="container-fluid px-3 px-md-4 py-3">
+        <PageWrapper className="container-fluid px-3 px-md-4 py-3">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -79,7 +80,7 @@ function MapView() {
                     </div>
                 </div>
             </motion.div>
-        </div>
+        </PageWrapper>
     );
 }
 export default MapView;

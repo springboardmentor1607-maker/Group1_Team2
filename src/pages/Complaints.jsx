@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import StatsSection from '../components/StatsSection';
 import { MapPin, Clock, User, AlertTriangle, CheckCircle, RefreshCw, Filter, Users } from 'lucide-react';
-import '../styles/Complaints.css';
+import PageWrapper from '../components/PageWrapper';
 
 function Complaints() {
     const navigate = useNavigate();
@@ -28,10 +28,10 @@ function Complaints() {
         const fetchPageData = async () => {
             try {
                 setLoading(true);
-                
+
                 // Determine which endpoint to call based on view mode
                 const complaintsEndpoint = viewMode === 'my' ? '/complaints/my-complaints' : '/complaints';
-                
+
                 const [complaintsRes, statsRes, profileRes] = await Promise.all([
                     api.get(complaintsEndpoint),
                     api.get('/complaints/stats'),
@@ -53,7 +53,7 @@ function Complaints() {
             }
         };
         fetchPageData();
-        
+
         // Auto-refresh every 10 seconds to get latest updates
         const interval = setInterval(() => {
             // Don't show loading spinner on background refresh
@@ -77,7 +77,7 @@ function Complaints() {
             };
             fetchWithoutLoading();
         }, 10000);
-        
+
         return () => clearInterval(interval);
     }, [viewMode]);
 
@@ -105,7 +105,7 @@ function Complaints() {
         const p = (priority || 'medium').toLowerCase();
         const priorityMap = {
             'critical': 'bg-danger',
-            'high': 'bg-warning', 
+            'high': 'bg-warning',
             'medium': 'bg-info',
             'low': 'bg-success'
         };
@@ -149,7 +149,7 @@ function Complaints() {
     }
 
     return (
-        <div className="complaints-page container-lg px-3 px-md-4 py-3">
+        <PageWrapper className="complaints-page container-lg px-3 px-md-4 py-3">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -157,10 +157,10 @@ function Complaints() {
             >
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                     <div>
-                        <h1 className="display-5 fw-bold mb-2" style={{ 
-                            background: 'linear-gradient(135deg, var(--primary-color), var(--accent-1))', 
-                            WebkitBackgroundClip: 'text', 
-                            WebkitTextFillColor: 'transparent' 
+                        <h1 className="display-5 fw-bold mb-2" style={{
+                            background: 'linear-gradient(135deg, var(--primary-color), var(--accent-1))',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent'
                         }}>
                             {viewMode === 'my' ? (
                                 <><User className="me-3" size={48} />My Complaints</>
@@ -169,13 +169,13 @@ function Complaints() {
                             )}
                         </h1>
                         <p className="text-muted mb-0">
-                            {viewMode === 'my' 
+                            {viewMode === 'my'
                                 ? 'Track your reported issues and their status'
                                 : 'View and track all reported issues in your community'
                             }
                         </p>
                     </div>
-                    
+
                     <div className="d-flex gap-2 flex-wrap">
                         {/* View Mode Toggle */}
                         <div className="btn-group" role="group" aria-label="View Mode">
@@ -192,7 +192,7 @@ function Complaints() {
                                 <User size={16} className="me-2" />My Issues
                             </button>
                         </div>
-                        
+
                         <button
                             onClick={() => navigate('/report-issue')}
                             className="btn btn-success rounded-3 px-4 py-2"
@@ -222,7 +222,7 @@ function Complaints() {
                                     {viewMode === 'my' ? 'No complaints filed yet' : 'No complaints reported yet'}
                                 </h4>
                                 <p className="text-muted">
-                                    {viewMode === 'my' 
+                                    {viewMode === 'my'
                                         ? 'You haven\'t filed any complaints yet. Click "Report New Issue" to get started.'
                                         : 'No community complaints have been reported yet.'
                                     }
@@ -243,7 +243,7 @@ function Complaints() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.1 }}
                                     className="card border-0 shadow-sm rounded-3 h-100 hover-shadow-lg"
-                                    style={{ 
+                                    style={{
                                         background: 'var(--bg-card)',
                                         transition: 'all 0.3s ease',
                                         cursor: 'pointer'
@@ -268,7 +268,7 @@ function Complaints() {
                                         </div>
 
                                         <h5 className="fw-bold mb-2 text-truncate">{complaint.title}</h5>
-                                        
+
                                         <div className="d-flex align-items-center gap-2 mb-2 text-muted">
                                             <span className="badge bg-secondary bg-opacity-10 text-secondary small">
                                                 {complaint.type || 'Other'}
@@ -317,7 +317,7 @@ function Complaints() {
                                                 marginBottom: '1rem',
                                                 boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)'
                                             }}>
-                                                <p className="text-muted small mb-0" style={{ 
+                                                <p className="text-muted small mb-0" style={{
                                                     display: '-webkit-box',
                                                     WebkitLineClamp: 2,
                                                     WebkitBoxOrient: 'vertical',
@@ -333,13 +333,13 @@ function Complaints() {
 
                                         {/* Show location on map button */}
                                         {complaint.latitude && complaint.longitude && (
-                                            <button 
-                                                onClick={() => navigate('/map', { 
-                                                    state: { 
-                                                        focusLat: complaint.latitude, 
+                                            <button
+                                                onClick={() => navigate('/map', {
+                                                    state: {
+                                                        focusLat: complaint.latitude,
                                                         focusLng: complaint.longitude,
-                                                        complaintId: complaint.id 
-                                                    } 
+                                                        complaintId: complaint.id
+                                                    }
                                                 })}
                                                 className="btn btn-outline-primary btn-sm rounded-pill"
                                             >
@@ -354,7 +354,7 @@ function Complaints() {
                     )}
                 </div>
             </motion.div>
-        </div>
+        </PageWrapper>
     );
 }
 
