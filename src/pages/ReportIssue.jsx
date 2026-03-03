@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, FileVolume2, AlertTriangle, Send, Map as MapIcon, Info, Plus, Ban } from 'lucide-react';
+import { MapPin, FileVolume2, AlertTriangle, Send, Map as MapIcon, Info, Plus, Ban, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MapSection from '../components/MapSection';
 import { api } from '../lib/api';
@@ -23,11 +23,50 @@ const ReportIssue = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [userRole, setUserRole] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [geocoding, setGeocoding] = useState(false);
+    const [geocodeError, setGeocodeError] = useState('');
+    const [markerPosition, setMarkerPosition] = useState(null);
 
     useEffect(() => {
         const role = localStorage.getItem('userRole');
         setUserRole(role);
         setLoading(false);
+    }, []);
+
+    // Geocoding function using OpenStreetMap Nominatim API
+    const geocodeAddress = useCallback(async (address) => {
+        if (!address || address.length < 3) return;
+        
+        setGeocoding(true);
+        setGeocodeError('');
+        
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
+            );
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+                const { lat, lon } = data[0];
+                const latitude = parseFloat(lat);
+                const longitude = parseFloat(lon);
+                
+                setFormData(prev => ({ 
+                    ...prev, 
+                    latitude, 
+                    longitude 
+                }));
+                setMarkerPosition({ lat: latitude, lng: longitude });
+                setGeocodeError('');
+            } else {
+                setGeocodeError('Location not found. Please try a different address or click on the map.');
+            }
+        } catch (err) {
+            console.error('Geocoding error:', err);
+            setGeocodeError('Failed to find location. Please click on the map to mark location manually.');
+        } finally {
+            setGeocoding(false);
+        }
     }, []);
 
     // Block non-citizens from accessing this page
@@ -77,6 +116,8 @@ const ReportIssue = () => {
 
     const handleLocationSelect = (lat, lng) => {
         setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+        setMarkerPosition({ lat, lng });
+        setGeocodeError(''); // Clear any geocoding errors
     };
 
     const handleSubmit = async (e) => {
@@ -137,6 +178,8 @@ const ReportIssue = () => {
                                 setFormData({
                                     title: '', type: '', priority: '', address: '', landmark: '', description: '', latitude: null, longitude: null
                                 });
+                                setMarkerPosition(null);
+                                setGeocodeError('');
                             }}
                             className="btn btn-outline-primary px-4 py-3 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2"
                         >
@@ -230,7 +273,7 @@ const ReportIssue = () => {
                                             </select>
                                         </div>
 
-                                        {/* Address */}
+                                        {/* Address with Geocode Button */}
                                         <div className="col-12 col-md-6">
                                             <label className="form-label fw-semibold" style={{ color: '#ef4444' }}>Address</label>
                                             <div className="input-group">
@@ -240,13 +283,31 @@ const ReportIssue = () => {
                                                 <input
                                                     type="text"
                                                     name="address"
-                                                    className="form-control border-start-0"
+                                                    className="form-control border-start-0 border-end-0"
                                                     placeholder="Enter street address"
                                                     value={formData.address}
                                                     onChange={handleChange}
                                                     required
                                                 />
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline-primary"
+                                                    onClick={() => geocodeAddress(formData.address)}
+                                                    disabled={!formData.address || geocoding}
+                                                    title="Find location on map"
+                                                >
+                                                    {geocoding ? (
+                                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    ) : (
+                                                        <Search size={18} />
+                                                    )}
+                                                </button>
                                             </div>
+                                            {geocoding && <small className="text-primary mt-1 d-block">🔍 Searching for location...</small>}
+                                            {geocodeError && <small className="text-warning mt-1 d-block">⚠️ {geocodeError}</small>}
+                                            {formData.latitude && formData.longitude && !geocodeError && !geocoding && (
+                                                <small className="text-success mt-1 d-block">✓ Location marked on map</small>
+                                            )}
                                         </div>
 
                                         {/* Nearby Landmark */}
@@ -283,11 +344,15 @@ const ReportIssue = () => {
                                                 Location on Map
                                             </label>
                                             <div className="rounded-3 overflow-hidden border border-secondary border-opacity-10 shadow-sm" style={{ minHeight: '300px' }}>
-                                                <MapSection onLocationSelect={handleLocationSelect} showComplaints={false} />
+                                                <MapSection 
+                                                    onLocationSelect={handleLocationSelect} 
+                                                    showComplaints={false} 
+                                                    markerPosition={markerPosition}
+                                                />
                                             </div>
                                             <small className="text-muted mt-2 d-flex align-items-center">
                                                 <Info size={14} className="me-1" />
-                                                Click on the map to mark the exact location
+                                                Click "Search" to auto-locate address, click map to mark manually, or drag the marker for precise positioning
                                             </small>
                                         </div>
 
