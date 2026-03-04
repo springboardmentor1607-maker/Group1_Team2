@@ -1,0 +1,315 @@
+/* ===============================
+   BOOTSTRAP OVERRIDES (APPLE PRO STYLE - Dual Mode)
+   =============================== */
+
+:root,
+[data-bs-theme="light"] {
+    --bs-body-bg: transparent;
+    --bs-body-color: #1d1d1f;
+    --bs-secondary-color: #86868b;
+    --bs-border-color: rgba(0, 0, 0, 0.08);
+
+    --card-bg: rgba(255, 255, 255, 0.2);
+    --sidebar-bg: rgba(255, 255, 255, 0.3);
+    --active-item-bg: rgba(0, 113, 227, 0.08);
+    --active-item-color: #0071e3;
+    --hover-item-bg: rgba(255, 255, 255, 0.4);
+
+    --card-border-top: rgba(255, 255, 255, 0.9);
+    --card-border-left: rgba(255, 255, 255, 0.8);
+
+    --map-filter: none;
+    --btn-gradient-bg: linear-gradient(180deg, #f5f5f7 0%, #e8e8ed 100%);
+    --btn-gradient-hover: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%);
+    --btn-gradient-text: #1d1d1f;
+    --alert-border: rgba(0, 0, 0, 0.08);
+    --border-light: rgba(0, 0, 0, 0.08);
+}
+
+[data-bs-theme="dark"] {
+    --bs-body-bg: transparent;
+    --bs-body-color: #f5f5f7;
+    --bs-secondary-color: #86868b;
+    --bs-border-color: rgba(255, 255, 255, 0.18);
+
+    --card-bg: rgba(255, 255, 255, 0.04);
+    --sidebar-bg: rgba(255, 255, 255, 0.02);
+    --active-item-bg: rgba(255, 255, 255, 0.15);
+    --active-item-color: #ffffff;
+    --hover-item-bg: rgba(255, 255, 255, 0.08);
+
+    --card-border-top: rgba(255, 255, 255, 0.3);
+    --card-border-left: rgba(255, 255, 255, 0.2);
+
+    --map-filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+    --btn-gradient-bg: linear-gradient(180deg, #424245 0%, #1c1c1e 100%);
+    --btn-gradient-hover: linear-gradient(180deg, #515154 0%, #2c2c2e 100%);
+    --btn-gradient-text: #ffffff;
+    --alert-border: rgba(255, 255, 255, 0.1);
+    --border-light: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--bs-body-color);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -0.01em;
+}
+
+/* ---------- Custom Classes ---------- */
+.card,
+.dashboard-card {
+    background-color: var(--card-bg);
+    backdrop-filter: saturate(200%) blur(80px);
+    -webkit-backdrop-filter: saturate(200%) blur(80px);
+    color: var(--bs-body-color);
+    border: 1px solid var(--bs-border-color);
+    border-top: 1px solid var(--card-border-top);
+    border-left: 1px solid var(--card-border-left);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, background-color 0.4s ease;
+    overflow: hidden;
+}
+
+.sidebar {
+    background-color: var(--sidebar-bg);
+    backdrop-filter: saturate(200%) blur(60px);
+    -webkit-backdrop-filter: saturate(200%) blur(60px);
+    border-right: 1px solid var(--border-light);
+}
+
+.nav-link.active {
+    background-color: var(--active-item-bg);
+    color: var(--active-item-color);
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.nav-link:hover:not(.active) {
+    background-color: var(--hover-item-bg);
+    border-radius: 12px;
+}
+
+.text-adaptive {
+    color: var(--bs-body-color);
+}
+
+.hover-bg-adaptive:hover {
+    background-color: var(--hover-item-bg);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 0.75rem 1.75rem;
+}
+
+.btn-primary {
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    border: none;
+    box-shadow: var(--btn-shadow);
+}
+
+.btn-primary:hover {
+    background: var(--btn-hover-bg);
+    color: var(--btn-text);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1), inset 0 -2px 0 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn-outline-primary {
+    border: 1px solid var(--border-glass);
+    color: var(--text-primary);
+    background-color: var(--bg-card);
+    backdrop-filter: blur(20px);
+}
+
+.btn-outline-primary:hover {
+    background: var(--text-primary);
+    border-color: var(--text-primary);
+    color: var(--bg-primary);
+}
+
+.btn:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+/* Remove Bootstrap solid background overrides to show mesh gradient underneath */
+.bg-body,
+.bg-light,
+.bg-dark {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+[data-bs-theme="dark"] .bg-body,
+[data-bs-theme="light"] .bg-body {
+    background-color: transparent !important;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.2);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(128, 128, 128, 0.4);
+}
+
+/* ===============================
+   MAP COMPONENT FIXES
+   =============================== */
+.leaflet-container {
+    height: 100% !important;
+    width: 100% !important;
+    border-radius: 18px;
+    z-index: 1 !important;
+    filter: var(--map-filter);
+}
+
+.map-complaint-card,
+.map-legend {
+    background: var(--card-bg);
+    backdrop-filter: saturate(200%) blur(60px);
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
+    border-top: 1px solid var(--card-border-top);
+    box-shadow: var(--shadow-md);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    color: var(--bs-body-color);
+}
+
+.map-complaint-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Forms */
+.form-control-plaintext {
+    background-color: var(--card-bg);
+    backdrop-filter: saturate(200%) blur(60px);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+}
+
+.profile-field-display {
+    background-color: var(--card-bg);
+    backdrop-filter: saturate(200%) blur(60px);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.profile-field-display:hover {
+    background-color: var(--hover-item-bg);
+}
+
+.alert {
+    border: 1px solid var(--alert-border);
+    border-radius: 16px;
+    font-weight: 500;
+    backdrop-filter: saturate(200%) blur(60px);
+}
+
+/* Profile Avatar */
+.profile-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-body-color);
+    font-size: 3.5rem;
+    font-weight: 300;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: var(--shadow-md);
+}
+
+.profile-avatar:hover {
+    transform: scale(1.05) rotate(2deg);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-gradient {
+    background: var(--btn-gradient-bg);
+    border: 1px solid var(--border-light);
+    color: var(--btn-gradient-text);
+    font-weight: 500;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 30px;
+    padding: 0.75rem 1.75rem;
+}
+
+.btn-gradient:hover {
+    background: var(--btn-gradient-hover);
+    color: var(--btn-gradient-text);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-page .form-label {
+    color: var(--bs-secondary-color) !important;
+    font-weight: 500;
+}
+
+.profile-page .form-control {
+    color: var(--bs-body-color) !important;
+}
+
+.profile-page .form-control::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.profile-page .form-control-plaintext span,
+.profile-page .profile-field-display span {
+    color: var(--bs-body-color) !important;
+}
+
+.profile-page small {
+    color: var(--text-muted) !important;
+}
+
+.bg-danger.bg-opacity-25 {
+    background-color: rgba(255, 69, 58, 0.15) !important;
+}
+
+[data-bs-theme="dark"] .bg-danger.bg-opacity-25.text-dark {
+    color: #ff453a !important;
+}
+
+[data-bs-theme="dark"] .bg-warning.bg-opacity-25.text-dark {
+    color: #ffd60a !important;
+    background-color: rgba(255, 214, 10, 0.15) !important;
+}
+
+[data-bs-theme="dark"] .bg-info.bg-opacity-25.text-dark {
+    color: #64d2ff !important;
+    background-color: rgba(100, 210, 255, 0.15) !important;
+}
+
+[data-bs-theme="dark"] .bg-success.bg-opacity-25.text-dark {
+    color: #32d74b !important;
+    background-color: rgba(50, 215, 75, 0.15) !important;
+}
