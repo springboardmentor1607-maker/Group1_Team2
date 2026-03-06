@@ -6,7 +6,7 @@ const createComplaint = async (req, res) => {
         console.log('Body:', req.body);
         console.log('User from Token:', req.user);
 
-        const { title, type, priority, address, landmark, description, latitude, longitude } = req.body;
+        const { title, type, priority, address, landmark, description, latitude, longitude, photo } = req.body;
         const user_id = req.user ? req.user.id : null;
 
         if (!user_id) {
@@ -16,9 +16,9 @@ const createComplaint = async (req, res) => {
 
         // Only citizens can file complaints
         if (req.user.role !== 'citizen') {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Only citizens can file complaints. Volunteers and admins cannot create complaints.' 
+            return res.status(403).json({
+                success: false,
+                message: 'Only citizens can file complaints. Volunteers and admins cannot create complaints.'
             });
         }
 
@@ -31,7 +31,8 @@ const createComplaint = async (req, res) => {
             landmark,
             description,
             latitude,
-            longitude
+            longitude,
+            photo
         });
 
         res.status(201).json({
@@ -90,21 +91,21 @@ const getDashboardStats = async (req, res) => {
 const assignVolunteer = async (req, res) => {
     try {
         const { complaintId, volunteerId } = req.body;
-        
+
         // Check if user is admin
         if (req.user.role !== 'admin') {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Access denied. Admin privileges required.' 
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. Admin privileges required.'
             });
         }
 
         const updatedComplaint = await Complaint.assignVolunteer(complaintId, volunteerId);
-        
+
         if (!updatedComplaint) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Complaint not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Complaint not found'
             });
         }
 
@@ -123,21 +124,21 @@ const updateComplaintStatus = async (req, res) => {
     try {
         const { complaintId } = req.params;
         const { status } = req.body;
-        
+
         // Check if user is admin or volunteer
         if (!['admin', 'volunteer'].includes(req.user.role)) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Access denied. Admin or volunteer privileges required.' 
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. Admin or volunteer privileges required.'
             });
         }
 
         const updatedComplaint = await Complaint.updateStatus(complaintId, status);
-        
+
         if (!updatedComplaint) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Complaint not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Complaint not found'
             });
         }
 
@@ -155,12 +156,12 @@ const updateComplaintStatus = async (req, res) => {
 const getVolunteerComplaints = async (req, res) => {
     try {
         const volunteerId = req.user.id;
-        
+
         // Check if user is volunteer
         if (req.user.role !== 'volunteer') {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Access denied. Volunteer privileges required.' 
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. Volunteer privileges required.'
             });
         }
 

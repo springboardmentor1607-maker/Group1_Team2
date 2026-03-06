@@ -9,11 +9,11 @@
     --bs-secondary-color: #86868b;
     --bs-border-color: rgba(0, 0, 0, 0.08);
 
-    --card-bg: rgba(255, 255, 255, 0.2);
-    --sidebar-bg: rgba(255, 255, 255, 0.3);
-    --active-item-bg: rgba(0, 113, 227, 0.08);
+    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);
+    --sidebar-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+    --active-item-bg: rgba(0, 113, 227, 0.1);
     --active-item-color: #0071e3;
-    --hover-item-bg: rgba(255, 255, 255, 0.4);
+    --hover-item-bg: rgba(255, 255, 255, 0.6);
 
     --card-border-top: rgba(255, 255, 255, 0.9);
     --card-border-left: rgba(255, 255, 255, 0.8);
@@ -24,6 +24,7 @@
     --btn-gradient-text: #1d1d1f;
     --alert-border: rgba(0, 0, 0, 0.08);
     --border-light: rgba(0, 0, 0, 0.08);
+    --liquid-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.8), inset -3px -3px 7px rgba(0, 0, 0, 0.05), var(--shadow-lg);
 }
 
 [data-bs-theme="dark"] {
@@ -32,11 +33,11 @@
     --bs-secondary-color: #86868b;
     --bs-border-color: rgba(255, 255, 255, 0.18);
 
-    --card-bg: rgba(255, 255, 255, 0.04);
-    --sidebar-bg: rgba(255, 255, 255, 0.02);
+    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+    --sidebar-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
     --active-item-bg: rgba(255, 255, 255, 0.15);
     --active-item-color: #ffffff;
-    --hover-item-bg: rgba(255, 255, 255, 0.08);
+    --hover-item-bg: rgba(255, 255, 255, 0.12);
 
     --card-border-top: rgba(255, 255, 255, 0.3);
     --card-border-left: rgba(255, 255, 255, 0.2);
@@ -47,6 +48,7 @@
     --btn-gradient-text: #ffffff;
     --alert-border: rgba(255, 255, 255, 0.1);
     --border-light: rgba(255, 255, 255, 0.1);
+    --liquid-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.15), inset -3px -3px 7px rgba(0, 0, 0, 0.5), var(--shadow-lg);
 }
 
 body {
@@ -59,23 +61,24 @@ body {
 /* ---------- Custom Classes ---------- */
 .card,
 .dashboard-card {
-    background-color: var(--card-bg);
-    backdrop-filter: saturate(200%) blur(80px);
-    -webkit-backdrop-filter: saturate(200%) blur(80px);
+    background: var(--card-bg);
+    backdrop-filter: saturate(150%) blur(20px);
+    -webkit-backdrop-filter: saturate(150%) blur(20px);
     color: var(--bs-body-color);
     border: 1px solid var(--bs-border-color);
     border-top: 1px solid var(--card-border-top);
     border-left: 1px solid var(--card-border-left);
     border-radius: var(--border-radius);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--liquid-shadow);
     transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, background-color 0.4s ease;
     overflow: hidden;
 }
 
 .sidebar {
-    background-color: var(--sidebar-bg);
-    backdrop-filter: saturate(200%) blur(60px);
-    -webkit-backdrop-filter: saturate(200%) blur(60px);
+    background: var(--sidebar-bg);
+    backdrop-filter: saturate(150%) blur(20px);
+    -webkit-backdrop-filter: saturate(150%) blur(20px);
+    box-shadow: var(--liquid-shadow);
     border-right: 1px solid var(--border-light);
 }
 
@@ -185,11 +188,11 @@ body {
 .map-complaint-card,
 .map-legend {
     background: var(--card-bg);
-    backdrop-filter: saturate(200%) blur(60px);
+    backdrop-filter: saturate(150%) blur(20px);
     border-radius: 20px;
     border: 1px solid var(--border-light);
     border-top: 1px solid var(--card-border-top);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--liquid-shadow);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     color: var(--bs-body-color);
 }
@@ -201,16 +204,18 @@ body {
 
 /* Forms */
 .form-control-plaintext {
-    background-color: var(--card-bg);
-    backdrop-filter: saturate(200%) blur(60px);
+    background: var(--card-bg);
+    backdrop-filter: saturate(150%) blur(20px);
     border: 1px solid var(--border-light);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.05);
     border-radius: 14px;
 }
 
 .profile-field-display {
-    background-color: var(--card-bg);
-    backdrop-filter: saturate(200%) blur(60px);
+    background: var(--card-bg);
+    backdrop-filter: saturate(150%) blur(20px);
     border: 1px solid var(--border-light);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     padding: 1rem 1.25rem;
     min-height: 56px;
@@ -227,7 +232,8 @@ body {
     border: 1px solid var(--alert-border);
     border-radius: 16px;
     font-weight: 500;
-    backdrop-filter: saturate(200%) blur(60px);
+    backdrop-filter: saturate(150%) blur(20px);
+    box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.5), inset -2px -2px 5px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* Profile Avatar */

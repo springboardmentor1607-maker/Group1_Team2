@@ -182,12 +182,14 @@ function Complaints() {
                             <button
                                 onClick={() => handleViewModeChange('all')}
                                 className={`btn ${viewMode === 'all' ? 'btn-primary' : 'btn-outline-primary'} rounded-start`}
+                                style={{ color: viewMode === 'all' ? 'var(--btn-text)' : 'inherit' }}
                             >
                                 <Users size={16} className="me-2" />All
                             </button>
                             <button
                                 onClick={() => handleViewModeChange('my')}
                                 className={`btn ${viewMode === 'my' ? 'btn-primary' : 'btn-outline-primary'} rounded-end`}
+                                style={{ color: viewMode === 'my' ? 'var(--btn-text)' : 'inherit' }}
                             >
                                 <User size={16} className="me-2" />My Issues
                             </button>
@@ -242,14 +244,29 @@ function Complaints() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.1 }}
-                                    className="card border-0 shadow-sm rounded-3 h-100 hover-shadow-lg"
+                                    className="card border-0 shadow-sm rounded-4 h-100 hover-shadow-lg overflow-hidden"
                                     style={{
                                         background: 'var(--bg-card)',
+                                        backdropFilter: 'blur(20px)',
+                                        WebkitBackdropFilter: 'blur(20px)',
+                                        border: '1px solid var(--border-glass)',
                                         transition: 'all 0.3s ease',
-                                        cursor: 'pointer'
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        flexDirection: 'column'
                                     }}
                                 >
-                                    <div className="card-body p-4">
+                                    {complaint.photo && (
+                                        <div style={{
+                                            width: '100%',
+                                            height: '160px',
+                                            backgroundImage: `url(${complaint.photo})`,
+                                            backgroundSize: 'cover',
+                                            backgroundPosition: 'center',
+                                            borderBottom: '1px solid var(--border-color)'
+                                        }} />
+                                    )}
+                                    <div className="card-body p-4 d-flex flex-column" style={{ flex: 1 }}>
                                         <div className="d-flex justify-content-between align-items-start mb-3">
                                             <div className="d-flex align-items-center gap-2">
                                                 <span className="badge bg-primary bg-opacity-10 text-primary fs-6">
@@ -267,9 +284,9 @@ function Complaints() {
                                             </div>
                                         </div>
 
-                                        <h5 className="fw-bold mb-2 text-truncate">{complaint.title}</h5>
+                                        <h5 className="fw-bold mb-2 text-truncate" style={{ color: 'var(--text-primary)' }}>{complaint.title}</h5>
 
-                                        <div className="d-flex align-items-center gap-2 mb-2 text-muted">
+                                        <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
                                             <span className="badge bg-secondary bg-opacity-10 text-secondary small">
                                                 {complaint.type || 'Other'}
                                             </span>
@@ -278,9 +295,8 @@ function Complaints() {
                                             <span className="small">{formatDate(complaint.created_at)}</span>
                                         </div>
 
-                                        {/* Show Reporter Info (only in all complaints view) */}
                                         {viewMode === 'all' && (
-                                            <div className="d-flex align-items-center gap-2 mb-2 text-muted">
+                                            <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
                                                 <User size={14} />
                                                 <span className="small">
                                                     Reported by: {complaint.user_name || 'Unknown'}
@@ -288,9 +304,8 @@ function Complaints() {
                                             </div>
                                         )}
 
-                                        {/* Show Volunteer Assignment */}
                                         {complaint.volunteer_name && (
-                                            <div className="d-flex align-items-center gap-2 mb-2 text-muted">
+                                            <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
                                                 <User size={14} />
                                                 <span className="small">
                                                     Assigned to: {complaint.volunteer_name}
@@ -299,54 +314,58 @@ function Complaints() {
                                         )}
 
                                         <div className="d-flex align-items-start gap-2 mb-3">
-                                            <MapPin size={14} className="text-muted mt-1 flex-shrink-0" />
-                                            <div className="small text-muted">
+                                            <MapPin size={14} className="mt-1 flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
+                                            <div className="small" style={{ color: 'var(--text-muted)' }}>
                                                 <div>{complaint.address}</div>
                                                 {complaint.landmark && (
-                                                    <div className="text-muted">Near: {complaint.landmark}</div>
+                                                    <div className="opacity-75">Near: {complaint.landmark}</div>
                                                 )}
                                             </div>
                                         </div>
 
-                                        {complaint.description && (
-                                            <div style={{
-                                                background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%)',
-                                                padding: '0.875rem 1rem',
-                                                borderRadius: '12px',
-                                                border: '2px solid rgba(96, 165, 250, 0.4)',
-                                                marginBottom: '1rem',
-                                                boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)'
-                                            }}>
-                                                <p className="text-muted small mb-0" style={{
-                                                    display: '-webkit-box',
-                                                    WebkitLineClamp: 2,
-                                                    WebkitBoxOrient: 'vertical',
-                                                    overflow: 'hidden',
-                                                    lineHeight: '1.6',
-                                                    color: '#dc2626',
-                                                    fontWeight: '500'
+                                        <div className="mt-auto">
+                                            {complaint.description && (
+                                                <div style={{
+                                                    background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%)',
+                                                    padding: '0.875rem 1rem',
+                                                    borderRadius: '12px',
+                                                    border: '1px solid rgba(96, 165, 250, 0.2)',
+                                                    marginBottom: '1rem',
+                                                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.02)'
                                                 }}>
-                                                    {complaint.description}
-                                                </p>
-                                            </div>
-                                        )}
+                                                    <p className="small mb-0" style={{
+                                                        display: '-webkit-box',
+                                                        WebkitLineClamp: 2,
+                                                        WebkitBoxOrient: 'vertical',
+                                                        overflow: 'hidden',
+                                                        lineHeight: '1.6',
+                                                        fontWeight: '500',
+                                                        color: 'var(--text-primary)'
+                                                    }}>
+                                                        {complaint.description}
+                                                    </p>
+                                                </div>
+                                            )}
 
-                                        {/* Show location on map button */}
-                                        {complaint.latitude && complaint.longitude && (
-                                            <button
-                                                onClick={() => navigate('/map', {
-                                                    state: {
-                                                        focusLat: complaint.latitude,
-                                                        focusLng: complaint.longitude,
-                                                        complaintId: complaint.id
-                                                    }
-                                                })}
-                                                className="btn btn-outline-primary btn-sm rounded-pill"
-                                            >
-                                                <MapPin size={14} className="me-1" />
-                                                View on Map
-                                            </button>
-                                        )}
+                                            {complaint.latitude && complaint.longitude && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate('/map', {
+                                                            state: {
+                                                                focusLat: complaint.latitude,
+                                                                focusLng: complaint.longitude,
+                                                                complaintId: complaint.id
+                                                            }
+                                                        });
+                                                    }}
+                                                    className="btn btn-sm rounded-pill btn-outline-primary"
+                                                >
+                                                    <MapPin size={14} className="me-1" />
+                                                    View on Map
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </motion.div>
                             </div>

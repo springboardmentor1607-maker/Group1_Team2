@@ -1,11 +1,11 @@
 const { pool } = require('../config/db');
 
 const Complaint = {
-    async create({ user_id, title, type, priority, address, landmark, description, latitude, longitude }) {
+    async create({ user_id, title, type, priority, address, landmark, description, latitude, longitude, photo }) {
         const result = await pool.query(
-            `INSERT INTO complaints (user_id, title, type, priority, address, landmark, description, latitude, longitude)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-            [user_id, title, type, priority, address, landmark, description, latitude, longitude]
+            `INSERT INTO complaints (user_id, title, type, priority, address, landmark, description, latitude, longitude, photo)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+            [user_id, title, type, priority, address, landmark, description, latitude, longitude, photo]
         );
         return result.rows[0];
     },

@@ -15,7 +15,8 @@ const ReportIssue = () => {
         landmark: '',
         description: '',
         latitude: null,
-        longitude: null
+        longitude: null,
+        photo: null // Base64 string of the image
     });
 
     const navigate = useNavigate();
@@ -74,6 +75,25 @@ const ReportIssue = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Check file size (e.g., max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                setError('Image size should be less than 5MB');
+                e.target.value = ''; // Reset input
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData(prev => ({ ...prev, photo: reader.result }));
+                setError(''); // Clear any previous errors
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handleLocationSelect = (lat, lng) => {
@@ -136,7 +156,7 @@ const ReportIssue = () => {
                             onClick={() => {
                                 setIsSuccess(false);
                                 setFormData({
-                                    title: '', type: '', priority: '', address: '', landmark: '', description: '', latitude: null, longitude: null
+                                    title: '', type: '', priority: '', address: '', landmark: '', description: '', latitude: null, longitude: null, photo: null
                                 });
                             }}
                             className="btn btn-outline-primary px-4 py-3 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2"
@@ -276,6 +296,29 @@ const ReportIssue = () => {
                                                 required
                                             ></textarea>
                                         </div>
+
+                                        {/* Photo Upload */}
+                                        <div className="col-12">
+                                            <label className="form-label fw-semibold" style={{ color: '#ef4444' }}>Upload Photo (Optional)</label>
+                                            <input
+                                                type="file"
+                                                name="photo"
+                                                className="form-control"
+                                                accept="image/*"
+                                                onChange={handlePhotoChange}
+                                            />
+                                            {formData.photo && (
+                                                <div className="mt-3">
+                                                    <img
+                                                        src={formData.photo}
+                                                        alt="Preview"
+                                                        className="img-thumbnail"
+                                                        style={{ maxHeight: '200px', maxWidth: '100%', objectFit: 'cover' }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+
 
                                         {/* Map Location */}
                                         <div className="col-12">
