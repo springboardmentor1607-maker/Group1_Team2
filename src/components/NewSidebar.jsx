@@ -106,8 +106,8 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                                     whileHover={{ scale: 1.02, x: 4 }}
                                     whileTap={{ scale: 0.98 }}
                                     className={`btn d-flex align-items-center w-100 text-start border-0 rounded-3 mb-2 p-3 position-relative ${isActive
-                                            ? 'nav-link active text-white'
-                                            : 'bg-transparent'
+                                        ? 'nav-link active text-white'
+                                        : 'bg-transparent'
                                         }`}
                                     style={{
                                         background: isActive
@@ -194,8 +194,8 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                         onClick={toggleTheme}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`btn btn-outline-secondary w-100 d-flex align-items-center border-2 rounded-3 p-3 mb-2 ${!isOpen ? 'justify-content-center' : ''}`}
-                        style={{ transition: 'all 0.3s ease' }}
+                        className={`btn w-100 d-flex align-items-center rounded-3 p-3 mb-2 ${!isOpen ? 'justify-content-center' : ''}`}
+                        style={{ transition: 'all 0.3s ease', background: 'transparent', color: 'var(--bs-body-color)', border: 'none' }}
                         title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
                     >
                         {theme === 'light' ? <Moon size={20} className={`${isOpen ? 'me-3' : ''}`} /> : <Sun size={20} className={`${isOpen ? 'me-3' : ''}`} />}
@@ -215,8 +215,8 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                         onClick={onLogout}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`btn btn-outline-danger w-100 d-flex align-items-center border-2 rounded-3 p-3 ${!isOpen ? 'justify-content-center' : ''}`}
-                        style={{ transition: 'all 0.3s ease' }}
+                        className={`btn text-danger w-100 d-flex align-items-center rounded-3 p-3 ${!isOpen ? 'justify-content-center' : ''}`}
+                        style={{ transition: 'all 0.3s ease', background: 'transparent', border: 'none' }}
                     >
                         <LogOut size={20} className={`${isOpen ? 'me-3' : ''}`} />
                         {isOpen && (

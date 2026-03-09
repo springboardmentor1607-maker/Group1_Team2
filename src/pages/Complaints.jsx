@@ -5,6 +5,7 @@ import { api } from '../lib/api';
 import StatsSection from '../components/StatsSection';
 import { MapPin, Clock, User, AlertTriangle, CheckCircle, RefreshCw, Filter, Users } from 'lucide-react';
 import PageWrapper from '../components/PageWrapper';
+import ComplaintCard from '../components/ComplaintCard';
 
 function Complaints() {
     const navigate = useNavigate();
@@ -88,49 +89,6 @@ function Complaints() {
             searchParams.set('view', 'my');
         }
         navigate(`/complaints${searchParams.toString() ? '?' + searchParams.toString() : ''}`);
-    };
-
-    const getStatusBadge = (status) => {
-        const s = (status || 'pending').toLowerCase();
-        const statusMap = {
-            'pending': 'warning',
-            'progress': 'info',
-            'in progress': 'info',
-            'resolved': 'success',
-        };
-        return `badge bg-${statusMap[s] || 'warning'} rounded-pill`;
-    };
-
-    const getPriorityBadge = (priority) => {
-        const p = (priority || 'medium').toLowerCase();
-        const priorityMap = {
-            'critical': 'bg-danger',
-            'high': 'bg-warning',
-            'medium': 'bg-info',
-            'low': 'bg-success'
-        };
-        return `badge ${priorityMap[p] || 'bg-info'} bg-opacity-
-        5 text-dark small fw-normal`;
-    };
-
-    const getStatusIcon = (status) => {
-        const s = (status || 'pending').toLowerCase();
-        switch (s) {
-            case 'resolved': return <CheckCircle size={16} className="text-success" />;
-            case 'progress':
-            case 'in progress': return <RefreshCw size={16} className="text-info" />;
-            default: return <Clock size={16} className="text-warning" />;
-        }
-    };
-
-    const formatDate = (dateStr) => {
-        return new Date(dateStr).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
     };
 
     if (loading) {
@@ -240,134 +198,7 @@ function Complaints() {
                     ) : (
                         complaints.map((complaint, index) => (
                             <div key={complaint.id} className="col-12 col-lg-6">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1 }}
-                                    className="card border-0 shadow-sm rounded-4 h-100 hover-shadow-lg overflow-hidden"
-                                    style={{
-                                        background: 'var(--bg-card)',
-                                        backdropFilter: 'blur(20px)',
-                                        WebkitBackdropFilter: 'blur(20px)',
-                                        border: '1px solid var(--border-glass)',
-                                        transition: 'all 0.3s ease',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        flexDirection: 'column'
-                                    }}
-                                >
-                                    {complaint.photo && (
-                                        <div style={{
-                                            width: '100%',
-                                            height: '160px',
-                                            backgroundImage: `url(${complaint.photo})`,
-                                            backgroundSize: 'cover',
-                                            backgroundPosition: 'center',
-                                            borderBottom: '1px solid var(--border-color)'
-                                        }} />
-                                    )}
-                                    <div className="card-body p-4 d-flex flex-column" style={{ flex: 1 }}>
-                                        <div className="d-flex justify-content-between align-items-start mb-3">
-                                            <div className="d-flex align-items-center gap-2">
-                                                <span className="badge bg-primary bg-opacity-10 text-primary fs-6">
-                                                    #{complaint.id}
-                                                </span>
-                                                <span className={getPriorityBadge(complaint.priority)}>
-                                                    {complaint.priority || 'Medium'}
-                                                </span>
-                                            </div>
-                                            <div className="d-flex align-items-center gap-2">
-                                                {getStatusIcon(complaint.status)}
-                                                <span className={getStatusBadge(complaint.status)}>
-                                                    {complaint.status || 'Pending'}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <h5 className="fw-bold mb-2 text-truncate" style={{ color: 'var(--text-primary)' }}>{complaint.title}</h5>
-
-                                        <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-                                            <span className="badge bg-secondary bg-opacity-10 text-secondary small">
-                                                {complaint.type || 'Other'}
-                                            </span>
-                                            <span>•</span>
-                                            <Clock size={14} />
-                                            <span className="small">{formatDate(complaint.created_at)}</span>
-                                        </div>
-
-                                        {viewMode === 'all' && (
-                                            <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-                                                <User size={14} />
-                                                <span className="small">
-                                                    Reported by: {complaint.user_name || 'Unknown'}
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        {complaint.volunteer_name && (
-                                            <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-                                                <User size={14} />
-                                                <span className="small">
-                                                    Assigned to: {complaint.volunteer_name}
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        <div className="d-flex align-items-start gap-2 mb-3">
-                                            <MapPin size={14} className="mt-1 flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
-                                            <div className="small" style={{ color: 'var(--text-muted)' }}>
-                                                <div>{complaint.address}</div>
-                                                {complaint.landmark && (
-                                                    <div className="opacity-75">Near: {complaint.landmark}</div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="mt-auto">
-                                            {complaint.description && (
-                                                <div style={{
-                                                    background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%)',
-                                                    padding: '0.875rem 1rem',
-                                                    borderRadius: '12px',
-                                                    border: '1px solid rgba(96, 165, 250, 0.2)',
-                                                    marginBottom: '1rem',
-                                                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.02)'
-                                                }}>
-                                                    <p className="small mb-0" style={{
-                                                        display: '-webkit-box',
-                                                        WebkitLineClamp: 2,
-                                                        WebkitBoxOrient: 'vertical',
-                                                        overflow: 'hidden',
-                                                        lineHeight: '1.6',
-                                                        fontWeight: '500',
-                                                        color: 'var(--text-primary)'
-                                                    }}>
-                                                        {complaint.description}
-                                                    </p>
-                                                </div>
-                                            )}
-
-                                            {complaint.latitude && complaint.longitude && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate('/map', {
-                                                            state: {
-                                                                focusLat: complaint.latitude,
-                                                                focusLng: complaint.longitude,
-                                                                complaintId: complaint.id
-                                                            }
-                                                        });
-                                                    }}
-                                                    className="btn btn-sm rounded-pill btn-outline-primary"
-                                                >
-                                                    <MapPin size={14} className="me-1" />
-                                                    View on Map
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </motion.div>
+                                <ComplaintCard complaint={complaint} viewMode={viewMode} index={index} />
                             </div>
                         ))
                     )}

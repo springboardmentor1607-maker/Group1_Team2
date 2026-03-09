@@ -40,35 +40,38 @@
 }
 
 [data-bs-theme="dark"] {
+  color-scheme: dark;
   --primary-color: #ffffff;
   --primary-hover: #f5f5f7;
   --accent-1: #2997ff;
 
-  --bg-primary: #000000;
+  --bg-primary: #050505;
   --bg-secondary: #0a0a0c;
-  --bg-card: rgba(255, 255, 255, 0.04);
+  --bg-card: linear-gradient(145deg, #1f1f25 0%, #121215 100%);
 
-  --mesh-bg-1: radial-gradient(circle at 20% 0%, rgba(116, 0, 184, 0.9) 0%, transparent 60%);
-  --mesh-bg-2: radial-gradient(circle at 80% 20%, rgba(83, 144, 217, 0.7) 0%, transparent 50%);
-  --mesh-bg-3: radial-gradient(circle at 50% 80%, rgba(255, 200, 221, 0.3) 0%, transparent 60%);
-  --mesh-bg-4: radial-gradient(circle at 10% 80%, rgba(105, 48, 195, 0.8) 0%, transparent 50%);
-  --mesh-bg-5: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.2) 0%, transparent 100%);
+  --mesh-bg-1: radial-gradient(circle at 20% 0%, rgba(0, 122, 255, 0.2) 0%, transparent 60%);
+  --mesh-bg-2: radial-gradient(circle at 80% 20%, rgba(10, 132, 255, 0.15) 0%, transparent 50%);
+  --mesh-bg-3: radial-gradient(circle at 50% 80%, rgba(94, 176, 255, 0.1) 0%, transparent 60%);
+  --mesh-bg-4: radial-gradient(circle at 10% 80%, rgba(0, 100, 220, 0.15) 0%, transparent 50%);
+  --mesh-bg-5: none;
 
   --text-primary: #ffffff;
   --text-secondary: #ebebf5;
   --text-muted: #a1a1a6;
+  --card-border-top: transparent;
+  --card-border-left: transparent;
 
   --border-color: rgba(255, 255, 255, 0.18);
   --border-glass: rgba(255, 255, 255, 0.3);
 
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 12px 24px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 
-  --navbar-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
-  --form-input-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
-  --form-input-focus-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
-  --liquid-shadow-dark: inset 2px 2px 5px rgba(255, 255, 255, 0.15), inset -3px -3px 7px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.4);
+  --navbar-bg: rgba(28, 28, 30, 0.95);
+  --form-input-bg: #2c2c2e;
+  --form-input-focus-bg: #3a3a3c;
+  --liquid-shadow-dark: var(--shadow-sm);
 
   --hero-gradient: linear-gradient(180deg, #FFFFFF 0%, #A1A1A6 100%);
   --btn-bg: rgba(255, 255, 255, 0.9);
@@ -168,6 +171,9 @@ h3,
   top: 0;
   z-index: 50;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .navbar-brand {
@@ -269,6 +275,10 @@ h3,
   color: var(--text-primary) !important;
   box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .form-control:focus,
@@ -357,6 +367,10 @@ a:hover {
   height: 4rem !important;
 }
 
+.h-64 {
+  height: 16rem !important;
+}
+
 @media (min-width: 992px) {
   .lg\:left-64 {
     left: 16rem !important;
@@ -385,6 +399,25 @@ a:hover {
 
 .top-0 {
   top: 0 !important;
+}
+
+/* Custom Scrollbar to prevent white edge lines */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-glass);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .end-0 {

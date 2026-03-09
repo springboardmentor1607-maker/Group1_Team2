@@ -57,9 +57,7 @@ export default function ChatWidget() {
                         style={{
                             width: '350px',
                             height: '500px',
-                            background: 'var(--navbar-bg)',
-                            backdropFilter: 'blur(30px)',
-                            WebkitBackdropFilter: 'blur(30px)',
+                            background: 'var(--card-bg)',
                             border: '1px solid var(--border-glass)',
                             boxShadow: 'var(--shadow-lg)'
                         }}
@@ -104,8 +102,7 @@ export default function ChatWidget() {
                                                 border: msg.isBot ? '1px solid var(--border-color)' : 'none',
                                                 borderRadius: '16px',
                                                 borderBottomLeftRadius: msg.isBot ? '4px' : '16px',
-                                                borderBottomRightRadius: msg.isBot ? '16px' : '4px',
-                                                backdropFilter: msg.isBot ? 'blur(10px)' : 'none'
+                                                borderBottomRightRadius: msg.isBot ? '16px' : '4px'
                                             }}
                                         >
                                             <p className="m-0 small" style={{ lineHeight: '1.5' }}>{msg.text}</p>
@@ -129,9 +126,8 @@ export default function ChatWidget() {
 
                         {/* Input Area */}
                         <div className="p-3 mt-auto" style={{
-                            background: 'var(--bg-card)',
-                            borderTop: '1px solid var(--border-color)',
-                            backdropFilter: 'blur(20px)'
+                            background: 'var(--card-bg)',
+                            borderTop: '1px solid var(--border-color)'
                         }}>
                             <form onSubmit={handleSendMessage} className="d-flex gap-2 align-items-center">
                                 <input

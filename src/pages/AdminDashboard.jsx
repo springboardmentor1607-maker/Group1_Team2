@@ -187,8 +187,8 @@ const AdminDashboard = () => {
                 {/* Tabs */}
                 <div className="row">
                     <div className="col-12">
-                        <div className="card border-0 shadow">
-                            <div className="card-header bg-white">
+                        <div className="card border-0 shadow" style={{ background: 'var(--card-bg)' }}>
+                            <div className="card-header border-bottom border-secondary" style={{ background: 'transparent' }}>
                                 <nav>
                                     <div className="nav nav-tabs" role="tablist">
                                         <button
@@ -217,7 +217,7 @@ const AdminDashboard = () => {
                                     <div>
                                         <h5 className="mb-3">All Complaints Management</h5>
                                         <div className="table-responsive">
-                                            <table className="table table-hover">
+                                            <table className="table table-hover" style={{ color: 'var(--bs-body-color)' }}>
                                                 <thead>
                                                     <tr>
                                                         <th>ID</th>
@@ -296,7 +296,7 @@ const AdminDashboard = () => {
                                     <div>
                                         <h5 className="mb-3">User Management ({users.length} users)</h5>
                                         <div className="table-responsive">
-                                            <table className="table table-hover">
+                                            <table className="table table-hover" style={{ color: 'var(--bs-body-color)' }}>
                                                 <thead>
                                                     <tr>
                                                         <th>ID</th>
@@ -350,7 +350,7 @@ const AdminDashboard = () => {
                                     <div>
                                         <h5 className="mb-3">Volunteer Management ({volunteers.length} volunteers)</h5>
                                         <div className="table-responsive">
-                                            <table className="table table-hover">
+                                            <table className="table table-hover" style={{ color: 'var(--bs-body-color)' }}>
                                                 <thead>
                                                     <tr>
                                                         <th>ID</th>
@@ -400,12 +400,12 @@ const AdminDashboard = () => {
             {selectedComplaint && (
                 <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
+                        <div className="modal-content" style={{ background: 'var(--card-bg)', color: 'var(--bs-body-color)' }}>
+                            <div className="modal-header border-bottom border-secondary">
                                 <h5 className="modal-title">Assign Volunteer</h5>
                                 <button
                                     type="button"
-                                    className="btn-close"
+                                    className="btn-close btn-close-white"
                                     onClick={() => setSelectedComplaint(null)}
                                 ></button>
                             </div>
@@ -426,10 +426,10 @@ const AdminDashboard = () => {
                                     </select>
                                 </div>
                             </div>
-                            <div className="modal-footer">
+                            <div className="modal-footer border-top border-secondary">
                                 <button
                                     type="button"
-                                    className="btn btn-secondary"
+                                    className="btn btn-outline-secondary"
                                     onClick={() => setSelectedComplaint(null)}
                                 >
                                     Cancel

@@ -48,7 +48,8 @@ const createComplaint = async (req, res) => {
 
 const getAllComplaints = async (req, res) => {
     try {
-        const complaints = await Complaint.findAllWithDetails();
+        const currentUserId = req.user ? req.user.id : null;
+        const complaints = await Complaint.findAllWithDetails(currentUserId);
         res.json({ success: true, data: complaints });
     } catch (err) {
         console.error('Error in getAllComplaints:', err.message);
@@ -173,6 +174,65 @@ const getVolunteerComplaints = async (req, res) => {
     }
 };
 
+const voteComplaint = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { complaintId } = req.params;
+        const { voteType } = req.body; // Expect 'upvote' or 'downvote'
+
+        if (!['upvote', 'downvote'].includes(voteType)) {
+            return res.status(400).json({ success: false, message: 'Invalid vote type' });
+        }
+
+        await Complaint.setVote(userId, complaintId, voteType);
+        res.json({ success: true, message: 'Vote recorded successfully' });
+    } catch (err) {
+        console.error('Error in voteComplaint:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+const unvoteComplaint = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { complaintId } = req.params;
+        await Complaint.removeVote(userId, complaintId);
+        res.json({ success: true, message: 'Vote removed successfully' });
+    } catch (err) {
+        console.error('Error in unvoteComplaint:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+const addComplaintComment = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { complaintId } = req.params;
+        const { content } = req.body;
+
+        if (!content) {
+            return res.status(400).json({ success: false, message: 'Comment content is required' });
+        }
+
+        const comment = await Complaint.addComment(userId, complaintId, content);
+        res.status(201).json({ success: true, message: 'Comment added successfully', data: comment });
+    } catch (err) {
+        console.error('Error in addComplaintComment:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+const getComplaintComments = async (req, res) => {
+    try {
+        const { complaintId } = req.params;
+        const comments = await Complaint.getCommentsByComplaint(complaintId);
+        res.json({ success: true, data: comments });
+    } catch (err) {
+        console.error('Error in getComplaintComments:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
 module.exports = {
     createComplaint,
     getAllComplaints,
@@ -180,5 +240,9 @@ module.exports = {
     getVolunteerComplaints,
     getDashboardStats,
     assignVolunteer,
-    updateComplaintStatus
+    updateComplaintStatus,
+    voteComplaint,
+    unvoteComplaint,
+    addComplaintComment,
+    getComplaintComments
 };
