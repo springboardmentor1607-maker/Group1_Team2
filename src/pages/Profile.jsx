@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../lib/api";
+import PageWrapper from "../components/PageWrapper";
 
 export default function Profile() {
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ export default function Profile() {
     try {
       const response = await api.get('/auth/profile');
       const user = response.user;
-      
+
       setFormData({
         fullName: user.name || "",
         email: user.email || "",
@@ -76,7 +77,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="container">
+    <PageWrapper className="container">
       <h1 className="fs-2 fw-bold text-body mb-4">
         Edit Profile
       </h1>
@@ -189,6 +190,6 @@ export default function Profile() {
           </div>
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

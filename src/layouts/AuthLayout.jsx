@@ -14,11 +14,11 @@ const AuthLayout = ({ children, title, subtitle }) => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                     className="w-100"
-                    style={{ maxWidth: '480px', zIndex: 1, marginTop: '70px' }}
+                    style={{ maxWidth: '480px', zIndex: 1 }}
                 >
                     <div className="text-center mb-4">
                         <div className="d-flex justify-content-center mb-3">
-                            <div className="p-3 rounded-4 bg-gradient-to-br from-green-500 to-teal-500 shadow-lg" style={{ background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)' }}>
+                            <div className="p-3 rounded-4 shadow-lg" style={{ background: 'linear-gradient(135deg, #0071e3 0%, #32ade6 100%)' }}>
                                 <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M6 18V26H10V18H6ZM11 15V26H15V15H11ZM16 17V26H20V17H16ZM21 19V26H25V19H21Z" fill="white" />
                                     <path d="M13 13L14 13L14 21L12 21L12 13Z" fill="white" transform="rotate(-45 14 14)" />

@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
+import React, { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { motion } from 'framer-motion';
 import L from 'leaflet';
@@ -13,38 +13,8 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom icon for user-selected location (more prominent)
-const selectedLocationIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
-
-// Component to handle map center changes
-function MapUpdater({ center }) {
-    const map = useMap();
-    useEffect(() => {
-        if (center) {
-            map.flyTo(center, 15, { duration: 1 });
-        }
-    }, [center, map]);
-    return null;
-}
-
-function LocationMarker({ onLocationSelect, initialPosition }) {
-    const [position, setPosition] = useState(initialPosition);
-    const markerRef = useRef(null);
-
-    // Update position when initialPosition changes (from geocoding)
-    useEffect(() => {
-        if (initialPosition) {
-            setPosition(initialPosition);
-        }
-    }, [initialPosition]);
-
+function LocationMarker({ onLocationSelect }) {
+    const [position, setPosition] = useState(null);
     useMapEvents({
         click(e) {
             const { lat, lng } = e.latlng;
@@ -55,48 +25,16 @@ function LocationMarker({ onLocationSelect, initialPosition }) {
         },
     });
 
-    // Handle marker drag
-    const handleDragEnd = () => {
-        const marker = markerRef.current;
-        if (marker != null) {
-            const { lat, lng } = marker.getLatLng();
-            setPosition({ lat, lng });
-            if (onLocationSelect) {
-                onLocationSelect(lat, lng);
-            }
-        }
-    };
-
     return position === null ? null : (
-        <Marker 
-            position={position}
-            draggable={true}
-            icon={selectedLocationIcon}
-            ref={markerRef}
-            eventHandlers={{
-                dragend: handleDragEnd,
-            }}
-        >
-            <Popup>
-                <div className="text-center">
-                    <strong>📍 Issue Location</strong>
-                    <p className="mb-0 small">Drag marker to adjust position</p>
-                </div>
-            </Popup>
+        <Marker position={position}>
+            <Popup>Selected Location</Popup>
         </Marker>
     );
 }
 
-export default function MapSection({ onLocationSelect, showComplaints = true, markerPosition }) {
-    const [center, setCenter] = useState([10.8505, 76.2711]); // Default: Kerala
+export default function MapSection({ onLocationSelect, showComplaints = true }) {
+    const [center] = useState([10.8505, 76.2711]); // Default: Kerala (from user guide)
     const [complaints, setComplaints] = useState([]);
-
-    // Update center when marker position changes
-    useEffect(() => {
-        if (markerPosition) {
-            setCenter([markerPosition.lat, markerPosition.lng]);
-        }
-    }, [markerPosition]);
 
     useEffect(() => {
         if (!showComplaints) return;
@@ -125,16 +63,13 @@ export default function MapSection({ onLocationSelect, showComplaints = true, ma
             className="card border-0 shadow-lg p-4 rounded-xl mb-4"
             style={{ height: '400px' }}
         >
-            <h3 className="fs-5 fw-semibold text-body mb-4">
-                {showComplaints ? 'Complaint Map View' : 'Select Issue Location'}
-            </h3>
+            <h3 className="fs-5 fw-semibold text-body mb-4">Complaint Map View</h3>
             <div className="h-100 w-100 rounded overflow-hidden position-relative z-0">
-                <MapContainer center={center} zoom={13} scrollWheelZoom={true} style={{ height: '100%', width: '100%', zIndex: 0 }}>
+                <MapContainer center={center} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%', zIndex: 0 }}>
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <MapUpdater center={center} />
                     {showComplaints && complaints.map(complaint => {
                         const lat = parseFloat(complaint.latitude);
                         const lng = parseFloat(complaint.longitude);
@@ -152,7 +87,7 @@ export default function MapSection({ onLocationSelect, showComplaints = true, ma
                             </Marker>
                         );
                     })}
-                    {onLocationSelect && <LocationMarker onLocationSelect={onLocationSelect} initialPosition={markerPosition} />}
+                    {onLocationSelect && <LocationMarker onLocationSelect={onLocationSelect} />}
                 </MapContainer>
             </div>
         </motion.div>

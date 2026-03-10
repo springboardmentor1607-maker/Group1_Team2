@@ -9,7 +9,6 @@ const connectDB = async () => {
     try {
         await pool.query('SELECT NOW()'); // test connection
         console.log('PostgreSQL Connected...');
-
         // Auto-migration
         await pool.query(`
             CREATE TABLE IF NOT EXISTS complaints (

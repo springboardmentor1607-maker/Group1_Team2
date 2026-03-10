@@ -22,7 +22,6 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-
 // REGISTER
 exports.register = async (req, res) => {
     try {
@@ -73,7 +72,6 @@ exports.login = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
-
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
@@ -167,13 +165,13 @@ exports.getAllUsers = async (req, res) => {
     try {
         // Check if user is admin
         if (req.user.role !== 'admin') {
-            return res.status(403).json({ 
-                message: 'Access denied. Admin privileges required.' 
+            return res.status(403).json({
+                message: 'Access denied. Admin privileges required.'
             });
         }
 
         const users = await User.findAll();
-        
+
         // Remove password from response
         const safeUsers = users.map(user => {
             const { password, ...safeUser } = user;
@@ -186,8 +184,8 @@ exports.getAllUsers = async (req, res) => {
         });
     } catch (error) {
         console.error('Get all users error:', error);
-        res.status(500).json({ 
-            message: 'Server error while fetching users' 
+        res.status(500).json({
+            message: 'Server error while fetching users'
         });
     }
 };
@@ -197,32 +195,32 @@ exports.updateUserRole = async (req, res) => {
     try {
         // Check if user is admin
         if (req.user.role !== 'admin') {
-            return res.status(403).json({ 
-                message: 'Access denied. Admin privileges required.' 
+            return res.status(403).json({
+                message: 'Access denied. Admin privileges required.'
             });
         }
 
         const { user_id, role } = req.body;
 
         if (!user_id || !role) {
-            return res.status(400).json({ 
-                message: 'User ID and role are required' 
+            return res.status(400).json({
+                message: 'User ID and role are required'
             });
         }
 
         // Validate role
         const validRoles = ['citizen', 'volunteer', 'admin'];
         if (!validRoles.includes(role)) {
-            return res.status(400).json({ 
-                message: 'Invalid role. Must be: citizen, volunteer, or admin' 
+            return res.status(400).json({
+                message: 'Invalid role. Must be: citizen, volunteer, or admin'
             });
         }
 
         const updatedUser = await User.updateRole(user_id, role);
-        
+
         if (!updatedUser) {
-            return res.status(404).json({ 
-                message: 'User not found' 
+            return res.status(404).json({
+                message: 'User not found'
             });
         }
 
@@ -236,8 +234,8 @@ exports.updateUserRole = async (req, res) => {
         });
     } catch (error) {
         console.error('Update user role error:', error);
-        res.status(500).json({ 
-            message: 'Server error while updating user role' 
+        res.status(500).json({
+            message: 'Server error while updating user role'
         });
     }
 };

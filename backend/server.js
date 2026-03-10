@@ -9,7 +9,7 @@ connectDB();// Connect to Databas
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
 app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
     if (req.method === 'POST') console.log('Body:', req.body);

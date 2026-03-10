@@ -8,6 +8,7 @@ import { Plus, List, Map as MapIcon, AlertTriangle, Users, CheckCircle } from 'l
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import PageWrapper from '../components/PageWrapper';
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -36,7 +37,7 @@ export default function Dashboard() {
                     inProgress: statsData.stats?.in_progress || 0,
                     resolved: statsData.stats?.resolved || 0
                 });
-                
+
                 // Transform recent complaints into activity format
                 const recentComplaints = statsData.recent || [];
                 const formattedActivities = recentComplaints.map(complaint => ({
@@ -61,10 +62,10 @@ export default function Dashboard() {
         };
 
         fetchDashboardData();
-        
+
         // Auto-refresh every 10 seconds to get latest updates
         const interval = setInterval(fetchDashboardData, 10000);
-        
+
         return () => clearInterval(interval);
     }, []);
 
@@ -79,7 +80,7 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="container-xxl">
+        <PageWrapper className="container-xxl">
 
             {/* ===== TOP HEADER ROW ===== */}
             <div className="d-flex align-items-start justify-content-between mb-4">
@@ -167,6 +168,6 @@ export default function Dashboard() {
                     </button>
                 </div>
             </motion.div>
-        </div>
+        </PageWrapper>
     );
 }

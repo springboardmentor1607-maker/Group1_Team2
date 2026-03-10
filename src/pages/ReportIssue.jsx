@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, FileVolume2, AlertTriangle, Send, Map as MapIcon, Info, Plus, Ban, Search } from 'lucide-react';
+import { MapPin, FileVolume2, AlertTriangle, Send, Map as MapIcon, Info, Plus, Ban } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MapSection from '../components/MapSection';
 import { api } from '../lib/api';
+import PageWrapper from '../components/PageWrapper';
 
 const ReportIssue = () => {
     const [formData, setFormData] = useState({
@@ -14,7 +15,8 @@ const ReportIssue = () => {
         landmark: '',
         description: '',
         latitude: null,
-        longitude: null
+        longitude: null,
+        photo: null // Base64 string of the image
     });
 
     const navigate = useNavigate();
@@ -23,50 +25,11 @@ const ReportIssue = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [userRole, setUserRole] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [geocoding, setGeocoding] = useState(false);
-    const [geocodeError, setGeocodeError] = useState('');
-    const [markerPosition, setMarkerPosition] = useState(null);
 
     useEffect(() => {
         const role = localStorage.getItem('userRole');
         setUserRole(role);
         setLoading(false);
-    }, []);
-
-    // Geocoding function using OpenStreetMap Nominatim API
-    const geocodeAddress = useCallback(async (address) => {
-        if (!address || address.length < 3) return;
-        
-        setGeocoding(true);
-        setGeocodeError('');
-        
-        try {
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
-            );
-            const data = await response.json();
-            
-            if (data && data.length > 0) {
-                const { lat, lon } = data[0];
-                const latitude = parseFloat(lat);
-                const longitude = parseFloat(lon);
-                
-                setFormData(prev => ({ 
-                    ...prev, 
-                    latitude, 
-                    longitude 
-                }));
-                setMarkerPosition({ lat: latitude, lng: longitude });
-                setGeocodeError('');
-            } else {
-                setGeocodeError('Location not found. Please try a different address or click on the map.');
-            }
-        } catch (err) {
-            console.error('Geocoding error:', err);
-            setGeocodeError('Failed to find location. Please click on the map to mark location manually.');
-        } finally {
-            setGeocoding(false);
-        }
     }, []);
 
     // Block non-citizens from accessing this page
@@ -82,7 +45,7 @@ const ReportIssue = () => {
 
     if (userRole && userRole !== 'citizen') {
         return (
-            <div className="container-lg px-3 px-md-4 py-5 text-center">
+            <PageWrapper className="container-lg px-3 px-md-4 py-5 text-center">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -105,7 +68,7 @@ const ReportIssue = () => {
                         Go to Dashboard
                     </button>
                 </motion.div>
-            </div>
+            </PageWrapper>
         );
     }
 
@@ -114,10 +77,27 @@ const ReportIssue = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Check file size (e.g., max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                setError('Image size should be less than 5MB');
+                e.target.value = ''; // Reset input
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData(prev => ({ ...prev, photo: reader.result }));
+                setError(''); // Clear any previous errors
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleLocationSelect = (lat, lng) => {
         setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
-        setMarkerPosition({ lat, lng });
-        setGeocodeError(''); // Clear any geocoding errors
     };
 
     const handleSubmit = async (e) => {
@@ -145,7 +125,7 @@ const ReportIssue = () => {
 
     if (isSuccess) {
         return (
-            <div className="container-lg px-3 px-md-4 py-5 text-center">
+            <PageWrapper className="container-lg px-3 px-md-4 py-5 text-center">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -176,10 +156,8 @@ const ReportIssue = () => {
                             onClick={() => {
                                 setIsSuccess(false);
                                 setFormData({
-                                    title: '', type: '', priority: '', address: '', landmark: '', description: '', latitude: null, longitude: null
+                                    title: '', type: '', priority: '', address: '', landmark: '', description: '', latitude: null, longitude: null, photo: null
                                 });
-                                setMarkerPosition(null);
-                                setGeocodeError('');
                             }}
                             className="btn btn-outline-primary px-4 py-3 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2"
                         >
@@ -187,12 +165,12 @@ const ReportIssue = () => {
                         </button>
                     </div>
                 </motion.div>
-            </div>
+            </PageWrapper>
         );
     }
 
     return (
-        <div className="container-lg px-3 px-md-4 py-3">
+        <PageWrapper className="container-lg px-3 px-md-4 py-3">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -273,7 +251,7 @@ const ReportIssue = () => {
                                             </select>
                                         </div>
 
-                                        {/* Address with Geocode Button */}
+                                        {/* Address */}
                                         <div className="col-12 col-md-6">
                                             <label className="form-label fw-semibold" style={{ color: '#ef4444' }}>Address</label>
                                             <div className="input-group">
@@ -283,31 +261,13 @@ const ReportIssue = () => {
                                                 <input
                                                     type="text"
                                                     name="address"
-                                                    className="form-control border-start-0 border-end-0"
+                                                    className="form-control border-start-0"
                                                     placeholder="Enter street address"
                                                     value={formData.address}
                                                     onChange={handleChange}
                                                     required
                                                 />
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-outline-primary"
-                                                    onClick={() => geocodeAddress(formData.address)}
-                                                    disabled={!formData.address || geocoding}
-                                                    title="Find location on map"
-                                                >
-                                                    {geocoding ? (
-                                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                    ) : (
-                                                        <Search size={18} />
-                                                    )}
-                                                </button>
                                             </div>
-                                            {geocoding && <small className="text-primary mt-1 d-block">🔍 Searching for location...</small>}
-                                            {geocodeError && <small className="text-warning mt-1 d-block">⚠️ {geocodeError}</small>}
-                                            {formData.latitude && formData.longitude && !geocodeError && !geocoding && (
-                                                <small className="text-success mt-1 d-block">✓ Location marked on map</small>
-                                            )}
                                         </div>
 
                                         {/* Nearby Landmark */}
@@ -337,6 +297,29 @@ const ReportIssue = () => {
                                             ></textarea>
                                         </div>
 
+                                        {/* Photo Upload */}
+                                        <div className="col-12">
+                                            <label className="form-label fw-semibold" style={{ color: '#ef4444' }}>Upload Photo (Optional)</label>
+                                            <input
+                                                type="file"
+                                                name="photo"
+                                                className="form-control"
+                                                accept="image/*"
+                                                onChange={handlePhotoChange}
+                                            />
+                                            {formData.photo && (
+                                                <div className="mt-3">
+                                                    <img
+                                                        src={formData.photo}
+                                                        alt="Preview"
+                                                        className="img-thumbnail"
+                                                        style={{ maxHeight: '200px', maxWidth: '100%', objectFit: 'cover' }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+
+
                                         {/* Map Location */}
                                         <div className="col-12">
                                             <label className="form-label fw-semibold d-flex align-items-center mb-3" style={{ color: '#ef4444' }}>
@@ -344,15 +327,11 @@ const ReportIssue = () => {
                                                 Location on Map
                                             </label>
                                             <div className="rounded-3 overflow-hidden border border-secondary border-opacity-10 shadow-sm" style={{ minHeight: '300px' }}>
-                                                <MapSection 
-                                                    onLocationSelect={handleLocationSelect} 
-                                                    showComplaints={false} 
-                                                    markerPosition={markerPosition}
-                                                />
+                                                <MapSection onLocationSelect={handleLocationSelect} showComplaints={false} />
                                             </div>
                                             <small className="text-muted mt-2 d-flex align-items-center">
                                                 <Info size={14} className="me-1" />
-                                                Click "Search" to auto-locate address, click map to mark manually, or drag the marker for precise positioning
+                                                Click on the map to mark the exact location
                                             </small>
                                         </div>
 
@@ -376,7 +355,7 @@ const ReportIssue = () => {
                     </div>
                 </form>
             </motion.div>
-        </div>
+        </PageWrapper>
     );
 };
 

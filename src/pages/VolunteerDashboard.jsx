@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ClipboardList, MapPin, Clock, CheckCircle2, AlertTriangle, User, Phone, Calendar } from 'lucide-react';
 import { api } from '../lib/api';
+import PageWrapper from '../components/PageWrapper';
 
 const VolunteerDashboard = () => {
     const [complaints, setComplaints] = useState([]);
@@ -11,7 +12,7 @@ const VolunteerDashboard = () => {
 
     useEffect(() => {
         fetchVolunteerComplaints();
-        
+
         // Auto-refresh every 10 seconds to get latest updates
         const interval = setInterval(() => {
             // Background refresh without affecting loading state
@@ -19,12 +20,12 @@ const VolunteerDashboard = () => {
                 try {
                     const response = await api.get('/complaints/volunteer-complaints');
                     setComplaints(response.data || []);
-                    
+
                     const total = response.data?.length || 0;
                     const pending = response.data?.filter(c => c.status === 'Pending')?.length || 0;
                     const inProgress = response.data?.filter(c => c.status === 'In Progress')?.length || 0;
                     const resolved = response.data?.filter(c => c.status === 'Resolved')?.length || 0;
-                    
+
                     setStats({ total, pending, inProgress, resolved });
                 } catch (err) {
                     console.error('Error refreshing volunteer complaints:', err);
@@ -32,7 +33,7 @@ const VolunteerDashboard = () => {
             };
             fetchWithoutLoading();
         }, 10000);
-        
+
         return () => clearInterval(interval);
     }, []);
 
@@ -40,13 +41,13 @@ const VolunteerDashboard = () => {
         try {
             const response = await api.get('/complaints/volunteer-complaints');
             setComplaints(response.data || []);
-            
+
             // Calculate stats
             const total = response.data?.length || 0;
             const pending = response.data?.filter(c => c.status === 'Pending')?.length || 0;
             const inProgress = response.data?.filter(c => c.status === 'In Progress')?.length || 0;
             const resolved = response.data?.filter(c => c.status === 'Resolved')?.length || 0;
-            
+
             setStats({ total, pending, inProgress, resolved });
         } catch (err) {
             console.error('Error fetching volunteer complaints:', err);
@@ -91,7 +92,7 @@ const VolunteerDashboard = () => {
     }
 
     return (
-        <div className="container-fluid px-3 px-md-4 py-3">
+        <PageWrapper className="container-fluid px-3 px-md-4 py-3">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -147,79 +148,84 @@ const VolunteerDashboard = () => {
 
                 {/* Complaints List */}
                 <div className="card border-0 shadow">
-                    <div className="card-header bg-white">
-                        <h5 className="mb-0 fw-bold">Your Assigned Complaints</h5>
+                    <div className="card-header bg-transparent border-bottom border-light">
+                        <h5 className="mb-0 fw-bold" style={{ color: 'var(--text-primary)' }}>Your Assigned Complaints</h5>
                     </div>
                     <div className="card-body">
                         {complaints.length === 0 ? (
                             <div className="text-center py-5">
-                                <ClipboardList size={64} className="text-muted mb-3" />
-                                <p className="text-muted">No complaints assigned to you yet.</p>
+                                <ClipboardList size={64} className="mb-3" style={{ color: 'var(--text-muted)' }} />
+                                <p style={{ color: 'var(--text-muted)' }}>No complaints assigned to you yet.</p>
                             </div>
                         ) : (
                             <div className="table-responsive">
-                                <table className="table table-hover">
+                                <table className="table table-hover align-middle">
                                     <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Title</th>
-                                            <th>Type</th>
-                                            <th>Priority</th>
-                                            <th>Status</th>
-                                            <th>Citizen Info</th>
-                                            <th>Location</th>
-                                            <th>Date</th>
+                                        <tr style={{ color: 'var(--text-primary)' }}>
+                                            <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>ID</th>
+                                            <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>Title</th>
+                                            <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>Type</th>
+                                            <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>Priority</th>
+                                            <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>Status</th>
+                                            <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>Citizen Info</th>
+                                            <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>Location</th>
+                                            <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>Date</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {complaints.map((complaint) => (
                                             <tr key={complaint.id}>
-                                                <td className="fw-bold">#{complaint.id}</td>
-                                                <td>
-                                                    <div className="fw-semibold">{complaint.title}</div>
-                                                    <small className="text-muted">{complaint.description?.substring(0, 50)}...</small>
+                                                <td className="fw-bold bg-transparent" style={{ color: 'var(--text-primary)' }}>#{complaint.id}</td>
+                                                <td className="bg-transparent">
+                                                    <div className="fw-semibold" style={{ color: 'var(--text-primary)' }}>{complaint.title}</div>
+                                                    <small style={{ color: 'var(--text-muted)' }}>{complaint.description?.substring(0, 50)}...</small>
                                                 </td>
-                                                <td>
+                                                <td className="bg-transparent">
                                                     <span className="badge bg-secondary">{complaint.type}</span>
                                                 </td>
-                                                <td>{getPriorityBadge(complaint.priority)}</td>
-                                                <td>
+                                                <td className="bg-transparent">{getPriorityBadge(complaint.priority)}</td>
+                                                <td className="bg-transparent">
                                                     <select
-                                                        className="form-select form-select-sm"
+                                                        className="form-select form-select-sm border-0 shadow-sm"
                                                         value={complaint.status || 'Pending'}
                                                         onChange={(e) => updateStatus(complaint.id, e.target.value)}
                                                         disabled={updating === complaint.id}
-                                                        style={{ minWidth: '130px' }}
+                                                        style={{
+                                                            minWidth: '130px',
+                                                            background: 'var(--bg-secondary)',
+                                                            color: 'var(--text-primary)',
+                                                            cursor: updating === complaint.id ? 'not-allowed' : 'pointer'
+                                                        }}
                                                     >
                                                         <option value="Pending">Pending</option>
                                                         <option value="In Progress">In Progress</option>
                                                         <option value="Resolved">Resolved</option>
                                                     </select>
                                                 </td>
-                                                <td>
+                                                <td className="bg-transparent">
                                                     <div className="d-flex flex-column gap-1">
-                                                        <small className="d-flex align-items-center gap-1">
+                                                        <small className="d-flex align-items-center gap-1" style={{ color: 'var(--text-primary)' }}>
                                                             <User size={12} /> {complaint.user_name}
                                                         </small>
                                                         {complaint.user_phone && (
-                                                            <small className="d-flex align-items-center gap-1 text-muted">
+                                                            <small className="d-flex align-items-center gap-1" style={{ color: 'var(--text-muted)' }}>
                                                                 <Phone size={12} /> {complaint.user_phone}
                                                             </small>
                                                         )}
-                                                        <small className="text-muted">{complaint.user_email}</small>
+                                                        <small style={{ color: 'var(--text-muted)' }}>{complaint.user_email}</small>
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    <small className="d-flex align-items-center gap-1">
+                                                <td className="bg-transparent">
+                                                    <small className="d-flex align-items-center gap-1" style={{ color: 'var(--text-primary)' }}>
                                                         <MapPin size={12} />
                                                         {complaint.address?.substring(0, 30)}...
                                                     </small>
                                                     {complaint.landmark && (
-                                                        <small className="text-muted">Near: {complaint.landmark}</small>
+                                                        <small style={{ color: 'var(--text-muted)' }}>Near: {complaint.landmark}</small>
                                                     )}
                                                 </td>
-                                                <td>
-                                                    <small className="d-flex align-items-center gap-1">
+                                                <td className="bg-transparent">
+                                                    <small className="d-flex align-items-center gap-1" style={{ color: 'var(--text-primary)' }}>
                                                         <Calendar size={12} />
                                                         {new Date(complaint.created_at).toLocaleDateString()}
                                                     </small>
@@ -234,10 +240,10 @@ const VolunteerDashboard = () => {
                 </div>
 
                 {/* Instructions Card */}
-                <div className="card border-0 shadow mt-4 bg-light">
+                <div className="card border-0 shadow mt-4" style={{ background: 'var(--bg-card)' }}>
                     <div className="card-body">
-                        <h6 className="fw-bold mb-2">Instructions:</h6>
-                        <ul className="mb-0">
+                        <h6 className="fw-bold mb-2" style={{ color: 'var(--text-primary)' }}>Instructions:</h6>
+                        <ul className="mb-0" style={{ color: 'var(--text-muted)' }}>
                             <li>Use the status dropdown to update complaint progress: Pending → In Progress → Resolved</li>
                             <li>Dashboard statistics will update in real-time as you change complaint statuses</li>
                             <li>Contact citizens using the provided phone number or email for any clarifications</li>
@@ -245,7 +251,7 @@ const VolunteerDashboard = () => {
                     </div>
                 </div>
             </motion.div>
-        </div>
+        </PageWrapper>
     );
 };
 

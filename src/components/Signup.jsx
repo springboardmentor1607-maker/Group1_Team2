@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import PageWrapper from './PageWrapper';
 
 function Signup({ onLogin }) {
     const [formData, setFormData] = useState({
@@ -121,14 +122,14 @@ function Signup({ onLogin }) {
                 // Store token and auth state
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('isAuthenticated', 'true');
-                
+
                 // Store user role (from form selection)
                 localStorage.setItem('userRole', role);
 
                 if (onLogin) {
                     onLogin();
                 }
-                
+
                 // Redirect based on role
                 if (role === 'admin') {
                     navigate('/admin');
@@ -145,7 +146,7 @@ function Signup({ onLogin }) {
     }
 
     return (
-        <div className="auth-card">
+        <PageWrapper className="auth-card">
             <div className="card">
                 <div className="card-body">
                     <h2 className="card-title text-center mb-4">Register for CleanStreet</h2>
@@ -268,7 +269,7 @@ function Signup({ onLogin }) {
                     </form>
                 </div>
             </div>
-        </div>
+        </PageWrapper>
     )
 }
 
