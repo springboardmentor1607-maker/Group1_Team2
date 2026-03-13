@@ -139,15 +139,15 @@ function Complaints() {
                         <div className="btn-group" role="group" aria-label="View Mode">
                             <button
                                 onClick={() => handleViewModeChange('all')}
-                                className={`btn ${viewMode === 'all' ? 'btn-primary' : 'btn-outline-primary'} rounded-start`}
-                                style={{ color: viewMode === 'all' ? 'var(--btn-text)' : 'inherit' }}
+                                className={`btn ${viewMode === 'all' ? 'btn-primary text-white' : 'btn-outline-primary border-primary'} rounded-start d-flex align-items-center justify-content-center`}
+                                style={viewMode !== 'all' ? { color: 'var(--text-primary)' } : {}}
                             >
                                 <Users size={16} className="me-2" />All
                             </button>
                             <button
                                 onClick={() => handleViewModeChange('my')}
-                                className={`btn ${viewMode === 'my' ? 'btn-primary' : 'btn-outline-primary'} rounded-end`}
-                                style={{ color: viewMode === 'my' ? 'var(--btn-text)' : 'inherit' }}
+                                className={`btn ${viewMode === 'my' ? 'btn-primary text-white' : 'btn-outline-primary border-primary'} rounded-end d-flex align-items-center justify-content-center`}
+                                style={viewMode !== 'my' ? { color: 'var(--text-primary)' } : {}}
                             >
                                 <User size={16} className="me-2" />My Issues
                             </button>

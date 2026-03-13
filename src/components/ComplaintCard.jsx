@@ -57,6 +57,7 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
     const [newComment, setNewComment] = useState('');
     const [loadingComments, setLoadingComments] = useState(false);
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+    const [showBigIcon, setShowBigIcon] = useState(null);
 
     const handleVote = async (e, type) => {
         e.stopPropagation();
@@ -87,6 +88,10 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
                     if (type === 'downvote') setDownvotesCount(prev => prev + 1);
                 }
                 setUserVoteType(type);
+
+                // Show big overlay animation
+                setShowBigIcon(type);
+                setTimeout(() => setShowBigIcon(null), 1000);
             }
         } catch (err) {
             console.error(`Error ${type}ing:`, err);
@@ -145,12 +150,46 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="card border-0 shadow-sm rounded-4 h-100 hover-shadow-lg overflow-hidden"
+            className="card border-0 shadow-sm rounded-4 hover-shadow-lg overflow-hidden position-relative"
             style={{
                 background: 'var(--card-bg)', border: '1px solid var(--border-glass)',
                 transition: 'all 0.3s ease', cursor: 'pointer', display: 'flex', flexDirection: 'column'
             }}
         >
+            {/* Big Icon Animation Overlay */}
+            <AnimatePresence>
+                {showBigIcon && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.5, x: '-50%', y: '-50%' }}
+                        animate={{ opacity: 1, scale: 1.5, x: '-50%', y: '-50%' }}
+                        exit={{ opacity: 0, scale: 0.8, x: '-50%', y: '-50%' }}
+                        transition={{ duration: 0.4, type: "spring" }}
+                        style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            zIndex: 100,
+                            pointerEvents: 'none',
+                            background: showBigIcon === 'upvote' ? 'rgba(13, 110, 253, 0.15)' : 'rgba(220, 53, 69, 0.15)',
+                            backdropFilter: 'blur(4px)',
+                            WebkitBackdropFilter: 'blur(4px)',
+                            borderRadius: '50%',
+                            padding: '2rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                        }}
+                    >
+                        {showBigIcon === 'upvote' ? (
+                            <ThumbsUp size={80} className="text-primary" fill="currentColor" />
+                        ) : (
+                            <ThumbsDown size={80} className="text-danger" fill="currentColor" />
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {complaint.photo && (
                 <div style={{
                     width: '100%', height: '160px', backgroundImage: `url(${complaint.photo})`,
@@ -176,11 +215,9 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
                     <span>•</span><Clock size={14} /><span className="small">{formatDate(complaint.created_at)}</span>
                 </div>
 
-                {viewMode === 'all' && (
-                    <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-                        <User size={14} /><span className="small">Reported by: {complaint.user_name || 'Unknown'}</span>
-                    </div>
-                )}
+                <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
+                    <User size={14} /><span className="small">Reported by: {complaint.user_name || 'Unknown'}</span>
+                </div>
 
                 {complaint.volunteer_name && (
                     <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
@@ -213,32 +250,50 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
                     )}
 
                     {/* Actions Row: Vote and Comment */}
-                    <div className="d-flex align-items-center gap-3 mb-3">
+                    <div className="d-flex align-items-center gap-2 mb-3">
                         <motion.button
+                            whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={(e) => handleVote(e, 'upvote')}
-                            className={`btn btn-sm rounded-pill d-flex align-items-center gap-1 ${userVoteType === 'upvote' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                            className={`btn btn-sm rounded-pill px-3 py-1 d-flex align-items-center justify-content-center gap-2 ${userVoteType === 'upvote' ? 'btn-primary' : 'btn-outline-secondary'}`}
                         >
-                            <ThumbsUp size={14} className={userVoteType === 'upvote' ? "text-white" : ""} />
-                            <span>{upvotesCount}</span>
+                            <motion.div
+                                animate={userVoteType === 'upvote' ? { scale: [1, 1.3, 1], y: [0, -4, 0] } : {}}
+                                transition={{ duration: 0.3 }}
+                                className={`d-flex align-items-center ${userVoteType === 'upvote' ? 'text-white' : ''}`}
+                                style={userVoteType !== 'upvote' ? { color: 'var(--text-primary)' } : {}}
+                            >
+                                <ThumbsUp size={15} />
+                            </motion.div>
+                            <span className={`fw-medium ${userVoteType === 'upvote' ? 'text-white' : ''}`} style={userVoteType !== 'upvote' ? { color: 'var(--text-primary)' } : {}}>{upvotesCount}</span>
                         </motion.button>
 
                         <motion.button
+                            whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={(e) => handleVote(e, 'downvote')}
-                            className={`btn btn-sm rounded-pill d-flex align-items-center gap-1 ${userVoteType === 'downvote' ? 'btn-danger' : 'btn-outline-secondary'}`}
+                            className={`btn btn-sm rounded-pill px-3 py-1 d-flex align-items-center justify-content-center gap-2 ${userVoteType === 'downvote' ? 'btn-danger' : 'btn-outline-secondary'}`}
                         >
-                            <ThumbsDown size={14} className={userVoteType === 'downvote' ? "text-white" : ""} />
-                            <span>{downvotesCount}</span>
+                            <motion.div
+                                animate={userVoteType === 'downvote' ? { scale: [1, 1.3, 1], y: [0, 4, 0] } : {}}
+                                transition={{ duration: 0.3 }}
+                                className={`d-flex align-items-center ${userVoteType === 'downvote' ? 'text-white' : ''}`}
+                                style={userVoteType !== 'downvote' ? { color: 'var(--text-primary)' } : {}}
+                            >
+                                <ThumbsDown size={15} />
+                            </motion.div>
+                            <span className={`fw-medium ${userVoteType === 'downvote' ? 'text-white' : ''}`} style={userVoteType !== 'downvote' ? { color: 'var(--text-primary)' } : {}}>{downvotesCount}</span>
                         </motion.button>
 
                         <motion.button
+                            whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={toggleComments}
-                            className={`btn btn-sm rounded-pill d-flex align-items-center gap-1 ${showComments ? 'btn-primary bg-opacity-10 text-primary border-primary' : 'btn-outline-secondary'}`}
+                            className={`btn btn-sm rounded-pill px-3 py-1 d-flex align-items-center justify-content-center gap-2 ${showComments ? 'bg-primary bg-opacity-10 text-primary border border-primary' : 'btn-outline-secondary'}`}
+                            style={!showComments ? { color: 'var(--text-primary)' } : {}}
                         >
-                            <MessageSquare size={14} />
-                            <span>{commentsCount}</span>
+                            <MessageSquare size={15} />
+                            <span className="fw-medium">{commentsCount}</span>
                         </motion.button>
 
                         {complaint.latitude && complaint.longitude && (
@@ -247,10 +302,11 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
                                     e.stopPropagation();
                                     navigate('/map', { state: { focusLat: complaint.latitude, focusLng: complaint.longitude, complaintId: complaint.id } });
                                 }}
-                                className="btn btn-sm rounded-pill btn-outline-primary ms-auto"
+                                className="btn btn-sm rounded-pill btn-outline-primary px-3 py-1 d-flex align-items-center justify-content-center gap-1 ms-auto"
+                                style={{ color: 'var(--text-primary)', borderColor: 'var(--text-primary)' }}
                             >
-                                <MapPin size={14} className="me-1" />
-                                View Map
+                                <MapPin size={15} />
+                                <span className="fw-medium">View Map</span>
                             </button>
                         )}
                     </div>
@@ -276,14 +332,24 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
                                         onChange={e => setNewComment(e.target.value)}
                                         style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
                                     />
-                                    <button
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
                                         type="submit"
-                                        className="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                                        style={{ width: '32px', height: '32px' }}
+                                        className="btn btn-primary btn-sm rounded-pill px-3 fw-bold d-flex align-items-center gap-1"
                                         disabled={!newComment.trim() || isSubmittingComment}
                                     >
-                                        <Send size={14} />
-                                    </button>
+                                        {isSubmittingComment ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm text-white" role="status" aria-hidden="true" style={{ width: '14px', height: '14px' }}></span>
+                                                Posting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Send size={15} /> Post
+                                            </>
+                                        )}
+                                    </motion.button>
                                 </form>
 
                                 {loadingComments ? (
