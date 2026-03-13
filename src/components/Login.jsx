@@ -62,8 +62,6 @@ function Login({ onLogin }) {
 
         if (!password) {
             newErrors.password = 'Password is required'
-        } else if (!isPasswordValid) {
-            newErrors.password = 'Password must meet all requirements'
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -136,21 +134,6 @@ function Login({ onLogin }) {
                                 onBlur={() => setPasswordFocused(false)}
                             />
                             {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
-                            {passwordFocused && (
-                                <div className="mt-2">
-                                    <small className={passwordValidation.minLength ? 'text-success' : 'text-danger'}>
-                                        {passwordValidation.minLength ? '✓' : '✗'} At least 8 characters
-                                    </small>
-                                    <br />
-                                    <small className={passwordValidation.hasCapital ? 'text-success' : 'text-danger'}>
-                                        {passwordValidation.hasCapital ? '✓' : '✗'} At least 1 capital letter
-                                    </small>
-                                    <br />
-                                    <small className={passwordValidation.hasSpecial ? 'text-success' : 'text-danger'}>
-                                        {passwordValidation.hasSpecial ? '✓' : '✗'} At least 1 special character (!@#$%^&*...)
-                                    </small>
-                                </div>
-                            )}
                         </div>
                         <button type="submit" className="btn btn-primary w-100 mb-3">Login</button>
                         <div className="text-center">

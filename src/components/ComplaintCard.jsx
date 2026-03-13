@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, User, CheckCircle, RefreshCw, ThumbsUp, ThumbsDown, MessageSquare, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import AnimatedLikeButton from './AnimatedLikeButton';
+import AnimatedDislikeButton from './AnimatedDislikeButton';
+import AnimatedCommentButton from './AnimatedCommentButton';
 
 const getStatusBadge = (status) => {
     const s = (status || 'pending').toLowerCase();
@@ -18,12 +21,26 @@ const getStatusBadge = (status) => {
 const getPriorityBadge = (priority) => {
     const p = (priority || 'medium').toLowerCase();
     const priorityMap = {
-        'critical': 'bg-danger',
-        'high': 'bg-warning',
-        'medium': 'bg-info',
-        'low': 'bg-success'
+        'critical': { bg: '#ef4444', text: '#ffffff' }, // Bootstrap danger red
+        'high': { bg: '#f59e0b', text: '#000000' },     // Amber/warning
+        'medium': { bg: '#3b82f6', text: '#ffffff' },   // Blue/info
+        'low': { bg: '#10b981', text: '#ffffff' }       // Emerald/success
     };
-    return `badge ${priorityMap[p] || 'bg-info'} bg-opacity-10 text-dark small fw-normal`;
+
+    const style = priorityMap[p] || priorityMap['medium'];
+
+    // Instead of returning class names that might clash with dark mode overrides,
+    // we'll return an object with both the base classes and the inline styles needed
+    return {
+        className: 'badge px-2 py-1',
+        style: {
+            backgroundColor: style.bg,
+            color: style.text,
+            fontWeight: '600',
+            letterSpacing: '0.02em',
+            border: `1px solid ${style.bg}80` // 50% opacity border
+        }
+    };
 };
 
 const getStatusIcon = (status) => {
@@ -43,7 +60,7 @@ const formatDate = (dateStr) => {
     });
 };
 
-const ComplaintCard = ({ complaint, viewMode, index }) => {
+const ComplaintCard = ({ complaint, viewMode, index = 0 }) => {
     const navigate = useNavigate();
 
     // State for votes and comments
@@ -147,8 +164,13 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
             transition={{ delay: index * 0.1 }}
             className="card border-0 shadow-sm rounded-4 h-100 hover-shadow-lg overflow-hidden"
             style={{
-                background: 'var(--card-bg)', border: '1px solid var(--border-glass)',
-                transition: 'all 0.3s ease', cursor: 'pointer', display: 'flex', flexDirection: 'column'
+                background: 'var(--card-bg, #1a1a1c)',
+                border: '1px solid var(--border-color)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column'
             }}
         >
             {complaint.photo && (
@@ -161,7 +183,12 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
                 <div className="d-flex justify-content-between align-items-start mb-3">
                     <div className="d-flex align-items-center gap-2">
                         <span className="badge bg-primary bg-opacity-10 text-primary fs-6">#{complaint.id}</span>
-                        <span className={getPriorityBadge(complaint.priority)}>{complaint.priority || 'Medium'}</span>
+                        <span
+                            className={getPriorityBadge(complaint.priority).className}
+                            style={getPriorityBadge(complaint.priority).style}
+                        >
+                            {complaint.priority || 'Medium'}
+                        </span>
                     </div>
                     <div className="d-flex align-items-center gap-2">
                         {getStatusIcon(complaint.status)}
@@ -214,32 +241,23 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
 
                     {/* Actions Row: Vote and Comment */}
                     <div className="d-flex align-items-center gap-3 mb-3">
-                        <motion.button
-                            whileTap={{ scale: 0.95 }}
+                        <AnimatedLikeButton
+                            isLiked={userVoteType === 'upvote'}
                             onClick={(e) => handleVote(e, 'upvote')}
-                            className={`btn btn-sm rounded-pill d-flex align-items-center gap-1 ${userVoteType === 'upvote' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                        >
-                            <ThumbsUp size={14} className={userVoteType === 'upvote' ? "text-white" : ""} />
-                            <span>{upvotesCount}</span>
-                        </motion.button>
+                            count={upvotesCount}
+                        />
 
-                        <motion.button
-                            whileTap={{ scale: 0.95 }}
+                        <AnimatedDislikeButton
+                            isDisliked={userVoteType === 'downvote'}
                             onClick={(e) => handleVote(e, 'downvote')}
-                            className={`btn btn-sm rounded-pill d-flex align-items-center gap-1 ${userVoteType === 'downvote' ? 'btn-danger' : 'btn-outline-secondary'}`}
-                        >
-                            <ThumbsDown size={14} className={userVoteType === 'downvote' ? "text-white" : ""} />
-                            <span>{downvotesCount}</span>
-                        </motion.button>
+                            count={downvotesCount}
+                        />
 
-                        <motion.button
-                            whileTap={{ scale: 0.95 }}
+                        <AnimatedCommentButton
+                            isActive={showComments}
                             onClick={toggleComments}
-                            className={`btn btn-sm rounded-pill d-flex align-items-center gap-1 ${showComments ? 'btn-primary bg-opacity-10 text-primary border-primary' : 'btn-outline-secondary'}`}
-                        >
-                            <MessageSquare size={14} />
-                            <span>{commentsCount}</span>
-                        </motion.button>
+                            count={commentsCount}
+                        />
 
                         {complaint.latitude && complaint.longitude && (
                             <button
@@ -274,16 +292,33 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
                                         placeholder="Add a comment..."
                                         value={newComment}
                                         onChange={e => setNewComment(e.target.value)}
-                                        style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                                        style={{
+                                            background: 'rgba(255, 255, 255, 0.05)',
+                                            color: 'var(--text-primary)',
+                                            border: '1px solid var(--border-color)'
+                                        }}
                                     />
-                                    <button
+                                    <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
                                         type="submit"
-                                        className="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                                        style={{ width: '32px', height: '32px' }}
+                                        className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 p-0"
+                                        style={{
+                                            width: '42px',
+                                            height: '42px',
+                                            minWidth: '42px',
+                                            minHeight: '42px',
+                                            padding: 0,
+                                            boxShadow: '0 4px 15px rgba(0, 113, 227, 0.4)',
+                                            backgroundColor: '#0071e3',
+                                            color: '#ffffff',
+                                            opacity: newComment.trim() ? 1 : 0.8,
+                                            border: '2px solid rgba(255,255,255,0.2)'
+                                        }}
                                         disabled={!newComment.trim() || isSubmittingComment}
                                     >
-                                        <Send size={14} />
-                                    </button>
+                                        <Send size={18} style={{ color: '#ffffff', stroke: '#ffffff', fill: 'none' }} strokeWidth={2.5} />
+                                    </motion.button>
                                 </form>
 
                                 {loadingComments ? (
