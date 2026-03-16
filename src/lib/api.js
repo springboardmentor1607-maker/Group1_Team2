@@ -63,5 +63,23 @@ export const api = {
             throw new Error(error.message || `API request failed with status ${response.status}`);
         }
         return response.json();
+    },
+
+    delete: async (endpoint) => {
+        const response = await fetch(`${BASE_URL}${endpoint}`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        });
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('isAuthenticated');
+            window.location.href = '/login';
+            return;
+        }
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || `API request failed with status ${response.status}`);
+        }
+        return response.json();
     }
 };

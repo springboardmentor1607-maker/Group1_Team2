@@ -20,7 +20,7 @@ async function seedTestUsers() {
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
         `, ['Admin User', 'admin@test.com', adminPassword, '1234567890', 'Admin Office', 'admin']);
-        console.log('  Admin user created:');
+        console.log('✅ Admin user created:');
         console.log('   Email: admin@test.com');
         console.log('   Password: admin123');
         console.log('   Role: admin\n');

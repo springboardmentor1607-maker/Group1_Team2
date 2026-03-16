@@ -18,5 +18,4 @@ router.put('/profile', verifyToken, updateProfile);
 // Admin routes
 router.get('/admin/users', verifyToken, getAllUsers);
 router.put('/admin/users/role', verifyToken, updateUserRole);
-
 module.exports = router;
