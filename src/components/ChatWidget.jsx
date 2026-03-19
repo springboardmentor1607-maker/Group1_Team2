@@ -1,46 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Bot, Loader2 } from 'lucide-react';
+import { Send, X, Bot, User, Loader2, Sparkles } from 'lucide-react';
 import { api } from '../lib/api';
 
-export default function ChatWidget() {
+const ChatWidget = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const [isTyping, setIsTyping] = useState(false);
     const [messages, setMessages] = useState([
-        { id: 1, text: "Hello! I'm the CleanStreet Assistant. How can I help you today?", isBot: true }
+        { id: 1, text: "Hi! I'm your CleanStreet AI assistant. How can I help you today?", sender: 'bot', timestamp: new Date() }
     ]);
-    const [inputValue, setInputValue] = useState("");
+    const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const messagesEndRef = useRef(null);
 
-    const handleSendMessage = async (e) => {
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            scrollToBottom();
+        }
+    }, [messages, isOpen]);
+
+    const handleSend = async (e) => {
         e.preventDefault();
-        if (!inputValue.trim()) return;
+        if (!input.trim() || isLoading) return;
 
-        const userMsgText = inputValue;
-        // Add user message
-        const newMessage = { id: Date.now(), text: userMsgText, isBot: false };
-        setMessages(prev => [...prev, newMessage]);
-        setInputValue("");
-        setIsTyping(true);
+        const userMessage = { id: Date.now(), text: input, sender: 'user', timestamp: new Date() };
+        setMessages(prev => [...prev, userMessage]);
+        const currentInput = input;
+        setInput('');
+        setIsLoading(true);
 
         try {
-            const response = await api.post('/ai/chat', { message: userMsgText });
-            const botResponse = {
-                id: Date.now() + 1,
-                text: response.text,
-                isBot: true
+            const response = await api.post('/ai/chat', { 
+                message: currentInput,
+                history: messages.map(m => ({ role: m.sender === 'bot' ? 'assistant' : 'user', content: m.text }))
+            });
+            
+            const botMessage = { 
+                id: Date.now() + 1, 
+                text: response.reply || response.text || "I'm here to help!", 
+                sender: 'bot', 
+                timestamp: new Date() 
             };
-            setMessages(prev => [...prev, botResponse]);
-        } catch (err) {
-            console.error('Chat error:', err);
-            const errorText = err.response?.text || err.message || "Sorry, I'm having trouble connecting right now.";
-            const errorResponse = {
-                id: Date.now() + 1,
-                text: errorText,
-                isBot: true
-            };
-            setMessages(prev => [...prev, errorResponse]);
+            setMessages(prev => [...prev, botMessage]);
+        } catch (error) {
+            console.error('Chat error:', error);
+            setMessages(prev => [...prev, { 
+                id: Date.now() + 1, 
+                text: "Sorry, I'm having trouble connecting right now. Please try again later.", 
+                sender: 'bot', 
+                timestamp: new Date() 
+            }]);
         } finally {
-            setIsTyping(false);
+            setIsLoading(false);
         }
     };
 
@@ -49,112 +63,93 @@ export default function ChatWidget() {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                        initial={{ opacity: 0, scale: 0.8, y: 20, x: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+                        exit={{ opacity: 0, scale: 0.8, y: 20, x: 20 }}
                         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="card border-0 shadow-lg overflow-hidden mb-3"
+                        className="card border-0 shadow-lg overflow-hidden mb-3 rounded-4"
                         style={{
-                            width: '350px',
-                            height: '500px',
-                            background: 'var(--card-bg)',
-                            border: '1px solid var(--border-glass)',
-                            boxShadow: 'var(--shadow-lg)'
+                            width: '380px',
+                            height: '550px',
+                            background: 'white',
+                            border: '1px solid rgba(0,0,0,0.1)',
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
                         }}
                     >
                         {/* Header */}
-                        <div className="p-3 d-flex align-items-center justify-content-between text-white"
-                            style={{ background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--accent-1) 100%)', color: 'var(--btn-text)' }}>
+                        <div className="p-3 text-white d-flex align-items-center justify-content-between"
+                            style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)' }}>
                             <div className="d-flex align-items-center gap-2">
-                                <div className="bg-white bg-opacity-25 p-2 rounded-circle">
-                                    <Bot size={20} style={{ color: 'var(--btn-text)' }} />
+                                <div className="p-2 bg-white bg-opacity-20 rounded-circle">
+                                    <Bot size={20} className="text-white" />
                                 </div>
                                 <div>
-                                    <h6 className="m-0 fw-bold" style={{ color: 'var(--btn-text)' }}>CleanStreet AI</h6>
-                                    <span className="small opacity-75" style={{ color: 'var(--btn-text)' }}>Online</span>
+                                    <h6 className="m-0 fw-bold">CleanStreet Assistant</h6>
+                                    <small className="opacity-75">AI Support Online</small>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="btn btn-link p-1 hover-bg-opacity opacity-75 hover-opacity-100"
-                                style={{ color: 'var(--btn-text)' }}
+                                className="btn btn-link p-1 text-white border-0 opacity-75 hover-opacity-100"
                             >
                                 <X size={20} />
                             </button>
                         </div>
 
-                        {/* Messages Area */}
-                        <div className="card-body p-3 overflow-auto d-flex flex-column gap-3" style={{ background: 'transparent', height: '370px' }}>
-                            <AnimatePresence>
-                                {messages.map((msg) => (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        key={msg.id}
-                                        className={`d-flex ${msg.isBot ? 'justify-content-start' : 'justify-content-end'}`}
-                                    >
-                                        <div
-                                            className="p-3 shadow-sm"
-                                            style={{
-                                                maxWidth: '85%',
-                                                background: msg.isBot ? 'var(--bg-card)' : 'linear-gradient(135deg, var(--primary-color) 0%, var(--accent-1) 100%)',
-                                                color: msg.isBot ? 'var(--text-primary)' : 'var(--btn-text)',
-                                                border: msg.isBot ? '1px solid var(--border-color)' : 'none',
-                                                borderRadius: '16px',
-                                                borderBottomLeftRadius: msg.isBot ? '4px' : '16px',
-                                                borderBottomRightRadius: msg.isBot ? '16px' : '4px'
-                                            }}
-                                        >
-                                            <p className="m-0 small" style={{ lineHeight: '1.5' }}>{msg.text}</p>
+                        {/* Chat Messages */}
+                        <div className="flex-grow-1 overflow-auto p-4 d-flex flex-column gap-3 bg-light bg-opacity-50">
+                            {messages.map((msg) => (
+                                <div key={msg.id} className={`d-flex ${msg.sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`}>
+                                    <div className={`d-flex gap-2 max-w-85 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
+                                        <div className={`p-2 rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center shadow-sm`}
+                                            style={{ 
+                                                width: '32px', 
+                                                height: '32px',
+                                                background: msg.sender === 'user' ? '#7c3aed' : 'white',
+                                                color: msg.sender === 'user' ? 'white' : '#7c3aed',
+                                                marginTop: '4px'
+                                            }}>
+                                            {msg.sender === 'user' ? <User size={16} /> : <Bot size={16} />}
                                         </div>
-                                    </motion.div>
-                                ))}
-                                {isTyping && (
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="d-flex justify-content-start"
-                                    >
-                                        <div className="p-2 px-3 rounded-pill d-flex align-items-center gap-2 shadow-sm" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
-                                            <Loader2 size={14} className="animate-spin" style={{ color: 'var(--primary-color)' }} />
-                                            <span className="small text-muted" style={{ fontSize: '0.75rem' }}>AI is typing...</span>
+                                        <div className={`p-3 rounded-4 shadow-sm ${msg.sender === 'user' ? 'bg-primary text-white rounded-tr-0' : 'bg-white text-dark rounded-tl-0'}`}
+                                            style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>
+                                            {msg.text}
+                                            <div className={`mt-1 opacity-50`} style={{ fontSize: '0.7rem' }}>
+                                                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
                                         </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                                    </div>
+                                </div>
+                            ))}
+                            {isLoading && (
+                                <div className="d-flex justify-content-start">
+                                    <div className="bg-white p-3 rounded-4 rounded-tl-0 shadow-sm d-flex align-items-center gap-2">
+                                        <Loader2 size={16} className="animate-spin text-primary" />
+                                        <span className="small text-muted">AI is thinking...</span>
+                                    </div>
+                                </div>
+                            )}
+                            <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input Area */}
-                        <div className="p-3 mt-auto" style={{
-                            background: 'var(--card-bg)',
-                            borderTop: '1px solid var(--border-color)'
-                        }}>
-                            <form onSubmit={handleSendMessage} className="d-flex gap-2 align-items-center">
+                        {/* Input Form */}
+                        <div className="p-3 bg-white border-top border-light">
+                            <form onSubmit={handleSend} className="d-flex gap-2">
                                 <input
                                     type="text"
-                                    className="form-control border-0 bg-transparent shadow-none px-2"
-                                    placeholder="Message CleanStreet AI..."
-                                    value={inputValue}
-                                    onChange={(e) => setInputValue(e.target.value)}
-                                    style={{ color: 'var(--text-primary)' }}
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    placeholder="Ask anything..."
+                                    className="form-control rounded-pill border-light bg-light px-4 py-2 shadow-none"
+                                    style={{ fontSize: '0.9rem' }}
                                 />
                                 <button
                                     type="submit"
-                                    className="btn d-flex align-items-center justify-content-center rounded-circle p-2 shadow-sm"
-                                    disabled={!inputValue.trim()}
-                                    style={{
-                                        width: '38px',
-                                        height: '38px',
-                                        background: inputValue.trim() ? 'linear-gradient(135deg, var(--primary-color) 0%, var(--accent-1) 100%)' : 'var(--border-color)',
-                                        color: inputValue.trim() ? 'var(--btn-text)' : 'var(--text-muted)',
-                                        border: 'none',
-                                        transition: 'all 0.3s ease'
-                                    }}
+                                    disabled={!input.trim() || isLoading}
+                                    className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center p-0 shadow-sm"
+                                    style={{ width: '40px', height: '40px' }}
                                 >
-                                    <Send size={16} style={{
-                                        transform: inputValue.trim() ? 'translate(1px, -1px)' : 'none',
-                                        transition: 'transform 0.2s'
-                                    }} />
+                                    <Send size={18} />
                                 </button>
                             </form>
                         </div>
@@ -162,7 +157,6 @@ export default function ChatWidget() {
                 )}
             </AnimatePresence>
 
-            {/* Toggle Button */}
             <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -171,29 +165,28 @@ export default function ChatWidget() {
                 style={{
                     width: '60px',
                     height: '60px',
-                    background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--accent-1) 100%)',
-                    color: 'var(--btn-text)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    boxShadow: '0 8px 32px rgba(0, 113, 227, 0.4)',
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                    color: 'white',
+                    border: '2px solid rgba(255,255,255,0.4)',
+                    boxShadow: '0 8px 32px rgba(124, 58, 237, 0.4)',
                     backdropFilter: 'blur(10px)'
                 }}
             >
-                {isOpen ? <X size={26} /> : (
-                    <motion.div
-                        animate={{
-                            y: [0, -4, 0],
-                            rotate: [0, -5, 5, 0]
-                        }}
-                        transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                        }}
-                    >
-                        <Bot size={28} />
-                    </motion.div>
+                {isOpen ? <X size={24} /> : (
+                    <div className="position-relative">
+                        <Bot size={28} className="animate-pulse" />
+                        <motion.div 
+                            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                            transition={{ repeat: Infinity, duration: 2 }}
+                            className="position-absolute top-0 end-0 translate-middle-y"
+                        >
+                            <Sparkles size={12} className="text-warning" />
+                        </motion.div>
+                    </div>
                 )}
             </motion.button>
         </div>
     );
-}
+};
+
+export default ChatWidget;

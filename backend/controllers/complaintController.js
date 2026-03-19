@@ -1,4 +1,6 @@
 const Complaint = require('../models/Complaint');
+const Notification = require('../models/Notification');
+const User = require('../models/User');
 
 const createComplaint = async (req, res) => {
     try {
@@ -8,6 +10,16 @@ const createComplaint = async (req, res) => {
 
         const { title, type, priority, address, landmark, description, latitude, longitude, photo } = req.body;
         const user_id = req.user ? req.user.id : null;
+        const userName = req.user ? req.user.name : 'A citizen';
+
+        // Security check: Refuse base64 strings to protect database quota
+        if (photo && typeof photo === 'string' && photo.startsWith('data:image')) {
+            console.error('Submission rejected: Photo is a base64 string.');
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Large image data detected. Please upload via Supabase storage instead.' 
+            });
+        }
 
         if (!user_id) {
             console.error('Submission failed: No user_id in token');
@@ -35,6 +47,23 @@ const createComplaint = async (req, res) => {
             photo
         });
 
+        // Trigger notification for admins
+        try {
+            const admins = await User.findAdmins();
+            const notificationPromises = admins.map(admin => 
+                Notification.create({
+                    user_id: admin.id,
+                    type: 'complaint_submitted',
+                    title: 'New Complaint Reported',
+                    message: `${userName} reported a new ${type} issue: "${title}"`,
+                    complaint_id: complaint.id
+                })
+            );
+            await Promise.all(notificationPromises);
+        } catch (notifErr) {
+            console.error('Notification Error (admin):', notifErr.message);
+        }
+
         res.status(201).json({
             success: true,
             message: 'Complaint reported successfully',
@@ -48,9 +77,27 @@ const createComplaint = async (req, res) => {
 
 const getAllComplaints = async (req, res) => {
     try {
+        console.log(' --- DIAGNOSTIC: getAllComplaints CALLED --- ');
         const currentUserId = req.user ? req.user.id : null;
-        const complaints = await Complaint.findAllWithDetails(currentUserId);
-        res.json({ success: true, data: complaints });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const [complaints, totalCount] = await Promise.all([
+            Complaint.findAllWithDetails(currentUserId, limit, offset),
+            Complaint.getCount()
+        ]);
+
+        res.json({ 
+            success: true, 
+            data: complaints,
+            pagination: {
+                page,
+                limit,
+                total: totalCount,
+                pages: Math.ceil(totalCount / limit)
+            }
+        });
     } catch (err) {
         console.error('Error in getAllComplaints:', err.message);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -60,8 +107,25 @@ const getAllComplaints = async (req, res) => {
 const getUserComplaints = async (req, res) => {
     try {
         const userId = req.user.id;
-        const complaints = await Complaint.findByUserIdWithDetails(userId);
-        res.json({ success: true, data: complaints });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const [complaints, totalCount] = await Promise.all([
+            Complaint.findByUserIdWithDetails(userId, limit, offset),
+            Complaint.getCountByUserId(userId)
+        ]);
+
+        res.json({ 
+            success: true, 
+            data: complaints,
+            pagination: {
+                page,
+                limit,
+                total: totalCount,
+                pages: Math.ceil(totalCount / limit)
+            }
+        });
     } catch (err) {
         console.error('Error in getUserComplaints:', err.message);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -72,6 +136,7 @@ const getDashboardStats = async (req, res) => {
     try {
         const stats = await Complaint.getStats();
         const recent = await Complaint.getRecent();
+        const weekly = await Complaint.getWeeklyStats();
 
         res.json({
             success: true,
@@ -81,7 +146,8 @@ const getDashboardStats = async (req, res) => {
                 in_progress: parseInt(stats.in_progress) || 0,
                 resolved: parseInt(stats.resolved) || 0
             },
-            recent: recent
+            recent: recent,
+            weekly: weekly
         });
     } catch (err) {
         console.error('Error in getDashboardStats:', err.message);
@@ -110,10 +176,50 @@ const assignVolunteer = async (req, res) => {
             });
         }
 
+        // Fetch volunteer details
+        let volunteerInfo = null;
+        try {
+            const volunteer = await User.findById(volunteerId);
+            if (volunteer) {
+                volunteerInfo = { name: volunteer.name, email: volunteer.email };
+            }
+        } catch (volErr) {
+            console.error('Error fetching volunteer info:', volErr.message);
+        }
+
+        // Trigger notification for volunteer
+        try {
+            await Notification.create({
+                user_id: volunteerId,
+                type: 'complaint_assigned',
+                title: 'New Assignment',
+                message: `You have been assigned a new complaint: "${updatedComplaint.title}"`,
+                complaint_id: updatedComplaint.id
+            });
+        } catch (notifErr) {
+            console.error('Notification Error (volunteer):', notifErr.message);
+        }
+
+        // Trigger notification for citizen
+        try {
+            await Notification.create({
+                user_id: updatedComplaint.user_id,
+                type: 'status_changed',
+                title: 'Complaint Update',
+                message: `Your complaint "${updatedComplaint.title}" has been assigned to a volunteer and is now being addressed.`,
+                complaint_id: updatedComplaint.id
+            });
+        } catch (notifErr) {
+            console.error('Notification Error (citizen):', notifErr.message);
+        }
+
+        // Include volunteer info in response
+        const responseData = { ...updatedComplaint, volunteer_name: volunteerInfo?.name || null, volunteer_email: volunteerInfo?.email || null };
+
         res.json({
             success: true,
             message: 'Volunteer assigned successfully',
-            data: updatedComplaint
+            data: responseData
         });
     } catch (err) {
         console.error('Error in assignVolunteer:', err.message);
@@ -124,7 +230,16 @@ const assignVolunteer = async (req, res) => {
 const updateComplaintStatus = async (req, res) => {
     try {
         const { complaintId } = req.params;
-        const { status } = req.body;
+        const { status, volunteerPhoto } = req.body;
+
+        // Security check: Refuse base64 strings to protect database quota
+        if (volunteerPhoto && typeof volunteerPhoto === 'string' && volunteerPhoto.startsWith('data:image')) {
+            console.error('Update rejected: volunteerPhoto is a base64 string.');
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Large image data detected. Please upload via Supabase storage instead.' 
+            });
+        }
 
         // Check if user is admin or volunteer
         if (!['admin', 'volunteer'].includes(req.user.role)) {
@@ -134,13 +249,48 @@ const updateComplaintStatus = async (req, res) => {
             });
         }
 
-        const updatedComplaint = await Complaint.updateStatus(complaintId, status);
+        const updatedComplaint = await Complaint.updateStatus(complaintId, status, volunteerPhoto);
 
         if (!updatedComplaint) {
             return res.status(404).json({
                 success: false,
                 message: 'Complaint not found'
             });
+        }
+
+        // Trigger notifications
+        try {
+            // Notify Citizen
+            const statusLabels = {
+                'received': 'Received',
+                'in_review': 'Under Review',
+                'resolved': 'Resolved'
+            };
+            
+            await Notification.create({
+                user_id: updatedComplaint.user_id,
+                type: 'status_changed',
+                title: 'Complaint Status Update',
+                message: `The status of your complaint "${updatedComplaint.title}" has been updated to ${statusLabels[status] || status}.`,
+                complaint_id: updatedComplaint.id
+            });
+
+            // If volunteer submitted work (in_review), notify Admin
+            if (status === 'in_review' && req.user.role === 'volunteer') {
+                const admins = await User.findAdmins();
+                const notificationPromises = admins.map(admin => 
+                    Notification.create({
+                        user_id: admin.id,
+                        type: 'volunteer_submitted',
+                        title: 'Work Submitted by Volunteer',
+                        message: `Volunteer ${req.user.name} has submitted proof of work for "${updatedComplaint.title}"`,
+                        complaint_id: updatedComplaint.id
+                    })
+                );
+                await Promise.all(notificationPromises);
+            }
+        } catch (notifErr) {
+            console.error('Notification Error (status update):', notifErr.message);
         }
 
         res.json({
@@ -233,6 +383,43 @@ const getComplaintComments = async (req, res) => {
     }
 };
 
+const getComplaintPhoto = async (req, res) => {
+    try {
+        const { complaintId } = req.params;
+        const photos = await Complaint.getPhoto(complaintId);
+
+        if (!photos) {
+            return res.status(404).json({ success: false, message: 'Photos not found' });
+        }
+
+        // Allow browsers & CDN to cache the photo URL response for 1 hour
+        res.set('Cache-Control', 'public, max-age=3600');
+        res.json({ success: true, data: photos });
+    } catch (err) {
+        console.error('Error in getComplaintPhoto:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+
+const deleteComplaint = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { complaintId } = req.params;
+
+        const isDeleted = await Complaint.delete(complaintId, userId);
+
+        if (!isDeleted) {
+            return res.status(404).json({ success: false, message: 'Complaint not found or you do not have permission to delete it' });
+        }
+
+        res.json({ success: true, message: 'Complaint deleted successfully' });
+    } catch (err) {
+        console.error('Error in deleteComplaint:', err.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
 module.exports = {
     createComplaint,
     getAllComplaints,
@@ -244,5 +431,7 @@ module.exports = {
     voteComplaint,
     unvoteComplaint,
     addComplaintComment,
-    getComplaintComments
+    getComplaintComments,
+    getComplaintPhoto,
+    deleteComplaint
 };

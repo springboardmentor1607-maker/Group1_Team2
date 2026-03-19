@@ -11,7 +11,9 @@ const {
     voteComplaint,
     unvoteComplaint,
     addComplaintComment,
-    getComplaintComments
+    getComplaintComments,
+    getComplaintPhoto,
+    deleteComplaint
 } = require('../controllers/complaintController');
 const { verifyToken } = require('../controllers/authController');
 
@@ -27,6 +29,10 @@ router.post('/:complaintId/vote', verifyToken, voteComplaint);
 router.delete('/:complaintId/vote', verifyToken, unvoteComplaint);
 router.post('/:complaintId/comments', verifyToken, addComplaintComment);
 router.get('/:complaintId/comments', verifyToken, getComplaintComments);
+router.get('/:complaintId/photo', verifyToken, getComplaintPhoto);
+
+// Delete complaint route
+router.delete('/:complaintId', verifyToken, deleteComplaint);
 
 // Admin/Volunteer routes
 router.post('/assign-volunteer', verifyToken, assignVolunteer);

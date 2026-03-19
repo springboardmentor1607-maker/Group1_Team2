@@ -5,8 +5,45 @@ import { useNavigate } from 'react-router-dom';
 import MapSection from '../components/MapSection';
 import { api } from '../lib/api';
 import PageWrapper from '../components/PageWrapper';
+import Skeleton from '../components/Skeleton';
+import { supabase } from '../lib/supabaseClient';
+
+/**
+ * Compresses an image File using the Canvas API.
+ * @param {File} file - Original image file
+ * @param {number} maxWidth - Max width in pixels (default 800)
+ * @param {number} quality - JPEG quality 0–1 (default 0.75)
+ * @returns {Promise<File>} Compressed file
+ */
+const compressImage = (file, maxWidth = 800, quality = 0.75) => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            const scale = Math.min(1, maxWidth / img.width);
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(
+                (blob) => {
+                    if (!blob) return reject(new Error('Canvas compression failed'));
+                    const compressed = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
+                    resolve(compressed);
+                },
+                'image/jpeg',
+                quality
+            );
+        };
+        img.onerror = reject;
+        img.src = objectUrl;
+    });
+};
 
 const ReportIssue = () => {
+    const [imageFile, setImageFile] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
         type: '',
@@ -32,14 +69,42 @@ const ReportIssue = () => {
         setLoading(false);
     }, []);
 
-    // Block non-citizens from accessing this page
     if (loading) {
         return (
-            <div className="d-flex align-items-center justify-content-center vh-100">
-                <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
+            <PageWrapper className="container-lg px-3 px-md-4 py-3">
+                <div className="mb-4">
+                    <Skeleton width="400px" height="3.5rem" variant="title" className="mb-2" />
+                    <Skeleton width="300px" height="1rem" />
                 </div>
-            </div>
+                
+                <div className="card border-0 shadow-sm rounded-3 overflow-hidden">
+                    <div className="card-body p-4 p-md-5">
+                        <div className="d-flex align-items-center mb-4 pb-2 border-bottom">
+                            <Skeleton width="32px" height="32px" variant="circle" className="me-3" />
+                            <Skeleton width="200px" height="1.8rem" />
+                        </div>
+                        <div className="row g-4">
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="col-12 col-md-6">
+                                    <Skeleton width="120px" height="1rem" className="mb-2" />
+                                    <Skeleton width="100%" height="2.5rem" />
+                                </div>
+                            ))}
+                            <div className="col-12">
+                                <Skeleton width="120px" height="1rem" className="mb-2" />
+                                <Skeleton width="100%" height="8rem" />
+                            </div>
+                            <div className="col-12">
+                                <Skeleton width="200px" height="1.5rem" className="mb-3" />
+                                <Skeleton width="100%" height="300px" />
+                            </div>
+                            <div className="col-12 text-center mt-5">
+                                <Skeleton width="200px" height="3.5rem" className="mx-auto" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </PageWrapper>
         );
     }
 
@@ -77,16 +142,27 @@ const ReportIssue = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handlePhotoChange = (e) => {
+    const handlePhotoChange = async (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Check file size (e.g., max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                setError('Image size should be less than 5MB');
+            // Check file size (e.g., max 10MB raw — we compress it below)
+            if (file.size > 10 * 1024 * 1024) {
+                setError('Image size should be less than 10MB');
                 e.target.value = ''; // Reset input
                 return;
             }
 
+            // Compress the image before upload (max 800px wide, 75% JPEG quality)
+            try {
+                const compressed = await compressImage(file);
+                setImageFile(compressed);
+                console.log(`Image compressed: ${(file.size / 1024).toFixed(0)}KB → ${(compressed.size / 1024).toFixed(0)}KB`);
+            } catch {
+                // Fall back to original file if compression fails
+                setImageFile(file);
+            }
+
+            // Show preview from original file (higher quality preview is fine)
             const reader = new FileReader();
             reader.onloadend = () => {
                 setFormData(prev => ({ ...prev, photo: reader.result }));
@@ -95,6 +171,7 @@ const ReportIssue = () => {
             reader.readAsDataURL(file);
         }
     };
+
 
     const handleLocationSelect = (lat, lng) => {
         setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
@@ -112,7 +189,35 @@ const ReportIssue = () => {
         setError('');
 
         try {
-            await api.post('/complaints', formData);
+            let finalPhotoUrl = '';
+
+            // 1. Upload to Supabase Storage if an image was selected
+            if (imageFile) {
+                const fileExt = imageFile.name.split('.').pop();
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+                const filePath = `${fileName}`;
+
+                const { data, error: uploadError } = await supabase.storage
+                    .from('complaint-images')
+                    .upload(filePath, imageFile);
+
+                if (uploadError) throw uploadError;
+
+                // 2. Get Public URL
+                const { data: { publicUrl } } = supabase.storage
+                    .from('complaint-images')
+                    .getPublicUrl(filePath);
+                
+                finalPhotoUrl = publicUrl;
+            }
+
+            // 3. Submit to backend with public URL
+            const submissionData = {
+                ...formData,
+                photo: finalPhotoUrl
+            };
+
+            await api.post('/complaints', submissionData);
             setIsSuccess(true);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
@@ -344,8 +449,17 @@ const ReportIssue = () => {
                                                 whileTap={{ scale: 0.95 }}
                                                 disabled={submitting}
                                             >
-                                                {submitting ? 'Submitting...' : 'Submit Report'}
-                                                {!submitting && <Send size={18} />}
+                                                {submitting ? (
+                                                    <>
+                                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                        Submitting...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        Submit Report
+                                                        <Send size={18} />
+                                                    </>
+                                                )}
                                             </motion.button>
                                         </div>
                                     </div>

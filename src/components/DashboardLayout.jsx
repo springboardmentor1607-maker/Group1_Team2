@@ -18,6 +18,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import ChatWidget from './ChatWidget';
 import NewSidebar from './NewSidebar';
 import { api } from '../lib/api';
+import { useNotificationPolling } from '../hooks/useNotificationPolling';
 
 /* ===================== SIDEBAR ===================== */
 const Sidebar = ({ isOpen, closeSidebar, onLogout }) => {
@@ -171,6 +172,9 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
 export default function DashboardLayout({ children, onLogout }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [user, setUser] = useState(null);
+
+    // Global notification polling for all dashboard pages
+    useNotificationPolling(15000);
 
     useEffect(() => {
         const fetchUser = async () => {

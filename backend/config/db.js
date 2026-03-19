@@ -53,12 +53,32 @@ const connectDB = async () => {
                 IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='complaints' AND column_name='longitude') THEN
                     ALTER TABLE complaints ADD COLUMN longitude DECIMAL(11, 8);
                 END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='complaints' AND column_name='volunteer_photo') THEN
+                    ALTER TABLE complaints ADD COLUMN volunteer_photo TEXT;
+                END IF;
 
-                -- Fix NULL statuses to 'Pending'
-                UPDATE complaints SET status = 'Pending' WHERE status IS NULL;
+                -- Fix NULL or 'received' statuses to 'Pending'
+                UPDATE complaints SET status = 'Pending' WHERE status IS NULL OR status = 'received';
+
+                -- Notifications Table
+                IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'notifications') THEN
+                    CREATE TABLE notifications (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        type VARCHAR(50) NOT NULL,
+                        title VARCHAR(255) NOT NULL,
+                        message TEXT NOT NULL,
+                        complaint_id INTEGER REFERENCES complaints(id) ON DELETE CASCADE,
+                        is_read BOOLEAN DEFAULT FALSE,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                    CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+                    CREATE INDEX idx_notifications_is_read ON notifications(is_read);
+                    CREATE INDEX idx_notifications_created_at ON notifications(created_at);
+                END IF;
             END $$;
         `);
-        console.log('Complaints table and columns verified.');
+        console.log('Complaints and Notifications tables verified.');
     } catch (err) {
         console.error('Database Connection Error:', err.message);
         process.exit(1);

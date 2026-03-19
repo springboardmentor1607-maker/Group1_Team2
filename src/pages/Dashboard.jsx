@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import PageWrapper from '../components/PageWrapper';
+import Skeleton from '../components/Skeleton';
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function Dashboard() {
         resolved: 0
     });
     const [activities, setActivities] = useState([]);
+    const [weeklyData, setWeeklyData] = useState([]);
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -50,6 +52,7 @@ export default function Dashboard() {
                 }));
 
                 setActivities(formattedActivities);
+                setWeeklyData(statsData.weekly || []);
                 setUser(profileData.user);
             } catch (err) {
                 console.error('Error fetching dashboard data:', err);
@@ -71,11 +74,51 @@ export default function Dashboard() {
 
     if (loading) {
         return (
-            <div className="d-flex align-items-center justify-content-center vh-100">
-                <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
+            <PageWrapper className="container-xxl">
+                <div className="d-flex align-items-start justify-content-between mb-4">
+                    <Skeleton width="40%" height="2.5rem" variant="title" />
                 </div>
-            </div>
+                
+                {/* Stats Section Skeleton */}
+                <div className="row g-4 mb-4">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="col-12 col-md-6 col-lg-3">
+                            <div className="skeleton-card" style={{ height: '140px' }}>
+                                <Skeleton width="30%" height="1rem" className="mb-2" />
+                                <Skeleton width="60%" height="2rem" className="mb-2" />
+                                <Skeleton width="40%" height="0.8rem" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Main Content Area Skeletons */}
+                <div className="row g-4 mb-4">
+                    <div className="col-lg-8">
+                        <div className="skeleton-card" style={{ height: '400px' }}>
+                            <Skeleton width="100%" height="100%" />
+                        </div>
+                    </div>
+                    <div className="col-lg-4 d-flex flex-column gap-4">
+                        <div className="skeleton-card" style={{ height: '150px' }}>
+                            <Skeleton width="40%" height="1rem" className="mb-3" />
+                            <Skeleton variant="circle" width="80px" height="80px" className="mx-auto" />
+                        </div>
+                        <div className="skeleton-card" style={{ height: '226px' }}>
+                            <Skeleton width="40%" height="1rem" className="mb-3" />
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="d-flex gap-2 mb-3">
+                                    <Skeleton variant="circle" width="40px" height="40px" />
+                                    <div className="flex-grow-1">
+                                        <Skeleton width="80%" height="0.8rem" className="mb-2" />
+                                        <Skeleton width="40%" height="0.6rem" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </PageWrapper>
         );
     }
 
@@ -103,7 +146,7 @@ export default function Dashboard() {
                     { name: 'Progress', value: stats.inProgress, color: '#3b82f6' },
                     { name: 'Resolved', value: stats.resolved, color: '#10b981' },
                 ]}
-                weekly={[]} // Weekly data can be implemented later
+                weekly={weeklyData}
             />
 
             <div className="row g-4 mb-4">
@@ -136,7 +179,10 @@ export default function Dashboard() {
                 className="row row-cols-3 g-3 d-lg-none"
             >
                 <div>
-                    <button className="btn btn-white w-100 h-100 p-3 shadow-sm rounded-xl">
+                    <button 
+                        onClick={() => navigate('/complaints')}
+                        className="btn btn-white w-100 h-100 p-3 shadow-sm rounded-xl"
+                    >
                         <div className="mx-auto w-10 h-10 bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center mb-2">
                             <List className="w-5 h-5 text-primary" />
                         </div>

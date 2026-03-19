@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS complaints (
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     photo TEXT,
+    volunteer_photo TEXT,
     location_coords TEXT, -- JSON string with lat/lng coordinates
     address TEXT NOT NULL,
     assigned_to INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -62,3 +63,19 @@ VALUES
     (4, 'Overflowing Garbage Bin', 'Garbage bin near park is overflowing and attracting pests', '456 Park Avenue, Uptown', '{"lat": 40.7589, "lng": -73.9851}', 'received'),
     (4, 'Broken Street Light', 'Street light has been out for weeks making area unsafe', '789 Oak Street, East Side', '{"lat": 40.7505, "lng": -73.9934}', 'received')
 ON CONFLICT DO NOTHING;
+
+-- Notifications Table
+CREATE TABLE IF NOT EXISTS notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL, -- e.g., 'complaint_submitted', 'complaint_assigned', 'status_changed', 'volunteer_submitted'
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    complaint_id INTEGER REFERENCES complaints(id) ON DELETE CASCADE,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON notifications(is_read);
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at);

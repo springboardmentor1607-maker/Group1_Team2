@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users, FileText, UserCheck, AlertTriangle, Settings, Eye, UserPlus } from 'lucide-react';
+import { Users, FileText, UserCheck, AlertTriangle, Settings, Eye, UserPlus, CheckCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import PageWrapper from '../components/PageWrapper';
+import Skeleton from '../components/Skeleton';
+
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({ total: 0, pending: 0, inProgress: 0, resolved: 0 });
@@ -12,17 +14,30 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
     const [selectedComplaint, setSelectedComplaint] = useState(null);
+    const [isAssigning, setIsAssigning] = useState(false);
+    const [statusToUpdate, setStatusToUpdate] = useState('');
+    const [modalPhotos, setModalPhotos] = useState({ photo: null, volunteer_photo: null });
+    const [loadingPhotos, setLoadingPhotos] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [pageSize] = useState(20); // Show more items by default
+    const [statusFilter, setStatusFilter] = useState('All');
+
+    const reviewNeededCount = (complaints || []).filter(c => 
+        (c.status?.toLowerCase() === 'in progress' || c.status?.toLowerCase() === 'in_progress') && 
+        c.has_volunteer_photo
+    ).length;
 
     useEffect(() => {
-        fetchAdminData();
+        fetchAdminData(currentPage);
 
-        // Auto-refresh every 10 seconds to get latest updates
+        // Auto-refresh every 15 seconds to get latest updates
         const interval = setInterval(() => {
             // Background refresh without loading spinner
             const fetchWithoutLoading = async () => {
                 try {
                     const [complaintsRes, usersRes, statsRes] = await Promise.all([
-                        api.get('/complaints'),
+                        api.get(`/complaints?page=${currentPage}&limit=${pageSize}`),
                         api.get('/auth/admin/users'),
                         api.get('/complaints/stats')
                     ]);
@@ -31,36 +46,70 @@ const AdminDashboard = () => {
                     setUsers(usersRes.users || []);
                     setVolunteers(volunteersList);
                     setStats(statsRes.stats || { total: 0, pending: 0, inProgress: 0, resolved: 0 });
+                    if (complaintsRes.pagination) {
+                        setTotalPages(complaintsRes.pagination.pages);
+                    }
                 } catch (err) {
                     console.error('Error refreshing admin data:', err);
                 }
             };
             fetchWithoutLoading();
-        }, 10000);
+        }, 60000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [currentPage, pageSize]);
 
-    const fetchAdminData = async () => {
+    useEffect(() => {
+        const fetchModalPhotos = async () => {
+            // If the photos are already in selectedComplaint, use them
+            if (selectedComplaint && (selectedComplaint.photo || selectedComplaint.volunteer_photo)) {
+                setModalPhotos({
+                    photo: selectedComplaint.photo || null,
+                    volunteer_photo: selectedComplaint.volunteer_photo || null
+                });
+                return;
+            }
+
+            if (selectedComplaint && (selectedComplaint.has_photo || selectedComplaint.has_volunteer_photo)) {
+                setLoadingPhotos(true);
+                try {
+                    const res = await api.get(`/complaints/${selectedComplaint.id}/photo`);
+                    if (res && res.success && res.data) {
+                        setModalPhotos({
+                            photo: res.data.photo || null,
+                            volunteer_photo: res.data.volunteer_photo || null
+                        });
+                    }
+                } catch (err) {
+                    console.error('Error fetching modal photos:', err);
+                } finally {
+                    setLoadingPhotos(false);
+                }
+            } else {
+                setModalPhotos({ photo: null, volunteer_photo: null });
+            }
+        };
+
+        fetchModalPhotos();
+    }, [selectedComplaint?.id, selectedComplaint?.photo, selectedComplaint?.volunteer_photo]);
+
+    const fetchAdminData = async (page = 1) => {
         try {
+            if (page === 1) setLoading(true);
             const [complaintsRes, usersRes, statsRes] = await Promise.all([
-                api.get('/complaints'),
+                api.get(`/complaints?page=${page}&limit=${pageSize}`),
                 api.get('/auth/admin/users'),
                 api.get('/complaints/stats')
             ]);
 
-            console.log('Admin Data Loaded:');
-            console.log('Total Users:', usersRes.users?.length || 0);
-            console.log('Total Complaints:', complaintsRes.data?.length || 0);
-
-            const volunteersList = usersRes.users?.filter(user => user.role === 'volunteer') || [];
-            console.log('Volunteers Found:', volunteersList.length);
-            console.log('Volunteer Details:', volunteersList);
-
             setComplaints(complaintsRes.data || []);
             setUsers(usersRes.users || []);
+            const volunteersList = usersRes.users?.filter(user => user.role === 'volunteer') || [];
             setVolunteers(volunteersList);
             setStats(statsRes.stats || { total: 0, pending: 0, inProgress: 0, resolved: 0 });
+            if (complaintsRes.pagination) {
+                setTotalPages(complaintsRes.pagination.pages);
+            }
         } catch (err) {
             console.error('Error fetching admin data:', err);
         } finally {
@@ -69,16 +118,38 @@ const AdminDashboard = () => {
     };
 
     const assignVolunteer = async (complaintId, volunteerId) => {
+    try {
+        const res = await api.post('/complaints/assign-volunteer', {
+            complaintId,
+            volunteerId
+        });
+        // Refresh admin data
+        fetchAdminData();
+        // Update selected complaint with new volunteer info if modal is open
+        if (selectedComplaint && selectedComplaint.id === complaintId) {
+            const updated = res.data && res.data.data ? res.data.data : {};
+            setSelectedComplaint(prev => ({
+                ...prev,
+                volunteer_name: updated.volunteer_name || prev.volunteer_name,
+                volunteer_email: updated.volunteer_email || prev.volunteer_email,
+                assigned_to: volunteerId
+            }));
+        }
+        setIsAssigning(false);
+    } catch (err) {
+        console.error('Error assigning volunteer:', err);
+        alert('Failed to assign volunteer');
+    }
+};
+
+    const updateComplaintStatus = async (complaintId, newStatus) => {
         try {
-            await api.post('/complaints/assign-volunteer', {
-                complaintId,
-                volunteerId
-            });
-            fetchAdminData(); // Refresh data
+            await api.put(`/complaints/${complaintId}/status`, { status: newStatus });
+            fetchAdminData();
             setSelectedComplaint(null);
         } catch (err) {
-            console.error('Error assigning volunteer:', err);
-            alert('Failed to assign volunteer');
+            console.error('Error updating status:', err);
+            alert('Failed to update status');
         }
     };
 
@@ -99,6 +170,7 @@ const AdminDashboard = () => {
         const statusMap = {
             'pending': 'warning',
             'in progress': 'info',
+            'in_progress': 'info',
             'resolved': 'success'
         };
         const badgeType = statusMap[status?.toLowerCase()] || 'warning';
@@ -118,17 +190,57 @@ const AdminDashboard = () => {
 
     if (loading) {
         return (
-            <div className="d-flex align-items-center justify-content-center vh-100">
-                <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
+            <PageWrapper className="container-fluid px-3 px-md-4 py-3">
+                <div className="mb-4">
+                    <Skeleton width="400px" height="3.5rem" variant="title" className="mb-2" />
+                    <Skeleton width="300px" height="1rem" />
                 </div>
-            </div>
+                
+                <div className="row g-4 mb-4">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="col-md-3">
+                            <div className="skeleton-card" style={{ height: '120px' }}>
+                                <Skeleton width="32px" height="32px" variant="circle" className="mx-auto mb-2" />
+                                <Skeleton width="40%" height="1.5rem" className="mx-auto mb-2" />
+                                <Skeleton width="60%" height="0.8rem" className="mx-auto" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="card border-0 shadow-sm overflow-hidden">
+                    <div className="card-header bg-transparent border-bottom p-3">
+                        <div className="d-flex gap-3">
+                            <Skeleton width="150px" height="2rem" />
+                            <Skeleton width="150px" height="2rem" />
+                            <Skeleton width="150px" height="2rem" />
+                        </div>
+                    </div>
+                    <div className="card-body p-0">
+                        <div className="p-4">
+                            <Skeleton width="200px" height="1.5rem" className="mb-4" />
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <div key={i} className="d-flex gap-4 mb-3 pb-3 border-bottom border-light">
+                                    <Skeleton width="40px" height="1rem" />
+                                    <Skeleton width="200px" height="1rem" />
+                                    <Skeleton width="100px" height="1rem" />
+                                    <Skeleton width="80px" height="1rem" />
+                                    <Skeleton width="100px" height="1rem" />
+                                    <Skeleton width="100px" height="1rem" />
+                                    <Skeleton width="150px" height="1.5rem" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </PageWrapper>
         );
     }
 
     return (
-        <PageWrapper className="container-fluid px-3 px-md-4 py-3">
-            <motion.div
+        <>
+            <PageWrapper className="container-fluid px-3 px-md-4 py-3">
+                <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -214,8 +326,42 @@ const AdminDashboard = () => {
                             </div>
                             <div className="card-body">
                                 {activeTab === 'overview' && (
-                                    <div>
-                                        <h5 className="mb-3">All Complaints Management</h5>
+                                    <div className="mt-4">
+                                        <div className="d-flex justify-content-between align-items-center mb-3">
+                                            <div>
+                                                <h5 className="mb-1 fw-bold">Recent Complaints Breakdown</h5>
+                                                <p className="small text-muted mb-0">Latest status from the community</p>
+                                            </div>
+                                            <div className="d-flex gap-2">
+                                                {['All', 'Pending', 'In Progress', 'Resolved'].map((status) => {
+                                                    const count = status === 'All' ? stats.total : 
+                                                                 status === 'Pending' ? stats.pending : 
+                                                                 status === 'In Progress' ? stats.in_progress : 
+                                                                 stats.resolved;
+                                                    
+                                                    return (
+                                                        <button
+                                                            key={status}
+                                                            className={`btn btn-sm ${statusFilter === status ? 'btn-primary' : 'btn-outline-secondary'} d-flex align-items-center gap-1`}
+                                                            onClick={() => setStatusFilter(status)}
+                                                        >
+                                                            {status}
+                                                            <span className="badge rounded-pill bg-dark bg-opacity-25" style={{ fontSize: '0.7rem' }}>
+                                                                {status === 'All' ? stats.total : 
+                                                                 status === 'Pending' ? stats.pending : 
+                                                                 status === 'In Progress' ? stats.in_progress : 
+                                                                 stats.resolved}
+                                                            </span>
+                                                            {status === 'In Progress' && reviewNeededCount > 0 && (
+                                                                <span className="badge rounded-pill bg-danger" style={{ fontSize: '0.7rem' }} title="Ready for Review">
+                                                                    {reviewNeededCount}
+                                                                </span>
+                                                            )}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
                                         <div className="table-responsive">
                                             <table className="table table-hover" style={{ color: 'var(--bs-body-color)' }}>
                                                 <thead>
@@ -225,20 +371,25 @@ const AdminDashboard = () => {
                                                         <th>Type</th>
                                                         <th>Priority</th>
                                                         <th>Reporter</th>
-                                                        <th>Status</th>
-                                                        <th>Assign Volunteer</th>
+                                                         <th>Status</th>
+                                                         <th>Proof</th>
+                                                         <th>Assign Volunteer</th>
                                                         <th>Date</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {complaints.length === 0 ? (
+                                                    {complaints
+                                                        .filter(c => statusFilter === 'All' || c.status?.toLowerCase() === statusFilter.toLowerCase())
+                                                        .length === 0 ? (
                                                         <tr>
-                                                            <td colSpan="8" className="text-center text-muted py-4">
-                                                                No complaints found
+                                                            <td colSpan="9" className="text-center text-muted py-4">
+                                                                No {statusFilter !== 'All' ? statusFilter.toLowerCase() : ''} complaints found
                                                             </td>
                                                         </tr>
                                                     ) : (
-                                                        complaints.map(complaint => (
+                                                        complaints
+                                                            .filter(c => statusFilter === 'All' || c.status?.toLowerCase() === statusFilter.toLowerCase())
+                                                            .map(complaint => (
                                                             <tr key={complaint.id}>
                                                                 <td>{complaint.id}</td>
                                                                 <td>
@@ -254,35 +405,48 @@ const AdminDashboard = () => {
                                                                 </td>
                                                                 <td>{complaint.user_name || 'Unknown'}</td>
                                                                 <td>
-                                                                    <span className={getStatusBadge(complaint.status || 'Pending')}>
-                                                                        {complaint.status || 'Pending'}
-                                                                    </span>
+                                                                    <div className="d-flex align-items-center gap-2">
+                                                                        <span className={getStatusBadge(complaint.status || 'Pending')}>
+                                                                            {complaint.status || 'Pending'}
+                                                                        </span>
+                                                                        {(complaint.status?.toLowerCase() === 'in progress' || complaint.status?.toLowerCase() === 'in_progress') && 
+                                                                         complaint.has_volunteer_photo && (
+                                                                            <span className="rounded-circle bg-danger animate-pulse" 
+                                                                                  style={{ width: '8px', height: '8px', boxShadow: '0 0 5px #ef4444' }}
+                                                                                  title="Review Needed"
+                                                                            ></span>
+                                                                        )}
+                                                                    </div>
                                                                 </td>
                                                                 <td>
-                                                                    <select
-                                                                        className="form-select form-select-sm"
-                                                                        value={complaint.assigned_to || ''}
-                                                                        onChange={(e) => {
-                                                                            if (e.target.value) {
-                                                                                assignVolunteer(complaint.id, e.target.value);
-                                                                            }
-                                                                        }}
-                                                                        style={{ minWidth: '180px' }}
-                                                                    >
-                                                                        <option value="">-- Select Volunteer --</option>
-                                                                        {volunteers.map(volunteer => (
-                                                                            <option key={volunteer.id} value={volunteer.id}>
-                                                                                {volunteer.name}
-                                                                            </option>
-                                                                        ))}
-                                                                    </select>
-                                                                    {complaint.volunteer_name && (
-                                                                        <small className="text-muted d-block mt-1">
-                                                                            Current: {complaint.volunteer_name}
-                                                                        </small>
-                                                                    )}
+                                                                     {complaint.has_volunteer_photo ? (
+                                                                         <span className="badge bg-info">Available</span>
+                                                                     ) : (
+                                                                         <span className="badge bg-secondary">None</span>
+                                                                     )}
+                                                                 </td>
+                                                                <td>
+                                                                    <div className="d-flex flex-column gap-2">
+                                                                        <button 
+                                                                            className="btn btn-sm btn-outline-primary"
+                                                                            onClick={() => {
+                                                                                setSelectedComplaint(complaint);
+                                                                                setModalPhotos({
+                                                                                    photo: complaint.photo || null,
+                                                                                    volunteer_photo: complaint.volunteer_photo || null
+                                                                                });
+                                                                            }}
+                                                                        >
+                                                                            View Details & Verify
+                                                                        </button>
+                                                                        {complaint.volunteer_name && (
+                                                                            <small className="text-muted text-center">
+                                                                                Assigned: {complaint.volunteer_name}
+                                                                            </small>
+                                                                        )}
+                                                                    </div>
                                                                 </td>
-                                                                <td>{new Date(complaint.created_at).toLocaleDateString()}</td>
+                                                                <td>{new Date(complaint.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                                                             </tr>
                                                         ))
                                                     )}
@@ -395,63 +559,168 @@ const AdminDashboard = () => {
                     </div>
                 </div>
             </motion.div>
+        </PageWrapper>
 
-            {/* Volunteer Assignment Modal */}
+            {/* Complaint Details and Verification Modal */}
             {selectedComplaint && (
-                <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog">
-                        <div className="modal-content" style={{ background: 'var(--card-bg)', color: 'var(--bs-body-color)' }}>
+                <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                        <div className="modal-content" style={{ background: 'var(--bg-primary)', color: 'var(--bs-body-color)', zIndex: 1050, position: 'relative' }}>
                             <div className="modal-header border-bottom border-secondary">
-                                <h5 className="modal-title">Assign Volunteer</h5>
+                                <h5 className="modal-title">Complaint Details - #{selectedComplaint.id}</h5>
                                 <button
                                     type="button"
                                     className="btn-close btn-close-white"
-                                    onClick={() => setSelectedComplaint(null)}
+                                    onClick={() => {
+                                        setSelectedComplaint(null);
+                                        setIsAssigning(false);
+                                    }}
                                 ></button>
                             </div>
                             <div className="modal-body">
-                                <p><strong>Complaint:</strong> {selectedComplaint.title}</p>
-                                <p><strong>Current Status:</strong> {selectedComplaint.status || 'Pending'}</p>
-                                <p><strong>Current Assignee:</strong> {selectedComplaint.volunteer_name || 'Unassigned'}</p>
+                                <div className="row mb-4">
+                                    <div className="col-md-6">
+                                        <h6 className="text-muted mb-1">Title</h6>
+                                        <p className="fw-semibold">{selectedComplaint.title}</p>
+                                        
+                                        <h6 className="text-muted mb-1 mt-3">Priority & Status</h6>
+                                        <p>
+                                            <span className={getPriorityBadge(selectedComplaint.priority)}>{selectedComplaint.priority}</span>
+                                            <span className={`ms-2 ${getStatusBadge(selectedComplaint.status)}`}>{selectedComplaint.status}</span>
+                                        </p>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <h6 className="text-muted mb-1">Reporter</h6>
+                                        <p>{selectedComplaint.user_name} ({selectedComplaint.user_email})</p>
 
-                                <div className="mb-3">
-                                    <label className="form-label">Select Volunteer:</label>
-                                    <select className="form-select" id="volunteerSelect">
-                                        <option value="">-- Select Volunteer --</option>
-                                        {volunteers.map(volunteer => (
-                                            <option key={volunteer.id} value={volunteer.id}>
-                                                {volunteer.name} ({volunteer.email})
-                                            </option>
-                                        ))}
-                                    </select>
+                                         <h6 className="text-muted mb-1 mt-3">Address & Date</h6>
+                                         <p className="mb-0">{selectedComplaint.address}</p>
+                                         <small className="text-muted">
+                                             {new Date(selectedComplaint.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}{' '}
+                                             {new Date(selectedComplaint.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                         </small>
+                                     </div>
+                                </div>
+                                <div className="mb-4">
+                                    <h6 className="text-muted mb-1">Description</h6>
+                                    <p className="bg-dark p-3 rounded">{selectedComplaint.description}</p>
+                                </div>
+
+                                {/* Images Comparison */}
+                                <div className="row g-4 mb-4">
+                                    <div className="col-md-6">
+                                        <div className="card h-100 border-secondary" style={{ background: 'var(--bg-primary)' }}>
+                                            <div className="card-header border-bottom border-secondary bg-transparent">
+                                                <h6 className="mb-0 text-center">Original Issue (Citizen)</h6>
+                                            </div>
+                                            <div className="card-body text-center d-flex align-items-center justify-content-center" style={{ minHeight: '200px' }}>
+                                                {loadingPhotos ? (
+                                                    <Skeleton width="100%" height="100%" />
+                                                ) : modalPhotos.photo ? (
+                                                    <img src={modalPhotos.photo} alt="Original Issue" style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }} />
+                                                ) : (
+                                                    <p className="text-muted mb-0">No image provided</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <div className="card h-100 border-secondary" style={{ background: 'var(--bg-primary)' }}>
+                                            <div className="card-header border-bottom border-secondary bg-transparent">
+                                                <h6 className="mb-0 text-center">Proof of Work (Volunteer)</h6>
+                                            </div>
+                                            <div className="card-body text-center d-flex align-items-center justify-content-center" style={{ minHeight: '200px' }}>
+                                                {loadingPhotos ? (
+                                                    <Skeleton width="100%" height="100%" />
+                                                ) : modalPhotos.volunteer_photo ? (
+                                                    <img src={modalPhotos.volunteer_photo} alt="Proof of Work" style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }} />
+                                                ) : (
+                                                    <p className="text-muted mb-0">No proof of work submitted yet.</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Assignment Section */}
+                                <div className="p-3 rounded border border-secondary" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 className="mb-0">Volunteer Assignment</h6>
+                                        {!isAssigning && (
+                                            <button className="btn btn-sm btn-outline-info" onClick={() => setIsAssigning(true)}>
+                                                {selectedComplaint.assigned_to ? 'Change Volunteer' : 'Assign Volunteer'}
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    {!isAssigning ? (
+                                        <p className="mb-0">
+                                            {selectedComplaint.volunteer_name ? (
+                                                <span className="text-info fw-semibold">Assigned to: {selectedComplaint.volunteer_name}</span>
+                                            ) : (
+                                                <span className="text-muted">Currently Unassigned</span>
+                                            )}
+                                        </p>
+                                    ) : (
+                                        <div className="d-flex gap-2">
+                                            <select className="form-select" id="volunteerSelect" defaultValue={selectedComplaint.assigned_to || ''}>
+                                                <option value="">-- Select Volunteer --</option>
+                                                {volunteers.map(volunteer => (
+                                                    <option key={volunteer.id} value={volunteer.id}>
+                                                        {volunteer.name} ({volunteer.email})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <button 
+                                                className="btn btn-primary text-nowrap"
+                                                onClick={() => {
+                                                    const select = document.getElementById('volunteerSelect');
+                                                    if (select.value) {
+                                                        assignVolunteer(selectedComplaint.id, select.value);
+                                                    }
+                                                }}
+                                            >
+                                                Save Assignee
+                                            </button>
+                                            <button 
+                                                className="btn btn-outline-secondary"
+                                                onClick={() => setIsAssigning(false)}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                            <div className="modal-footer border-top border-secondary">
+                            
+                            <div className="modal-footer border-top border-secondary d-flex justify-content-between align-items-center">
+                                <div className="d-flex align-items-center gap-2">
+                                    {selectedComplaint.status?.toLowerCase() !== 'resolved' && (
+                                        <button 
+                                            className="btn btn-success text-nowrap d-flex align-items-center"
+                                            onClick={() => updateComplaintStatus(selectedComplaint.id, 'Resolved')}
+                                        >
+                                            <CheckCircle size={18} className="me-2" /> Mark as Resolved
+                                        </button>
+                                    )}
+                                </div>
+                                
                                 <button
                                     type="button"
                                     className="btn btn-outline-secondary"
-                                    onClick={() => setSelectedComplaint(null)}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
                                     onClick={() => {
-                                        const select = document.getElementById('volunteerSelect');
-                                        if (select.value) {
-                                            assignVolunteer(selectedComplaint.id, select.value);
-                                        }
+                                        setSelectedComplaint(null);
+                                        setIsAssigning(false);
                                     }}
                                 >
-                                    Assign Volunteer
+                                    Close
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
-        </PageWrapper>
+        </>
     );
 };
 

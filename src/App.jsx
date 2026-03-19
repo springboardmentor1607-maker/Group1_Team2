@@ -13,6 +13,8 @@ import Settings from './pages/Settings';
 import ReportIssue from './pages/ReportIssue';
 import AdminDashboard from './pages/AdminDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
+import Notifications from './pages/Notifications';
+import { ToastProvider } from './context/ToastContext';
 
 // Protected Route Component
 const ProtectedRoute = ({ isAuthenticated, children }) => {
@@ -52,73 +54,76 @@ function App() {
 
     return (
         <Router>
-            <Routes>
-                {/* Public Routes */}
-                <Route
-                    path="/login"
-                    element={
-                        isAuthenticated ? (
+            <ToastProvider>
+                <Routes>
+                    {/* Public Routes */}
+                    <Route
+                        path="/login"
+                        element={
+                            isAuthenticated ? (
+                                <Navigate 
+                                    to={getDashboardRoute()} 
+                                    replace 
+                                />
+                            ) : (
+                                <AuthLayout subtitle="Welcome Back, Citizen!">
+                                    <Login onLogin={handleLogin} />
+                                </AuthLayout>
+                            )
+                        }
+                    />
+                    <Route
+                        path="/signup"
+                        element={
+                            isAuthenticated ? (
+                                <Navigate 
+                                    to={getDashboardRoute()} 
+                                    replace 
+                                />
+                            ) : (
+                                <AuthLayout subtitle="Join Your Community Today">
+                                    <Signup onLogin={handleLogin} />
+                                </AuthLayout>
+                            )
+                        }
+                    />
+
+                    {/* Redirect Root to Login or Dashboard */}
+                    <Route
+                        path="/"
+                        element={
                             <Navigate 
-                                to={getDashboardRoute()} 
+                                to={isAuthenticated ? getDashboardRoute() : '/login'} 
                                 replace 
                             />
-                        ) : (
-                            <AuthLayout subtitle="Welcome Back, Citizen!">
-                                <Login onLogin={handleLogin} />
-                            </AuthLayout>
-                        )
-                    }
-                />
-                <Route
-                    path="/signup"
-                    element={
-                        isAuthenticated ? (
-                            <Navigate 
-                                to={getDashboardRoute()} 
-                                replace 
-                            />
-                        ) : (
-                            <AuthLayout subtitle="Join Your Community Today">
-                                <Signup onLogin={handleLogin} />
-                            </AuthLayout>
-                        )
-                    }
-                />
+                        }
+                    />
 
-                {/* Redirect Root to Login or Dashboard */}
-                <Route
-                    path="/"
-                    element={
-                        <Navigate 
-                            to={isAuthenticated ? getDashboardRoute() : '/login'} 
-                            replace 
-                        />
-                    }
-                />
-
-                {/* Protected Dashboard Routes */}
-                <Route
-                    path="/*"
-                    element={
-                        <ProtectedRoute isAuthenticated={isAuthenticated}>
-                            <DashboardLayout onLogout={handleLogout}>
-                                <Routes>
-                                    <Route path="/dashboard" element={<Dashboard />} />
-                                    <Route path="/volunteer" element={<VolunteerDashboard />} />
-                                    <Route path="/profile" element={<Profile />} />
-                                    <Route path="/complaints" element={<Complaints />} />
-                                    <Route path="/map" element={<MapView />} />
-                                    <Route path="/report-issue" element={<ReportIssue />} />
-                                    <Route path="/settings" element={<Settings />} />
-                                    <Route path="/admin" element={<AdminDashboard />} />
-                                    {/* Catch all inside dashboard to redirect based on role */}
-                                    <Route path="*" element={<Navigate to={getDashboardRoute()} replace />} />
-                                </Routes>
-                            </DashboardLayout>
-                        </ProtectedRoute>
-                    }
-                />
-            </Routes>
+                    {/* Protected Dashboard Routes */}
+                    <Route
+                        path="/*"
+                        element={
+                            <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                <DashboardLayout onLogout={handleLogout}>
+                                    <Routes>
+                                        <Route path="/dashboard" element={<Dashboard />} />
+                                        <Route path="/volunteer" element={<VolunteerDashboard />} />
+                                        <Route path="/profile" element={<Profile />} />
+                                        <Route path="/complaints" element={<Complaints />} />
+                                        <Route path="/map" element={<MapView />} />
+                                        <Route path="/report-issue" element={<ReportIssue />} />
+                                        <Route path="/settings" element={<Settings />} />
+                                        <Route path="/notifications" element={<Notifications />} />
+                                        <Route path="/admin" element={<AdminDashboard />} />
+                                        {/* Catch all inside dashboard to redirect based on role */}
+                                        <Route path="*" element={<Navigate to={getDashboardRoute()} replace />} />
+                                    </Routes>
+                                </DashboardLayout>
+                            </ProtectedRoute>
+                        }
+                    />
+                </Routes>
+            </ToastProvider>
         </Router>
     );
 }

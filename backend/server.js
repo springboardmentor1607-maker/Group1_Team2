@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const app = express();
-connectDB();// Connect to Databas
+connectDB();// Connect to Database
 
 // Middleware
 app.use(cors());
@@ -23,6 +23,7 @@ app.get('/health', (req, res) => {
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/complaints', require('./routes/complaintRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 
 const PORT = process.env.PORT || 3001;

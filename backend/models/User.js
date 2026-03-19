@@ -48,8 +48,11 @@ const User = {
     async findAll() {
         const result = await pool.query(`SELECT * FROM users`);
         return result.rows;
+    },
+    async findAdmins() {
+        const result = await pool.query(`SELECT id FROM users WHERE role='admin'`);
+        return result.rows;
     }
-
 };
 
 module.exports = User;

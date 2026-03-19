@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, MapPin, FileText, User, Settings, LogOut, AlertTriangle, Shield, ClipboardList, Moon, Sun } from 'lucide-react';
+import { Home, MapPin, FileText, User, Settings, LogOut, AlertTriangle, Shield, ClipboardList, Moon, Sun, Bell } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
@@ -19,6 +19,7 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                 { label: 'Admin Panel', path: '/admin', icon: Shield },
                 { label: 'Report Issue', path: '/report-issue', icon: AlertTriangle },
                 { label: 'Complaints', path: '/complaints', icon: FileText },
+                { label: 'Notifications', path: '/notifications', icon: Bell },
                 { label: 'Map View', path: '/map', icon: MapPin },
                 { label: 'Profile', path: '/profile', icon: User },
                 { label: 'Settings', path: '/settings', icon: Settings },
@@ -26,6 +27,7 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
         } else if (role === 'volunteer') {
             return [
                 { label: 'My Assignments', path: '/volunteer', icon: ClipboardList },
+                { label: 'Notifications', path: '/notifications', icon: Bell },
                 { label: 'Map View', path: '/map', icon: MapPin },
                 { label: 'Profile', path: '/profile', icon: User },
                 { label: 'Settings', path: '/settings', icon: Settings },
@@ -35,7 +37,8 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
             return [
                 { label: 'Dashboard', path: '/dashboard', icon: Home },
                 { label: 'Report Issue', path: '/report-issue', icon: AlertTriangle },
-                { label: 'My Complaints', path: '/complaints', icon: FileText },
+                { label: 'My Complaints', path: '/complaints?view=my', icon: FileText },
+                { label: 'Notifications', path: '/notifications', icon: Bell },
                 { label: 'Map View', path: '/map', icon: MapPin },
                 { label: 'Profile', path: '/profile', icon: User },
                 { label: 'Settings', path: '/settings', icon: Settings },

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Clock, User, CheckCircle, RefreshCw, ThumbsUp, ThumbsDown, MessageSquare, Send } from 'lucide-react';
+import { MapPin, Clock, User, CheckCircle, RefreshCw, ThumbsUp, ThumbsDown, MessageSquare, Send, Trash2, Image as ImageIcon, Map as MapIcon, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import Skeleton from './Skeleton';
 
 const getStatusBadge = (status) => {
     const s = (status || 'pending').toLowerCase();
@@ -18,12 +19,12 @@ const getStatusBadge = (status) => {
 const getPriorityBadge = (priority) => {
     const p = (priority || 'medium').toLowerCase();
     const priorityMap = {
-        'critical': 'bg-danger',
-        'high': 'bg-warning',
-        'medium': 'bg-info',
-        'low': 'bg-success'
+        'critical': 'bg-danger text-white',
+        'high': 'bg-warning text-dark',
+        'medium': 'bg-primary text-white',
+        'low': 'bg-success text-white'
     };
-    return `badge ${priorityMap[p] || 'bg-info'} bg-opacity-10 text-dark small fw-normal`;
+    return `badge ${priorityMap[p] || 'bg-primary text-white'} rounded-pill px-2 py-1 small fw-medium`;
 };
 
 const getStatusIcon = (status) => {
@@ -43,7 +44,7 @@ const formatDate = (dateStr) => {
     });
 };
 
-const ComplaintCard = ({ complaint, viewMode, index }) => {
+const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
     const navigate = useNavigate();
 
     // State for votes and comments
@@ -58,6 +59,29 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
     const [loadingComments, setLoadingComments] = useState(false);
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
     const [showBigIcon, setShowBigIcon] = useState(null);
+    const [isPhotoFocused, setIsPhotoFocused] = useState(false);
+
+    // Async Photo Loading
+    const [photoData, setPhotoData] = useState(null);
+    const [loadingPhoto, setLoadingPhoto] = useState(false);
+
+    const fetchPhoto = async (e) => {
+        if (e) e.stopPropagation();
+        if ((complaint.has_photo || complaint.has_volunteer_photo) && !photoData && !loadingPhoto) {
+            setLoadingPhoto(true);
+            try {
+                const res = await api.get(`/complaints/${complaint.id}/photo`);
+                setPhotoData(res.data);
+                setIsPhotoFocused(true); // Auto focus on first reveal
+            } catch (err) {
+                console.error('Error fetching complaint photo:', err);
+            } finally {
+                setLoadingPhoto(false);
+            }
+        } else if (photoData) {
+            setIsPhotoFocused(true); // Focus if photo already exists
+        }
+    };
 
     const handleVote = async (e, type) => {
         e.stopPropagation();
@@ -147,15 +171,66 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="card border-0 shadow-sm rounded-4 hover-shadow-lg overflow-hidden position-relative"
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ 
+                duration: 0.8, 
+                ease: [0.16, 1, 0.3, 1],
+                layout: { duration: 0.5, type: 'spring', bounce: 0.2 }
+            }}
+            whileHover={{ y: -5, scale: 1.01 }}
+            className="card border-0 overflow-hidden position-relative"
             style={{
-                background: 'var(--card-bg)', border: '1px solid var(--border-glass)',
-                transition: 'all 0.3s ease', cursor: 'pointer', display: 'flex', flexDirection: 'column'
+                background: 'var(--bg-card)',
+                backdropFilter: 'blur(25px)',
+                WebkitBackdropFilter: 'blur(25px)',
+                border: '1px solid var(--border-glass)',
+                borderRadius: '24px',
+                transition: 'box-shadow 0.3s ease',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: 'var(--shadow-lg)'
             }}
         >
+            {/* Focus Mode Navigation Overlay */}
+            <AnimatePresence>
+                {isPhotoFocused && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        style={{
+                            position: 'absolute',
+                            top: '20px',
+                            left: '20px',
+                            zIndex: 10,
+                            pointerEvents: 'auto'
+                        }}
+                    >
+                        <motion.button
+                            whileHover={{ scale: 1.1, x: -5 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsPhotoFocused(false);
+                            }}
+                            className="btn btn-light rounded-pill shadow-lg d-flex align-items-center gap-2 px-3 py-2 fw-bold"
+                            style={{ 
+                                background: 'rgba(255, 255, 255, 0.9)',
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(0,0,0,0.1)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.8rem'
+                            }}
+                        >
+                            <ChevronRight size={18} className="rotate-180" style={{ transform: 'rotate(180deg)' }} />
+                            Show Details
+                        </motion.button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             {/* Big Icon Animation Overlay */}
             <AnimatePresence>
                 {showBigIcon && (
@@ -190,125 +265,255 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
                 )}
             </AnimatePresence>
 
-            {complaint.photo && (
-                <div style={{
-                    width: '100%', height: '160px', backgroundImage: `url(${complaint.photo})`,
-                    backgroundSize: 'cover', backgroundPosition: 'center', borderBottom: '1px solid var(--border-color)'
-                }} />
-            )}
-            <div className="card-body p-4 d-flex flex-column" style={{ flex: 1 }}>
-                <div className="d-flex justify-content-between align-items-start mb-3">
-                    <div className="d-flex align-items-center gap-2">
-                        <span className="badge bg-primary bg-opacity-10 text-primary fs-6">#{complaint.id}</span>
-                        <span className={getPriorityBadge(complaint.priority)}>{complaint.priority || 'Medium'}</span>
-                    </div>
-                    <div className="d-flex align-items-center gap-2">
-                        {getStatusIcon(complaint.status)}
-                        <span className={getStatusBadge(complaint.status)}>{complaint.status || 'Pending'}</span>
-                    </div>
-                </div>
-
-                <h5 className="fw-bold mb-2 text-truncate" style={{ color: 'var(--text-primary)' }}>{complaint.title}</h5>
-
-                <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-                    <span className="badge bg-secondary bg-opacity-10 text-secondary small">{complaint.type || 'Other'}</span>
-                    <span>•</span><Clock size={14} /><span className="small">{formatDate(complaint.created_at)}</span>
-                </div>
-
-                <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-                    <User size={14} /><span className="small">Reported by: {complaint.user_name || 'Unknown'}</span>
-                </div>
-
-                {complaint.volunteer_name && (
-                    <div className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-                        <User size={14} /><span className="small">Assigned to: {complaint.volunteer_name}</span>
-                    </div>
-                )}
-
-                <div className="d-flex align-items-start gap-2 mb-3">
-                    <MapPin size={14} className="mt-1 flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
-                    <div className="small" style={{ color: 'var(--text-muted)' }}>
-                        <div>{complaint.address}</div>
-                        {complaint.landmark && <div className="opacity-75">Near: {complaint.landmark}</div>}
-                    </div>
-                </div>
-
-                <div className="mt-auto">
-                    {complaint.description && (
-                        <div style={{
-                            background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%)',
-                            padding: '0.875rem 1rem', borderRadius: '12px', border: '1px solid rgba(96, 165, 250, 0.2)',
-                            marginBottom: '1rem', boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.02)'
-                        }}>
-                            <p className="small mb-0" style={{
-                                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden', lineHeight: '1.6', fontWeight: '500', color: 'var(--text-primary)'
-                            }}>
-                                {complaint.description}
-                            </p>
+            {(complaint.has_photo || complaint.has_volunteer_photo) && (
+                <motion.div 
+                    layout
+                    onClick={!isPhotoFocused ? fetchPhoto : undefined}
+                    animate={{
+                        height: isPhotoFocused ? '500px' : (photoData?.photo ? '240px' : '160px'),
+                    }}
+                    transition={{
+                        layout: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+                        height: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+                    }}
+                    style={{
+                        width: '100%', 
+                        backgroundColor: 'var(--bg-secondary)',
+                        borderBottom: isPhotoFocused ? 'none' : '1px solid var(--border-color)',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        cursor: !photoData || !isPhotoFocused ? 'zoom-in' : 'default',
+                        zIndex: 2
+                    }}
+                >
+                    {loadingPhoto ? (
+                        <div className="h-100"><Skeleton width="100%" height="100%" /></div>
+                    ) : (photoData?.photo || photoData?.volunteer_photo) ? (
+                        <div className="h-100 position-relative">
+                            <motion.img 
+                                initial={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
+                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                                src={photoData?.volunteer_photo || photoData?.photo}
+                                alt="Complaint"
+                                style={{
+                                    width: '100%', 
+                                    height: '100%',
+                                    objectFit: 'cover'
+                                }} 
+                            />
+                            {photoData?.volunteer_photo && photoData?.photo && (
+                                <div 
+                                    className="position-absolute bottom-0 start-0 w-100 p-2 d-flex justify-content-center gap-2"
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <span className="badge bg-success shadow-sm">Showing Proof of Work</span>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div 
+                            className="d-flex flex-column align-items-center justify-content-center h-100 p-4"
+                            style={{
+                                background: 'radial-gradient(circle at center, rgba(128, 128, 128, 0.08) 0%, rgba(0, 0, 0, 0.03) 100%)',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}
+                        >
+                            <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="d-flex flex-column align-items-center gap-3"
+                            >
+                                <div 
+                                    className="rounded-circle d-flex align-items-center justify-content-center mb-1 shadow-lg"
+                                    style={{ 
+                                        width: '72px', height: '72px', 
+                                        background: 'rgba(255, 255, 255, 0.05)',
+                                        backdropFilter: 'blur(12px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                                        color: 'var(--primary-color)'
+                                    }}
+                                >
+                                    <ImageIcon size={36} strokeWidth={1.2} className="opacity-75" />
+                                </div>
+                                <div 
+                                    className="px-4 py-2 rounded-pill fw-bold position-relative overflow-hidden"
+                                    style={{
+                                        background: 'rgba(255, 255, 255, 0.95)',
+                                        backdropFilter: 'blur(10px)',
+                                        color: '#000',
+                                        fontSize: '0.8rem',
+                                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                                        border: '1px solid rgba(255, 255, 255, 0.5)',
+                                        letterSpacing: '0.5px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem'
+                                    }}
+                                >
+                                    <motion.div
+                                        animate={{ x: ['-200%', '200%'] }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '50%',
+                                            height: '100%',
+                                            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)',
+                                            transform: 'skewX(-20deg)',
+                                            pointerEvents: 'none'
+                                        }}
+                                    />
+                                    View Proof
+                                    <ChevronRight size={14} />
+                                </div>
+                            </motion.div>
                         </div>
                     )}
+                </motion.div>
+            )}
+            <motion.div 
+                layout
+                className="card-body p-4 d-flex flex-column" 
+                animate={{
+                    opacity: isPhotoFocused ? 0 : 1,
+                    y: isPhotoFocused ? 100 : 0,
+                    height: isPhotoFocused ? 0 : 'auto',
+                    padding: isPhotoFocused ? 0 : '1.5rem'
+                }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                style={{ flex: 1, position: 'relative', zIndex: 1, overflow: 'hidden' }}
+            >
+                <div style={{ display: isPhotoFocused ? 'none' : 'block' }}>
+                    <motion.div layout className="d-flex justify-content-between align-items-start mb-3">
+                        <div className="d-flex align-items-center gap-2">
+                            <span className="badge bg-primary bg-opacity-10 text-primary fs-6">#{complaint.id}</span>
+                            <span className={getPriorityBadge(complaint.priority)}>{complaint.priority || 'Medium'}</span>
+                        </div>
+                        <div className="d-flex align-items-center gap-2">
+                            {getStatusIcon(complaint.status)}
+                            <span className={getStatusBadge(complaint.status)}>{complaint.status || 'Pending'}</span>
+                        </div>
+                    </motion.div>
 
-                    {/* Actions Row: Vote and Comment */}
-                    <div className="d-flex align-items-center gap-2 mb-3">
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={(e) => handleVote(e, 'upvote')}
-                            className={`btn btn-sm rounded-pill px-3 py-1 d-flex align-items-center justify-content-center gap-2 ${userVoteType === 'upvote' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                        >
-                            <motion.div
-                                animate={userVoteType === 'upvote' ? { scale: [1, 1.3, 1], y: [0, -4, 0] } : {}}
-                                transition={{ duration: 0.3 }}
-                                className={`d-flex align-items-center ${userVoteType === 'upvote' ? 'text-white' : ''}`}
-                                style={userVoteType !== 'upvote' ? { color: 'var(--text-primary)' } : {}}
-                            >
-                                <ThumbsUp size={15} />
-                            </motion.div>
-                            <span className={`fw-medium ${userVoteType === 'upvote' ? 'text-white' : ''}`} style={userVoteType !== 'upvote' ? { color: 'var(--text-primary)' } : {}}>{upvotesCount}</span>
-                        </motion.button>
+                    <motion.h5 layout className="fw-bold mb-2 text-truncate" style={{ color: 'var(--text-primary)' }}>{complaint.title}</motion.h5>
 
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={(e) => handleVote(e, 'downvote')}
-                            className={`btn btn-sm rounded-pill px-3 py-1 d-flex align-items-center justify-content-center gap-2 ${userVoteType === 'downvote' ? 'btn-danger' : 'btn-outline-secondary'}`}
-                        >
-                            <motion.div
-                                animate={userVoteType === 'downvote' ? { scale: [1, 1.3, 1], y: [0, 4, 0] } : {}}
-                                transition={{ duration: 0.3 }}
-                                className={`d-flex align-items-center ${userVoteType === 'downvote' ? 'text-white' : ''}`}
-                                style={userVoteType !== 'downvote' ? { color: 'var(--text-primary)' } : {}}
-                            >
-                                <ThumbsDown size={15} />
-                            </motion.div>
-                            <span className={`fw-medium ${userVoteType === 'downvote' ? 'text-white' : ''}`} style={userVoteType !== 'downvote' ? { color: 'var(--text-primary)' } : {}}>{downvotesCount}</span>
-                        </motion.button>
+                    <motion.div layout className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
+                        <span className="badge bg-secondary bg-opacity-10 text-secondary small">{complaint.type || 'Other'}</span>
+                        <span>•</span><Clock size={14} /><span className="small">{formatDate(complaint.created_at)}</span>
+                    </motion.div>
 
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={toggleComments}
-                            className={`btn btn-sm rounded-pill px-3 py-1 d-flex align-items-center justify-content-center gap-2 ${showComments ? 'bg-primary bg-opacity-10 text-primary border border-primary' : 'btn-outline-secondary'}`}
-                            style={!showComments ? { color: 'var(--text-primary)' } : {}}
-                        >
-                            <MessageSquare size={15} />
-                            <span className="fw-medium">{commentsCount}</span>
-                        </motion.button>
+                    <motion.div layout className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
+                        <User size={14} /><span className="small">Reported by: {complaint.user_name || 'Unknown'}</span>
+                    </motion.div>
 
-                        {complaint.latitude && complaint.longitude && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate('/map', { state: { focusLat: complaint.latitude, focusLng: complaint.longitude, complaintId: complaint.id } });
+                    {complaint.volunteer_name && (
+                        <motion.div layout className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
+                            <User size={14} /><span className="small">Assigned to: {complaint.volunteer_name}</span>
+                        </motion.div>
+                    )}
+
+                    <motion.div layout className="d-flex align-items-start gap-2 mb-3">
+                        <MapPin size={14} className="mt-1 flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
+                        <div className="small" style={{ color: 'var(--text-muted)' }}>
+                            <div>{complaint.address}</div>
+                            {complaint.landmark && <div className="opacity-75">Near: {complaint.landmark}</div>}
+                        </div>
+                    </motion.div>
+
+                    <div className="mt-auto">
+                        {complaint.description && (
+                            <motion.div 
+                                layout
+                                style={{
+                                    background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%)',
+                                    padding: '1rem', borderRadius: '16px', border: '1px solid rgba(96, 165, 250, 0.2)',
+                                    marginBottom: '1.25rem', boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.02)'
                                 }}
-                                className="btn btn-sm rounded-pill btn-outline-primary px-3 py-1 d-flex align-items-center justify-content-center gap-1 ms-auto"
-                                style={{ color: 'var(--text-primary)', borderColor: 'var(--text-primary)' }}
                             >
-                                <MapPin size={15} />
-                                <span className="fw-medium">View Map</span>
-                            </button>
+                                <p className="small mb-0" style={{
+                                    display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden', lineHeight: '1.6', fontWeight: '500', color: 'var(--text-primary)'
+                                }}>
+                                    {complaint.description}
+                                </p>
+                            </motion.div>
                         )}
+
+                        <motion.div layout className="d-flex align-items-center gap-3 mt-auto">
+                            <div className="d-flex align-items-center gap-2">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={(e) => handleVote(e, 'upvote')}
+                                    className={`btn btn-sm rounded-pill px-3 py-1.5 d-flex align-items-center justify-content-center gap-2 ${userVoteType === 'upvote' ? 'btn-primary shadow-md' : 'btn-outline-secondary'}`}
+                                    style={userVoteType !== 'upvote' ? { background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' } : {}}
+                                >
+                                    <ThumbsUp size={15} className={userVoteType === 'upvote' ? 'text-white' : 'text-primary'} fill={userVoteType === 'upvote' ? 'currentColor' : 'none'} />
+                                    <span className={`fw-bold ${userVoteType === 'upvote' ? 'text-white' : ''}`} style={userVoteType !== 'upvote' ? { color: 'var(--text-primary)' } : {}}>{upvotesCount}</span>
+                                </motion.button>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={(e) => handleVote(e, 'downvote')}
+                                    className={`btn btn-sm rounded-pill px-3 py-1.5 d-flex align-items-center justify-content-center gap-2 ${userVoteType === 'downvote' ? 'btn-danger shadow-md' : 'btn-outline-secondary'}`}
+                                    style={userVoteType !== 'downvote' ? { background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' } : {}}
+                                >
+                                    <ThumbsDown size={15} className={userVoteType === 'downvote' ? 'text-white' : 'text-danger'} fill={userVoteType === 'downvote' ? 'currentColor' : 'none'} />
+                                    <span className={`fw-bold ${userVoteType === 'downvote' ? 'text-white' : ''}`} style={userVoteType !== 'downvote' ? { color: 'var(--text-primary)' } : {}}>{downvotesCount}</span>
+                                </motion.button>
+                            </div>
+
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={toggleComments}
+                                className={`btn btn-sm rounded-pill px-3 py-1.5 d-flex align-items-center justify-content-center gap-2 ${showComments ? 'bg-primary bg-opacity-10 text-primary border border-primary shadow-sm' : 'btn-outline-secondary'}`}
+                                style={!showComments ? { background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', color: 'var(--text-primary)' } : {}}
+                            >
+                                <MessageSquare size={15} className={showComments ? 'text-primary' : 'text-secondary'} fill={showComments ? 'currentColor' : 'none'} />
+                                <span className="fw-bold">{commentsCount}</span>
+                            </motion.button>
+
+                            <div className="ms-auto d-flex gap-2">
+                                {complaint.latitude && complaint.longitude && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate('/map', { state: { focusLat: complaint.latitude, focusLng: complaint.longitude, complaintId: complaint.id } });
+                                        }}
+                                        className="btn btn-sm rounded-pill btn-outline-primary px-3 py-1.5 d-flex align-items-center justify-content-center gap-2"
+                                        style={{ background: 'rgba(0, 113, 227, 0.05)', borderColor: 'rgba(0, 113, 227, 0.1)', color: 'var(--primary-color)' }}
+                                    >
+                                        <MapPin size={14} />
+                                        <span className="fw-bold">Map</span>
+                                    </motion.button>
+                                )}
+                                
+                                {viewMode === 'my' && onDelete && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (window.confirm('Are you sure you want to delete this complaint?')) {
+                                                onDelete(complaint.id);
+                                            }
+                                        }}
+                                        className="btn btn-sm rounded-pill btn-outline-danger px-3 py-1.5 d-flex align-items-center justify-content-center gap-2"
+                                        style={{ background: 'rgba(220, 53, 69, 0.05)', borderColor: 'rgba(220, 53, 69, 0.1)' }}
+                                    >
+                                        <Trash2 size={14} />
+                                        <span className="fw-bold">Delete</span>
+                                    </motion.button>
+                                )}
+                            </div>
+                        </motion.div>
                     </div>
 
                     {/* Comments Section */}
@@ -353,7 +558,17 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
                                 </form>
 
                                 {loadingComments ? (
-                                    <div className="text-center py-2"><span className="spinner-border spinner-border-sm text-primary"></span></div>
+                                    <div className="d-flex flex-column gap-2 py-2">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="p-2 rounded-3" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+                                                <div className="d-flex justify-content-between mb-2">
+                                                    <Skeleton width="80px" height="12px" />
+                                                    <Skeleton width="60px" height="10px" />
+                                                </div>
+                                                <Skeleton width="100%" height="16px" />
+                                            </div>
+                                        ))}
+                                    </div>
                                 ) : (
                                     <div className="comments-list d-flex flex-column gap-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                                         {commentsList.length === 0 ? (
@@ -377,7 +592,7 @@ const ComplaintCard = ({ complaint, viewMode, index }) => {
                         )}
                     </AnimatePresence>
                 </div>
-            </div>
+            </motion.div>
         </motion.div>
     );
 };

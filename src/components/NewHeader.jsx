@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { Menu, Sun, Moon, Search, Bell, ChevronDown } from 'lucide-react';
+import NotificationCenter from './NotificationCenter';
+import { useEffect } from 'react';
+import { useToast } from '../context/ToastContext';
 
 const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
     const { theme, toggleTheme } = useTheme();
+    const { unreadCount } = useToast();
     const location = useLocation();
+    const [showNotifications, setShowNotifications] = useState(false);
 
     const getPageTitle = () => {
         switch (location.pathname) {
@@ -22,6 +27,8 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                 return 'Report a Civic Issue';
             case '/settings':
                 return 'Settings';
+            case '/notifications':
+                return 'Notifications';
             default:
                 return 'CleanStreet';
         }
@@ -41,6 +48,8 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                 return 'Help us keep the city clean by reporting issues';
             case '/settings':
                 return 'Customize your preferences';
+            case '/notifications':
+                return 'Stay updated with alerts and activity';
             default:
                 return 'Smart city cleanliness management';
         }
@@ -108,20 +117,30 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                 </motion.button>
 
                 {/* Notifications */}
-                <motion.button
-                    className="btn btn-light rounded-3 p-2 border-0 position-relative"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    style={{ backgroundColor: 'var(--hover-item-bg)' }}
-                >
-                    <Bell size={18} />
-                    <span
-                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                        style={{ fontSize: '10px' }}
+                <div className="position-relative">
+                    <motion.button
+                        onClick={() => setShowNotifications(!showNotifications)}
+                        className="btn btn-light rounded-3 p-2 border-0 position-relative"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        style={{ backgroundColor: 'var(--hover-item-bg)' }}
                     >
-                        3
-                    </span>
-                </motion.button>
+                        <Bell size={18} />
+                        {unreadCount > 0 && (
+                            <span
+                                className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                style={{ fontSize: '10px' }}
+                            >
+                                {unreadCount > 9 ? '9+' : unreadCount}
+                            </span>
+                        )}
+                    </motion.button>
+
+                    <NotificationCenter 
+                        isOpen={showNotifications} 
+                        onClose={() => setShowNotifications(false)} 
+                    />
+                </div>
 
                 {/* Theme Toggle */}
                 <motion.button
