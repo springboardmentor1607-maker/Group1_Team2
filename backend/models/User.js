@@ -52,6 +52,17 @@ const User = {
     async findAdmins() {
         const result = await pool.query(`SELECT id FROM users WHERE role='admin'`);
         return result.rows;
+    },
+
+    async getStats() {
+        const result = await pool.query(
+            `SELECT 
+                COUNT(*) FILTER (WHERE role = 'volunteer') as volunteers_count,
+                COUNT(*) FILTER (WHERE role = 'citizen') as citizens_count,
+                COUNT(*) as total_users
+             FROM users`
+        );
+        return result.rows[0];
     }
 };
 

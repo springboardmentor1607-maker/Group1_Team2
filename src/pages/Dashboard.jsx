@@ -123,20 +123,21 @@ export default function Dashboard() {
     }
 
     return (
-        <PageWrapper className="container-xxl">
-
-            {/* ===== TOP HEADER ROW ===== */}
-            <div className="d-flex align-items-start justify-content-between mb-4">
-
-                {/* LEFT TEXT ONLY (NO LOGO HERE) */}
-                <div>
-                    <h1 className="fw-bold text-body">
-                        Welcome Back, {user ? user.name : 'Citizen'}!
-                    </h1>
+        <PageWrapper className="container-xxl px-4 py-4">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+            >
+                {/* ===== TOP HEADER ROW ===== */}
+                <div className="d-flex align-items-start justify-content-between mb-4">
+                    <div>
+                        <h1 className="fw-bold apple-gradient-text display-5">
+                            Welcome Back, {user ? user.name : 'Citizen'}!
+                        </h1>
+                        <p className="text-muted lead">Track your reports and help make your city better.</p>
+                    </div>
                 </div>
-
-                {/* RIGHT ACTION BUTTON */}
-            </div>
 
             <StatsSection stats={stats} />
 
@@ -173,9 +174,9 @@ export default function Dashboard() {
 
             {/* ===== QUICK ACTIONS (MOBILE) ===== */}
             <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 1 }}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
                 className="row row-cols-3 g-3 d-lg-none"
             >
                 <div>
@@ -214,6 +215,7 @@ export default function Dashboard() {
                     </button>
                 </div>
             </motion.div>
-        </PageWrapper>
-    );
+        </motion.div>
+    </PageWrapper>
+);
 }

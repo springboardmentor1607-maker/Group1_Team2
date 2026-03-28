@@ -71,14 +71,14 @@ const ChatWidget = () => {
                         style={{
                             width: '380px',
                             height: '550px',
-                            background: 'white',
-                            border: '1px solid rgba(0,0,0,0.1)',
-                            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+                            background: 'var(--bg-secondary)',
+                            border: '1px solid var(--border-glass)',
+                            boxShadow: 'var(--shadow-lg)'
                         }}
                     >
                         {/* Header */}
                         <div className="p-3 text-white d-flex align-items-center justify-content-between"
-                            style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)' }}>
+                            style={{ background: 'linear-gradient(135deg, #4285f4 0%, #1a73e8 100%)' }}>
                             <div className="d-flex align-items-center gap-2">
                                 <div className="p-2 bg-white bg-opacity-20 rounded-circle">
                                     <Bot size={20} className="text-white" />
@@ -105,8 +105,8 @@ const ChatWidget = () => {
                                             style={{ 
                                                 width: '32px', 
                                                 height: '32px',
-                                                background: msg.sender === 'user' ? '#7c3aed' : 'white',
-                                                color: msg.sender === 'user' ? 'white' : '#7c3aed',
+                                                background: msg.sender === 'user' ? '#4285f4' : 'white',
+                                                color: msg.sender === 'user' ? 'white' : '#4285f4',
                                                 marginTop: '4px'
                                             }}>
                                             {msg.sender === 'user' ? <User size={16} /> : <Bot size={16} />}
@@ -165,10 +165,10 @@ const ChatWidget = () => {
                 style={{
                     width: '60px',
                     height: '60px',
-                    background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                    background: 'linear-gradient(135deg, #4285f4 0%, #1a73e8 100%)',
                     color: 'white',
                     border: '2px solid rgba(255,255,255,0.4)',
-                    boxShadow: '0 8px 32px rgba(124, 58, 237, 0.4)',
+                    boxShadow: '0 8px 32px rgba(66, 133, 244, 0.4)',
                     backdropFilter: 'blur(10px)'
                 }}
             >

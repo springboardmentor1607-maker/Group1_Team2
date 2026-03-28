@@ -66,7 +66,7 @@
     font-size: clamp(1.75rem, 4vw, 2.5rem);
     font-weight: 700;
     margin: 0;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #4285f4, #1a73e8);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -190,14 +190,14 @@
 }
 
 .quick-action-btn:hover {
-    border-color: #667eea;
+    border-color: #4285f4;
     color: var(--bs-body-color);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 8px 24px rgba(66, 133, 244, 0.15);
 }
 
 .quick-action-btn.primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #4285f4, #1a73e8);
     color: white;
     border-color: transparent;
 }
@@ -205,14 +205,14 @@
 .quick-action-btn.primary:hover {
     color: white;
     border-color: transparent;
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 32px rgba(66, 133, 244, 0.3);
 }
 
 .action-icon {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #4285f4, #1a73e8);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -341,9 +341,9 @@
 /* Focus States */
 .btn-action:focus-visible,
 .quick-action-btn:focus-visible {
-    outline: 2px solid #667eea;
+    outline: 2px solid #4285f4;
     outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.2);
 }
 
 /* High Contrast Mode */

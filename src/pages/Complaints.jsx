@@ -234,7 +234,7 @@ function Complaints() {
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                     <div>
                         <h1 className="display-5 fw-bold mb-2" style={{
-                            background: 'linear-gradient(135deg, var(--primary-color), var(--accent-1))',
+                            background: 'var(--primary-color)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
                         }}>

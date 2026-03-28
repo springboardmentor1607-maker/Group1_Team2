@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, getProfile, updateProfile, verifyToken, getAllUsers, updateUserRole } = require('../controllers/authController');
+const { register, login, getProfile, updateProfile, verifyToken, getAllUsers, updateUserRole, getUserStats } = require('../controllers/authController');
 
 console.log("AUTH ROUTES WORKING");
 
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+router.get('/stats', getUserStats);
 router.get('/test', (req, res) => {
    res.send("AUTH OK");
 });

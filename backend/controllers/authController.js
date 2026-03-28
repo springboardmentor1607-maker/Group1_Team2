@@ -239,3 +239,21 @@ exports.updateUserRole = async (req, res) => {
         });
     }
 };
+
+// GET USER STATS (Public)
+exports.getUserStats = async (req, res) => {
+    try {
+        const stats = await User.getStats();
+        res.json({
+            success: true,
+            stats: {
+                volunteers: parseInt(stats.volunteers_count, 10) || 0,
+                citizens: parseInt(stats.citizens_count, 10) || 0,
+                total: parseInt(stats.total_users, 10) || 0
+            }
+        });
+    } catch (err) {
+        console.error('Get user stats error:', err);
+        res.status(500).json({ message: 'Server error while fetching stats' });
+    }
+};

@@ -12,7 +12,7 @@ function MapView() {
                 transition={{ duration: 0.5 }}
             >
                 <div className="mb-4">
-                    <h1 className="display-5 fw-bold mb-2" style={{ background: 'linear-gradient(135deg, var(--primary-color), var(--accent-1))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    <h1 className="display-5 fw-bold mb-2" style={{ color: 'var(--primary-color)' }}>
                         <i className="bi bi-map me-3"></i>Interactive Map
                     </h1>
                     <p className="text-muted">View reported issues across your neighborhood</p>

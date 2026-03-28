@@ -274,9 +274,9 @@ const VolunteerDashboard = () => {
                 transition={{ duration: 0.5 }}
             >
                 <div className="mb-4">
-                    <h1 className="display-5 fw-bold mb-2">
-                        <ClipboardList className="me-3" size={48} />
-                        Volunteer Dashboard
+                    <h1 className="display-5 fw-bold mb-2 apple-gradient-text">
+                        <ClipboardList className="me-3 text-primary" size={48} />
+                        Volunteer Assignments
                     </h1>
                     <p className="text-muted">Manage your assigned complaints and update progress</p>
                 </div>
@@ -284,39 +284,31 @@ const VolunteerDashboard = () => {
                 {/* Stats Cards */}
                 <div className="row g-4 mb-4">
                     <div className="col-md-3">
-                        <div className="card border-0 shadow-sm h-100">
-                            <div className="card-body text-center">
+                        <div className="glass-card-premium h-100 p-4 text-center">
                                 <ClipboardList size={32} className="text-primary mb-2" />
                                 <h3 className="fw-bold">{stats.total}</h3>
                                 <p className="text-muted mb-0">Total Assigned</p>
-                            </div>
                         </div>
                     </div>
                     <div className="col-md-3">
-                        <div className="card border-0 shadow-sm h-100">
-                            <div className="card-body text-center">
+                        <div className="glass-card-premium h-100 p-4 text-center">
                                 <Clock size={32} className="text-warning mb-2" />
                                 <h3 className="fw-bold">{stats.pending}</h3>
                                 <p className="text-muted mb-0">Pending</p>
-                            </div>
                         </div>
                     </div>
                     <div className="col-md-3">
-                        <div className="card border-0 shadow-sm h-100">
-                            <div className="card-body text-center">
+                        <div className="glass-card-premium h-100 p-4 text-center">
                                 <AlertTriangle size={32} className="text-info mb-2" />
                                 <h3 className="fw-bold">{stats.inProgress}</h3>
                                 <p className="text-muted mb-0">In Progress</p>
-                            </div>
                         </div>
                     </div>
                     <div className="col-md-3">
-                        <div className="card border-0 shadow-sm h-100">
-                            <div className="card-body text-center">
+                        <div className="glass-card-premium h-100 p-4 text-center">
                                 <CheckCircle2 size={32} className="text-success mb-2" />
                                 <h3 className="fw-bold">{stats.resolved}</h3>
                                 <p className="text-muted mb-0">Resolved</p>
-                            </div>
                         </div>
                     </div>
                 </div>

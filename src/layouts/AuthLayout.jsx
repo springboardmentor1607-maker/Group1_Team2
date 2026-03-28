@@ -17,19 +17,28 @@ const AuthLayout = ({ children, title, subtitle }) => {
                     style={{ maxWidth: '480px', zIndex: 1 }}
                 >
                     <div className="text-center mb-4">
-                        <div className="d-flex justify-content-center mb-3">
-                            <div className="p-3 rounded-4 shadow-lg" style={{ background: 'linear-gradient(135deg, #0071e3 0%, #32ade6 100%)' }}>
-                                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M6 18V26H10V18H6ZM11 15V26H15V15H11ZM16 17V26H20V17H16ZM21 19V26H25V19H21Z" fill="white" />
-                                    <path d="M13 13L14 13L14 21L12 21L12 13Z" fill="white" transform="rotate(-45 14 14)" />
-                                    <circle cx="20" cy="8" r="1.5" fill="white" />
-                                    <circle cx="24" cy="10" r="1" fill="white" />
-                                    <circle cx="18" cy="11" r="1" fill="white" />
-                                </svg>
-                            </div>
-                        </div>
-                        <h1 className="fw-bold fs-2 text-body mb-2">CleanStreet</h1>
-                        <p className="text-muted">{subtitle || "Civic Issue Tracking Platform"}</p>
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.2, duration: 0.5 }}
+                            className="d-inline-flex justify-content-center align-items-center mb-4 p-3 rounded-circle glass-card"
+                            style={{ 
+                                width: '80px', 
+                                height: '80px',
+                                background: 'rgba(0, 113, 227, 0.1)',
+                                border: '1px solid rgba(0, 113, 227, 0.2)'
+                            }}
+                        >
+                            <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 18V26H10V18H6ZM11 15V26H15V15H11ZM16 17V26H20V17H16ZM21 19V26H25V19H21Z" fill="var(--primary-color)" />
+                                <path d="M13 13L14 13L14 21L12 21L12 13Z" fill="var(--primary-color)" transform="rotate(-45 14 14)" />
+                                <circle cx="20" cy="8" r="1.5" fill="var(--primary-color)" />
+                                <circle cx="24" cy="10" r="1" fill="var(--primary-color)" />
+                                <circle cx="18" cy="11" r="1" fill="var(--primary-color)" />
+                            </svg>
+                        </motion.div>
+                        <h1 className="fw-bold fs-1 text-body mb-2" style={{ letterSpacing: '-0.04em' }}>CleanStreet</h1>
+                        <p className="text-muted fs-5">{subtitle || "Civic Issue Tracking Platform"}</p>
                     </div>
 
                     {children}

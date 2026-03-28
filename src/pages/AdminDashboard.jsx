@@ -246,54 +246,49 @@ const AdminDashboard = () => {
                 transition={{ duration: 0.5 }}
             >
                 <div className="mb-4">
-                    <h1 className="display-5 fw-bold mb-2" style={{
-                        background: 'linear-gradient(135deg, var(--primary-color), var(--accent-1))',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
+                    <h1 className="display-5 fw-bold mb-2 d-flex align-items-center apple-gradient-text" style={{
+                        letterSpacing: '-0.03em',
+                        textShadow: '0 10px 30px rgba(66, 133, 244, 0.1)'
                     }}>
-                        <Settings className="me-3" size={48} />Admin Dashboard
+                        <Settings className="me-3 text-primary opacity-90" size={40} />Admin Panel
                     </h1>
                     <p className="text-muted">Manage complaints, users, and volunteers</p>
                 </div>
 
                 {/* Stats Cards */}
-                <div className="row g-4 mb-4">
-                    <div className="col-md-3">
-                        <div className="card border-0 shadow-sm h-100">
-                            <div className="card-body text-center">
-                                <FileText size={32} className="text-primary mb-2" />
-                                <h3 className="fw-bold">{stats.total}</h3>
-                                <p className="text-muted mb-0">Total Complaints</p>
-                            </div>
+                <div className="row g-4 mb-5">
+                    {[
+                        { title: 'Total Complaints', value: stats.total, icon: FileText, color: 'text-primary', bg: 'rgba(66, 133, 244, 0.12)' },
+                        { title: 'Pending', value: stats.pending, icon: AlertTriangle, color: 'text-warning', bg: 'rgba(255, 193, 7, 0.12)' },
+                        { title: 'Volunteers', value: volunteers.length, icon: Users, color: 'text-info', bg: 'rgba(13, 202, 240, 0.12)' },
+                        { title: 'Resolved', value: stats.resolved, icon: UserCheck, color: 'text-success', bg: 'rgba(25, 135, 84, 0.12)' }
+                    ].map((item, idx) => (
+                        <div className="col-md-3" key={idx}>
+                            <motion.div 
+                                whileHover={{ y: -8, scale: 1.02 }}
+                                className="glass-card-premium h-100"
+                                style={{ 
+                                    border: '1px solid rgba(255, 255, 255, 0.4)',
+                                    boxShadow: '0 20px 40px rgba(0,0,0,0.06)'
+                                }}
+                            >
+                                <div className="card-body p-4 d-flex flex-column align-items-center text-center">
+                                    <div className={`p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center shadow-sm`}
+                                         style={{ 
+                                             background: item.bg,
+                                             width: '64px',
+                                             height: '64px',
+                                             border: '1px solid rgba(255, 255, 255, 0.6)',
+                                             boxShadow: 'inset 0 0 12px rgba(255,255,255,0.4)'
+                                         }}>
+                                        <item.icon size={28} className={item.color} />
+                                    </div>
+                                    <h2 className="fw-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{item.value}</h2>
+                                    <p className="text-muted small fw-bold text-uppercase tracking-wider mb-0" style={{ opacity: 0.8 }}>{item.title}</p>
+                                </div>
+                            </motion.div>
                         </div>
-                    </div>
-                    <div className="col-md-3">
-                        <div className="card border-0 shadow-sm h-100">
-                            <div className="card-body text-center">
-                                <AlertTriangle size={32} className="text-warning mb-2" />
-                                <h3 className="fw-bold">{stats.pending}</h3>
-                                <p className="text-muted mb-0">Pending</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-md-3">
-                        <div className="card border-0 shadow-sm h-100">
-                            <div className="card-body text-center">
-                                <Users size={32} className="text-info mb-2" />
-                                <h3 className="fw-bold">{volunteers.length}</h3>
-                                <p className="text-muted mb-0">Volunteers</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-md-3">
-                        <div className="card border-0 shadow-sm h-100">
-                            <div className="card-body text-center">
-                                <UserCheck size={32} className="text-success mb-2" />
-                                <h3 className="fw-bold">{stats.resolved}</h3>
-                                <p className="text-muted mb-0">Resolved</p>
-                            </div>
-                        </div>
-                    </div>
+                    ))}
                 </div>
 
                 {/* Tabs */}

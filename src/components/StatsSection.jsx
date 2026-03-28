@@ -8,15 +8,25 @@ const StatCard = ({ title, value, icon: Icon, color, delay }) => (
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay, duration: 0.5 }}
-            className="card border-0 shadow-lg p-4 rounded-xl hover-shadow-xl transition-shadow h-100"
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="glass-card-premium p-4 h-100"
+            style={{ 
+                border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}
         >
-            <div className="d-flex align-items-center justify-content-between h-100">
+            <div className="d-flex align-items-center justify-content-between">
                 <div>
-                    <p className="small fw-medium text-body-secondary mb-2">{title}</p>
-                    <p className="fs-2 fw-bold text-body m-0">{value}</p>
+                    <h2 className="fw-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{value}</h2>
+                    <p className="text-muted small fw-semibold text-uppercase tracking-wider mb-0">{title}</p>
                 </div>
-                <div className={`p-3 rounded-circle text-white ${color}`}>
-                    <Icon className="w-6 h-6" />
+                <div className={`p-3 rounded-circle d-flex align-items-center justify-content-center shadow-sm ${color}`} 
+                     style={{ 
+                         width: '56px', 
+                         height: '56px',
+                         border: '1px solid rgba(255, 255, 255, 0.5)',
+                         boxShadow: 'inset 0 0 10px rgba(255,255,255,0.2)'
+                     }}>
+                    <Icon size={26} />
                 </div>
             </div>
         </motion.div>
@@ -27,10 +37,10 @@ export default function StatsSection({ stats }) {
     if (!stats) return null;
 
     const data = [
-        { title: 'Total Complaints', value: stats.total, icon: FileText, color: 'bg-primary' },
-        { title: 'Pending', value: stats.pending, icon: Clock, color: 'bg-warning' },
-        { title: 'Progress', value: stats.inProgress, icon: RefreshCw, color: 'bg-info' },
-        { title: 'Resolved', value: stats.resolved, icon: CheckCircle, color: 'bg-success' },
+        { title: 'Total Complaints', value: stats.total, icon: FileText, color: 'bg-primary bg-opacity-10 text-primary' },
+        { title: 'Pending Issues', value: stats.pending, icon: Clock, color: 'bg-warning bg-opacity-10 text-warning' },
+        { title: 'In Progress', value: stats.inProgress, icon: RefreshCw, color: 'bg-info bg-opacity-10 text-info' },
+        { title: 'Resolved', value: stats.resolved, icon: CheckCircle, color: 'bg-success bg-opacity-10 text-success' },
     ];
 
     return (

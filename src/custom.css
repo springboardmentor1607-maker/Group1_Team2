@@ -5,50 +5,50 @@
 :root,
 [data-bs-theme="light"] {
     --bs-body-bg: transparent;
-    --bs-body-color: #1d1d1f;
-    --bs-secondary-color: #86868b;
-    --bs-border-color: rgba(0, 0, 0, 0.08);
+    --bs-body-color: #1a1f36;
+    --bs-secondary-color: #4a5568;
+    --bs-border-color: rgba(66, 133, 244, 0.1);
 
-    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);
-    --sidebar-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
-    --active-item-bg: rgba(0, 113, 227, 0.1);
-    --active-item-color: #0071e3;
-    --hover-item-bg: rgba(255, 255, 255, 0.6);
+    --card-bg: rgba(255, 255, 255, 0.82);
+    --sidebar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(244, 249, 255, 0.65) 100%);
+    --active-item-bg: rgba(66, 133, 244, 0.1);
+    --active-item-color: #4285f4;
+    --hover-item-bg: rgba(66, 133, 244, 0.04);
 
-    --card-border-top: rgba(255, 255, 255, 0.9);
-    --card-border-left: rgba(255, 255, 255, 0.8);
+    --card-border-top: rgba(255, 255, 255, 0.8);
+    --card-border-left: rgba(255, 255, 255, 0.5);
 
     --map-filter: none;
-    --btn-gradient-bg: linear-gradient(180deg, #f5f5f7 0%, #e8e8ed 100%);
-    --btn-gradient-hover: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%);
-    --btn-gradient-text: #1d1d1f;
-    --alert-border: rgba(0, 0, 0, 0.08);
-    --border-light: rgba(0, 0, 0, 0.08);
-    --liquid-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.8), inset -3px -3px 7px rgba(0, 0, 0, 0.05), var(--shadow-lg);
+    --btn-gradient-bg: linear-gradient(180deg, #4285f4 0%, #1a73e8 100%);
+    --btn-gradient-hover: linear-gradient(180deg, #1a73e8 0%, #185abc 100%);
+    --btn-gradient-text: #ffffff;
+    --alert-border: rgba(66, 133, 244, 0.15);
+    --border-light: rgba(66, 133, 244, 0.1);
+    --liquid-shadow: 0 15px 45px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
 [data-bs-theme="dark"] {
     --bs-body-bg: transparent;
-    --bs-body-color: #f5f5f7;
-    --bs-secondary-color: #86868b;
-    --bs-border-color: rgba(255, 255, 255, 0.08);
+    --bs-body-color: #f8fafc;
+    --bs-secondary-color: #94a3b8;
+    --bs-border-color: rgba(255, 255, 255, 0.1);
 
-    --card-bg: linear-gradient(145deg, #1f1f25 0%, #121215 100%);
-    --sidebar-bg: linear-gradient(180deg, #111115 0%, #0a0a0c 100%);
-    --active-item-bg: linear-gradient(90deg, rgba(80, 20, 120, 0.3) 0%, rgba(20, 80, 140, 0.2) 100%);
-    --active-item-color: #ffffff;
-    --hover-item-bg: #2c2c2e;
+    --card-bg: linear-gradient(145deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+    --sidebar-bg: linear-gradient(180deg, #0a0e17 0%, #121721 100%);
+    --active-item-bg: rgba(66, 133, 244, 0.15);
+    --active-item-color: #8ab4f8;
+    --hover-item-bg: rgba(255, 255, 255, 0.04);
 
-    --card-border-top: rgba(255, 255, 255, 0.05);
+    --card-border-top: rgba(255, 255, 255, 0.1);
     --card-border-left: rgba(255, 255, 255, 0.05);
 
     --map-filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-    --btn-gradient-bg: #2c2c2e;
-    --btn-gradient-hover: #3a3a3c;
+    --btn-gradient-bg: linear-gradient(180deg, #4285f4 0%, #1a73e8 100%);
+    --btn-gradient-hover: linear-gradient(180deg, #1a73e8 0%, #185abc 100%);
     --btn-gradient-text: #ffffff;
     --alert-border: rgba(255, 255, 255, 0.1);
-    --border-light: rgba(255, 255, 255, 0.1);
-    --liquid-shadow: var(--shadow-sm);
+    --border-light: rgba(255, 255, 255, 0.08);
+    --liquid-shadow: 0 15px 45px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 body {
@@ -62,16 +62,20 @@ body {
 .card,
 .dashboard-card {
     background: var(--card-bg);
-    backdrop-filter: saturate(150%) blur(10px);
-    -webkit-backdrop-filter: saturate(150%) blur(10px);
+    backdrop-filter: saturate(180%) blur(50px);
+    -webkit-backdrop-filter: saturate(180%) blur(50px);
     color: var(--bs-body-color);
     border: 1px solid var(--bs-border-color);
     border-radius: var(--border-radius);
-    box-shadow: var(--liquid-shadow);
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, background-color 0.4s ease;
+    box-shadow: 
+        var(--shadow-md), 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease;
     overflow: hidden;
-    will-change: transform, opacity;
-    transform: translateZ(0);
+    position: relative;
+    border-top: 1px solid var(--card-border-top);
+    border-left: 1px solid var(--card-border-left);
 }
 
 .sidebar {
@@ -384,7 +388,7 @@ body {
 }
 
 .notification-item.unread {
-    background: rgba(102, 126, 234, 0.05);
+    background: rgba(66, 133, 244, 0.05);
 }
 
 .notification-item.unread::before {

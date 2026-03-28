@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Home, MapPin, FileText, User, Settings, LogOut, AlertTriangle, Shield, ClipboardList, Moon, Sun, Bell } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -60,16 +60,18 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                     width: isOpen ? '280px' : '80px',
                     borderRight: '1px solid var(--bs-border-color)',
                     transition: 'width 0.3s ease',
-                    backgroundColor: 'var(--sidebar-bg)'
+                    backgroundColor: 'var(--sidebar-bg)',
+                    backdropFilter: 'blur(50px) saturate(200%)'
                 }}
                 initial={false}
             >
                 {/* Logo Section */}
-                <div
-                    className="d-flex align-items-center px-4 py-3 border-bottom"
+                <Link
+                    to="/"
+                    className="d-flex align-items-center px-4 py-3 border-bottom text-decoration-none"
                     style={{
                         height: '70px',
-                        backgroundColor: 'var(--bs-body-bg)',
+                        backgroundColor: 'transparent',
                         borderColor: 'var(--bs-border-color)'
                     }}
                 >
@@ -78,7 +80,7 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                             style={{
                                 width: '40px',
                                 height: '40px',
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                background: 'var(--hero-gradient)'
                             }}>
                             <span className="text-white fw-bold fs-5">CS</span>
                         </div>
@@ -93,7 +95,7 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                             </motion.div>
                         )}
                     </div>
-                </div>
+                </Link>
 
                 {/* Navigation Menu */}
                 <nav className="flex-grow-1 p-3">
@@ -108,17 +110,17 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                                     onClick={() => navigate(item.path)}
                                     whileHover={{ scale: 1.02, x: 4 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className={`btn d-flex align-items-center w-100 text-start border-0 rounded-3 mb-2 p-3 position-relative ${isActive
-                                        ? 'nav-link active text-white'
+                                    className={`btn d-flex align-items-center w-100 text-start border-0 rounded-3 mb-1 p-2 position-relative ${isActive
+                                        ? 'nav-link active'
                                         : 'bg-transparent'
                                         }`}
                                     style={{
                                         background: isActive
-                                            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                            ? 'var(--active-item-bg)'
                                             : 'transparent',
-                                        color: !isActive ? 'var(--bs-body-color)' : 'white',
+                                        color: isActive ? 'var(--active-item-color)' : 'var(--bs-body-color)',
                                         boxShadow: isActive
-                                            ? '0 4px 12px rgba(102, 126, 234, 0.3)'
+                                            ? '0 4px 12px rgba(66, 133, 244, 0.15)'
                                             : 'none',
                                         transition: 'all 0.3s ease'
                                     }}
@@ -134,9 +136,10 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                                     }}
                                 >
                                     <Icon
-                                        size={20}
+                                        size={18}
+                                        strokeWidth={1.5}
                                         className={`${isOpen ? 'me-3' : ''} flex-shrink-0`}
-                                        style={{ minWidth: '20px' }}
+                                        style={{ minWidth: '18px' }}
                                     />
                                     {isOpen && (
                                         <motion.span
@@ -149,8 +152,8 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                                     )}
                                     {isActive && (
                                         <motion.div
-                                            className="position-absolute top-50 translate-middle-y bg-white rounded-pill"
-                                            style={{ right: '8px', width: '4px', height: '20px' }}
+                                            className="position-absolute top-50 translate-middle-y rounded-pill"
+                                            style={{ right: '8px', width: '4px', height: '20px', backgroundColor: 'var(--active-item-color)' }}
                                             initial={{ scale: 0 }}
                                             animate={{ scale: 1 }}
                                         />
@@ -163,34 +166,9 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
 
                 {/* User Section */}
                 <div className="p-3 border-top" style={{
-                    backgroundColor: 'var(--bs-body-bg)',
+                    backgroundColor: 'transparent',
                     borderColor: 'var(--bs-border-color)'
                 }}>
-                    {/* User Profile */}
-                    <div className={`d-flex align-items-center mb-3 p-3 rounded-3 shadow-sm ${!isOpen ? 'justify-content-center' : ''}`}
-                        style={{ backgroundColor: 'var(--card-bg)' }}>
-                        <div
-                            className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                            style={{
-                                width: '44px',
-                                height: '44px',
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                fontSize: '14px'
-                            }}
-                        >
-                            {initials}
-                        </div>
-                        {isOpen && (
-                            <motion.div
-                                className="ms-3 min-w-0"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                            >
-                                <p className="mb-0 fw-semibold text-truncate" style={{ color: 'var(--bs-body-color)' }}>{user?.name || 'User'}</p>
-                                <small className="text-capitalize" style={{ color: 'var(--bs-secondary-color)' }}>{user?.role || 'Citizen'}</small>
-                            </motion.div>
-                        )}
-                    </div>
 
                     {/* Theme Toggle Button */}
                     <motion.button

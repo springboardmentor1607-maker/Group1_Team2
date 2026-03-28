@@ -78,7 +78,7 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                     whileTap={{ scale: 0.95 }}
                     style={{ backgroundColor: 'var(--hover-item-bg)' }}
                 >
-                    <Menu size={20} />
+                    <Menu size={18} strokeWidth={1.5} />
                 </motion.button>
 
                 {/* Page Title & Description */}
@@ -113,7 +113,7 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                     whileTap={{ scale: 0.95 }}
                     style={{ backgroundColor: 'var(--hover-item-bg)' }}
                 >
-                    <Search size={18} />
+                    <Search size={18} strokeWidth={1.5} />
                 </motion.button>
 
                 {/* Notifications */}
@@ -125,7 +125,7 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                         whileTap={{ scale: 0.95 }}
                         style={{ backgroundColor: 'var(--hover-item-bg)' }}
                     >
-                        <Bell size={18} />
+                        <Bell size={18} strokeWidth={1.5} />
                         {unreadCount > 0 && (
                             <span
                                 className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
@@ -150,7 +150,7 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                     whileTap={{ scale: 0.95 }}
                     style={{ backgroundColor: 'var(--hover-item-bg)' }}
                 >
-                    {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+                    {theme === 'light' ? <Moon size={18} strokeWidth={1.5} /> : <Sun size={18} strokeWidth={1.5} />}
                 </motion.button>
 
                 {/* Divider */}
@@ -185,7 +185,7 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                         style={{
                             width: '42px',
                             height: '42px',
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            background: 'var(--hero-gradient)',
                             fontSize: '14px'
                         }}
                     >
@@ -193,7 +193,7 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                     </div>
 
                     {/* Dropdown Arrow */}
-                    <ChevronDown size={16} className="d-none d-lg-block" style={{ color: 'var(--bs-secondary-color)' }} />
+                    <ChevronDown size={14} strokeWidth={2} className="d-none d-lg-block" style={{ color: 'var(--bs-secondary-color)' }} />
                 </motion.div>
             </div>
         </motion.header>

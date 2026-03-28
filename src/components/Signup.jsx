@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 import PageWrapper from './PageWrapper';
+import AuthWrapper from './AuthWrapper';
 
 function Signup({ onLogin }) {
     const [formData, setFormData] = useState({
@@ -146,130 +148,170 @@ function Signup({ onLogin }) {
     }
 
     return (
-        <PageWrapper className="auth-card">
-            <div className="card">
-                <div className="card-body">
-                    <h2 className="card-title text-center mb-4">Register for CleanStreet</h2>
-                    <form onSubmit={handleSubmit}>
-                        <div className="mb-3">
-                            <label htmlFor="signupFullName" className="form-label">Full Name</label>
-                            <input
-                                type="text"
-                                className={`form-control ${errors.fullName ? 'is-invalid' : ''}`}
-                                id="signupFullName"
-                                name="fullName"
-                                placeholder="Enter your full name"
-                                value={formData.fullName}
-                                onChange={handleChange}
-                            />
-                            {errors.fullName && <div className="text-danger small mt-1">{errors.fullName}</div>}
-                        </div>
+        <AuthWrapper mode="signup">
+            <form onSubmit={handleSubmit}>
+                <div className="row">
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="col-12 mb-3"
+                    >
+                        <label htmlFor="signupFullName" className="form-label text-muted fw-semibold">Full Name</label>
+                    <input
+                        type="text"
+                        className={`form-control glass-input py-2 ${errors.fullName ? 'is-invalid border-danger' : ''}`}
+                        id="signupFullName"
+                        name="fullName"
+                        placeholder="John Doe"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                    />
+                    {errors.fullName && <div className="text-danger small mt-2 fw-medium">{errors.fullName}</div>}
+                    </motion.div>
 
-                        <div className="mb-3">
-                            <label htmlFor="signupUsername" className="form-label">Username</label>
-                            <input
-                                type="text"
-                                className={`form-control ${errors.username ? 'is-invalid' : ''}`}
-                                id="signupUsername"
-                                name="username"
-                                placeholder="Choose a username"
-                                value={formData.username}
-                                onChange={handleChange}
-                            />
-                            {errors.username && <div className="text-danger small mt-1">{errors.username}</div>}
-                        </div>
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="col-md-6 mb-3"
+                    >
+                        <label htmlFor="signupUsername" className="form-label text-muted fw-semibold">Username</label>
+                    <input
+                        type="text"
+                        className={`form-control glass-input py-2 ${errors.username ? 'is-invalid border-danger' : ''}`}
+                        id="signupUsername"
+                        name="username"
+                        placeholder="johndoe123"
+                        value={formData.username}
+                        onChange={handleChange}
+                    />
+                    {errors.username && <div className="text-danger small mt-2 fw-medium">{errors.username}</div>}
+                    </motion.div>
 
-                        <div className="mb-3">
-                            <label htmlFor="signupEmail" className="form-label">Email</label>
-                            <input
-                                type="email"
-                                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                                id="signupEmail"
-                                name="email"
-                                placeholder="Enter your email"
-                                value={formData.email}
-                                onChange={handleChange}
-                            />
-                            {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="signupRole" className="form-label">I am registering as</label>
-                            <select
-                                className="form-control"
-                                id="signupRole"
-                                name="role"
-                                value={formData.role}
-                                onChange={handleChange}
-                            >
-                                <option value="citizen">Citizen (File complaints)</option>
-                                <option value="volunteer">Volunteer (Handle complaints)</option>
-                                <option value="admin">Admin (Manage system)</option>
-                            </select>
-                            <small className="text-muted">Citizens file complaints. Volunteers update work progress. Admins manage the entire system.</small>
-                        </div>
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="col-md-6 mb-3"
+                    >
+                        <label htmlFor="signupPhone" className="form-label text-muted fw-semibold">Phone Number</label>
+                        <input
+                            type="tel"
+                            className={`form-control glass-input py-2 ${errors.phone ? 'is-invalid border-danger' : ''}`}
+                            id="signupPhone"
+                            name="phone"
+                            placeholder="(555) 000-0000"
+                            value={formData.phone}
+                            onChange={handleChange}
+                        />
+                        {errors.phone && <div className="text-danger small mt-2 fw-medium">{errors.phone}</div>}
+                    </motion.div>
 
-                        <div className="mb-3">
-                            <label htmlFor="signupPhone" className="form-label">Phone Number</label>
-                            <input
-                                type="tel"
-                                className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
-                                id="signupPhone"
-                                name="phone"
-                                placeholder="Enter your phone number"
-                                value={formData.phone}
-                                onChange={handleChange}
-                            />
-                            {errors.phone && <div className="text-danger small mt-1">{errors.phone}</div>}
-                        </div>
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="col-12 mb-3"
+                    >
+                        <label htmlFor="signupEmail" className="form-label text-muted fw-semibold">Email Address</label>
+                    <input
+                        type="email"
+                        className={`form-control glass-input py-2 ${errors.email ? 'is-invalid border-danger' : ''}`}
+                        id="signupEmail"
+                        name="email"
+                        placeholder="name@example.com"
+                        value={formData.email}
+                        onChange={handleChange}
+                    />
+                    {errors.email && <div className="text-danger small mt-2 fw-medium">{errors.email}</div>}
+                    </motion.div>
 
-                        <div className="mb-4">
-                            <label htmlFor="signupPassword" className="form-label">Password</label>
-                            <input
-                                type="password"
-                                className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                                id="signupPassword"
-                                name="password"
-                                placeholder="Create a password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                onFocus={() => setPasswordFocused(true)}
-                                onBlur={() => setPasswordFocused(false)}
-                            />
-                            {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
-                            {passwordFocused && (
-                                <div className="mt-2">
-                                    <small className={passwordValidation.minLength ? 'text-success' : 'text-danger'}>
-                                        {passwordValidation.minLength ? '✓' : '✗'} At least 8 characters
-                                    </small>
-                                    <br />
-                                    <small className={passwordValidation.hasCapital ? 'text-success' : 'text-danger'}>
-                                        {passwordValidation.hasCapital ? '✓' : '✗'} At least 1 capital letter
-                                    </small>
-                                    <br />
-                                    <small className={passwordValidation.hasSpecial ? 'text-success' : 'text-danger'}>
-                                        {passwordValidation.hasSpecial ? '✓' : '✗'} At least 1 special character (!@#$%^&*...)
-                                    </small>
-                                </div>
-                            )}
-                        </div>
-                        <button
-                            type="submit"
-                            className="btn btn-primary w-100 mb-3"
-                        >
-                            Register
-                        </button>
-                        <div className="text-center">
-                            <small className="text-muted">
-                                Already have an account?{' '}
-                                <Link to="/login" className="text-decoration-none">
-                                    Login
-                                </Link>
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className="col-12 mb-3"
+                    >
+                        <label htmlFor="signupRole" className="form-label text-muted fw-semibold">Account Type</label>
+                    <select
+                        className="form-select glass-input py-2"
+                        id="signupRole"
+                        name="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                    >
+                        <option value="citizen">Citizen (File complaints)</option>
+                        <option value="volunteer">Volunteer (Handle complaints)</option>
+                        <option value="admin">Admin (Manage system)</option>
+                    </select>
+                    </motion.div>
+
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="col-12 mb-4"
+                    >
+                        <label htmlFor="signupPassword" className="form-label text-muted fw-semibold">Password</label>
+                    <input
+                        type="password"
+                        className={`form-control glass-input py-2 ${errors.password ? 'is-invalid border-danger' : ''}`}
+                        id="signupPassword"
+                        name="password"
+                        placeholder="Create a secure password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        onFocus={() => setPasswordFocused(true)}
+                        onBlur={() => setPasswordFocused(false)}
+                    />
+                    {errors.password && <div className="text-danger small mt-2 fw-medium">{errors.password}</div>}
+                    {passwordFocused && (
+                        <div className="mt-2">
+                            <small className={passwordValidation.minLength ? 'text-success' : 'text-danger'}>
+                                {passwordValidation.minLength ? '✓' : '✗'} At least 8 characters
+                            </small>
+                            <br />
+                            <small className={passwordValidation.hasCapital ? 'text-success' : 'text-danger'}>
+                                {passwordValidation.hasCapital ? '✓' : '✗'} At least 1 capital letter
+                            </small>
+                            <br />
+                            <small className={passwordValidation.hasSpecial ? 'text-success' : 'text-danger'}>
+                                {passwordValidation.hasSpecial ? '✓' : '✗'} At least 1 special character (!@#$%^&*...)
                             </small>
                         </div>
-                    </form>
+                    )}
+                    </motion.div>
                 </div>
-            </div>
-        </PageWrapper>
+                
+                <motion.button
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7 }}
+                    whileHover={{ scale: 1.02, translateY: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    className="btn btn-primary w-100 py-3 mb-4 rounded-4 fw-bold shadow-lg border-0 shimmer-button"
+                    style={{ background: 'var(--primary-color)', letterSpacing: '0.01em' }}
+                >
+                    Create Account
+                </motion.button>
+                
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                    className="text-center"
+                >
+                    <span className="text-muted fw-medium">
+                        Already have an account?{' '}
+                        <Link to="/login" className="text-primary fw-bold text-decoration-none">
+                            Log In
+                        </Link>
+                    </span>
+                </motion.div>
+            </form>
+        </AuthWrapper>
     )
 }
 

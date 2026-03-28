@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, User, CheckCircle, RefreshCw, ThumbsUp, ThumbsDown, MessageSquare, Send, Trash2, Image as ImageIcon, Map as MapIcon, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -8,32 +8,32 @@ import Skeleton from './Skeleton';
 const getStatusBadge = (status) => {
     const s = (status || 'pending').toLowerCase();
     const statusMap = {
-        'pending': 'warning',
-        'progress': 'info',
-        'in progress': 'info',
-        'resolved': 'success',
+        'pending': 'status-pending',
+        'progress': 'status-progress',
+        'in progress': 'status-progress',
+        'resolved': 'status-resolved',
     };
-    return `badge bg-${statusMap[s] || 'warning'} rounded-pill`;
+    return `status-badge ${statusMap[s] || 'status-pending'}`;
 };
 
 const getPriorityBadge = (priority) => {
     const p = (priority || 'medium').toLowerCase();
     const priorityMap = {
-        'critical': 'bg-danger text-white',
-        'high': 'bg-warning text-dark',
-        'medium': 'bg-primary text-white',
-        'low': 'bg-success text-white'
+        'critical': 'priority-critical',
+        'high': 'priority-high',
+        'medium': 'priority-medium',
+        'low': 'priority-low'
     };
-    return `badge ${priorityMap[p] || 'bg-primary text-white'} rounded-pill px-2 py-1 small fw-medium`;
+    return `priority-badge ${priorityMap[p] || 'priority-medium'}`;
 };
 
 const getStatusIcon = (status) => {
     const s = (status || 'pending').toLowerCase();
     switch (s) {
-        case 'resolved': return <CheckCircle size={16} className="text-success" />;
+        case 'resolved': return <CheckCircle size={14} className="text-success opacity-75" />;
         case 'progress':
-        case 'in progress': return <RefreshCw size={16} className="text-info" />;
-        default: return <Clock size={16} className="text-warning" />;
+        case 'in progress': return <RefreshCw size={14} className="text-primary opacity-75" />;
+        default: return <Clock size={14} className="text-warning opacity-75" />;
     }
 };
 
@@ -59,27 +59,45 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
     const [loadingComments, setLoadingComments] = useState(false);
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
     const [showBigIcon, setShowBigIcon] = useState(null);
+    const [isRevealed, setIsRevealed] = useState(false);
     const [isPhotoFocused, setIsPhotoFocused] = useState(false);
-
-    // Async Photo Loading
-    const [photoData, setPhotoData] = useState(null);
+    const [fetchedPhotoData, setFetchedPhotoData] = useState(null);
     const [loadingPhoto, setLoadingPhoto] = useState(false);
+    const [viewingOriginal, setViewingOriginal] = useState(false);
 
-    const fetchPhoto = async (e) => {
+    // Derived photo data (prefers props if already present in complaint object)
+    const photoData = fetchedPhotoData || {
+        photo: complaint.photo,
+        volunteer_photo: complaint.volunteer_photo
+    };
+
+    const hasAnyPhoto = complaint.has_photo || complaint.has_volunteer_photo || photoData.photo || photoData.volunteer_photo;
+    const isResolved = complaint.status?.toLowerCase() === 'resolved';
+
+    // If resolved, default to volunteer photo, otherwise original
+    const displayPhoto = viewingOriginal ? photoData.photo : (photoData.volunteer_photo || photoData.photo);
+    const isShowingProof = !viewingOriginal && photoData.volunteer_photo;
+
+    const fetchPhoto = async (e, shouldFocus = true) => {
         if (e) e.stopPropagation();
-        if ((complaint.has_photo || complaint.has_volunteer_photo) && !photoData && !loadingPhoto) {
+        
+        // Mark as revealed immediately on click
+        setIsRevealed(true);
+        
+        // Only fetch if data is missing
+        if ((complaint.has_photo || complaint.has_volunteer_photo) && !photoData.photo && !photoData.volunteer_photo && !loadingPhoto) {
             setLoadingPhoto(true);
             try {
                 const res = await api.get(`/complaints/${complaint.id}/photo`);
-                setPhotoData(res.data);
-                setIsPhotoFocused(true); // Auto focus on first reveal
+                setFetchedPhotoData(res.data);
+                if (shouldFocus) setIsPhotoFocused(true); 
             } catch (err) {
                 console.error('Error fetching complaint photo:', err);
             } finally {
                 setLoadingPhoto(false);
             }
-        } else if (photoData) {
-            setIsPhotoFocused(true); // Focus if photo already exists
+        } else if (shouldFocus) {
+            setIsPhotoFocused(true); 
         }
     };
 
@@ -180,18 +198,14 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                 layout: { duration: 0.5, type: 'spring', bounce: 0.2 }
             }}
             whileHover={{ y: -5, scale: 1.01 }}
-            className="card border-0 overflow-hidden position-relative"
+            className="glass-card-premium overflow-hidden position-relative h-100"
             style={{
-                background: 'var(--bg-card)',
-                backdropFilter: 'blur(25px)',
-                WebkitBackdropFilter: 'blur(25px)',
-                border: '1px solid var(--border-glass)',
-                borderRadius: '24px',
-                transition: 'box-shadow 0.3s ease',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                boxShadow: 'var(--shadow-lg)'
+                boxShadow: '0 20px 40px rgba(0,0,0,0.08)'
             }}
         >
             {/* Focus Mode Navigation Overlay */}
@@ -265,7 +279,7 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                 )}
             </AnimatePresence>
 
-            {(complaint.has_photo || complaint.has_volunteer_photo) && (
+            {hasAnyPhoto && (
                 <motion.div 
                     layout
                     onClick={!isPhotoFocused ? fetchPhoto : undefined}
@@ -288,32 +302,47 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                 >
                     {loadingPhoto ? (
                         <div className="h-100"><Skeleton width="100%" height="100%" /></div>
-                    ) : (photoData?.photo || photoData?.volunteer_photo) ? (
+                    ) : (isRevealed && (photoData?.photo || photoData?.volunteer_photo)) ? (
                         <div className="h-100 position-relative">
                             <motion.img 
                                 initial={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
                                 animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                                src={photoData?.volunteer_photo || photoData?.photo}
+                                src={displayPhoto}
                                 alt="Complaint"
-                                style={{
-                                    width: '100%', 
-                                    height: '100%',
-                                    objectFit: 'cover'
-                                }} 
+                                className="w-100 h-100 object-fit-cover"
                             />
-                            {photoData?.volunteer_photo && photoData?.photo && (
+                            {photoData.volunteer_photo && (
                                 <div 
-                                    className="position-absolute bottom-0 start-0 w-100 p-2 d-flex justify-content-center gap-2"
+                                    className="position-absolute top-0 end-0 p-2 z-10"
                                     onClick={e => e.stopPropagation()}
                                 >
-                                    <span className="badge bg-success shadow-sm">Showing Proof of Work</span>
+                                    <div className="d-flex flex-column gap-2 align-items-end">
+                                        <span className={`badge ${isShowingProof ? 'bg-success' : 'bg-primary'} shadow-lg border border-white border-opacity-25`} style={{ backdropFilter: 'blur(8px)', padding: '8px 12px' }}>
+                                            {isShowingProof ? (
+                                                <><CheckCircle size={14} className="me-1" /> Proof of Work</>
+                                            ) : (
+                                                <><Clock size={14} className="me-1" /> Original Issue</>
+                                            )}
+                                        </span>
+                                        
+                                        {photoData.volunteer_photo && photoData.photo && (
+                                            <button 
+                                                className="btn btn-sm btn-light rounded-pill shadow-sm py-1 px-3 border-0 bg-white"
+                                                style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--primary-color)' }}
+                                                onClick={() => setViewingOriginal(!viewingOriginal)}
+                                            >
+                                                Switch to {viewingOriginal ? 'Proof' : 'Original'}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
                     ) : (
                         <div 
-                            className="d-flex flex-column align-items-center justify-content-center h-100 p-4"
+                            className="d-flex flex-column align-items-center justify-content-center h-100 p-4 cursor-pointer"
+                            onClick={fetchPhoto}
                             style={{
                                 background: 'radial-gradient(circle at center, rgba(128, 128, 128, 0.08) 0%, rgba(0, 0, 0, 0.03) 100%)',
                                 position: 'relative',
@@ -328,45 +357,30 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                                 <div 
                                     className="rounded-circle d-flex align-items-center justify-content-center mb-1 shadow-lg"
                                     style={{ 
-                                        width: '72px', height: '72px', 
+                                        width: '64px', height: '64px', 
                                         background: 'rgba(255, 255, 255, 0.05)',
                                         backdropFilter: 'blur(12px)',
                                         border: '1px solid rgba(255, 255, 255, 0.3)',
                                         color: 'var(--primary-color)'
                                     }}
                                 >
-                                    <ImageIcon size={36} strokeWidth={1.2} className="opacity-75" />
+                                    <ImageIcon size={32} strokeWidth={1.5} className="opacity-75" />
                                 </div>
                                 <div 
-                                    className="px-4 py-2 rounded-pill fw-bold position-relative overflow-hidden"
+                                    className="px-4 py-2 rounded-pill fw-bold position-relative overflow-hidden glass-surface shadow-lg"
                                     style={{
-                                        background: 'rgba(255, 255, 255, 0.95)',
-                                        backdropFilter: 'blur(10px)',
-                                        color: '#000',
-                                        fontSize: '0.8rem',
-                                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-                                        border: '1px solid rgba(255, 255, 255, 0.5)',
+                                        color: 'var(--text-primary)',
+                                        fontSize: '0.85rem',
                                         letterSpacing: '0.5px',
                                         display: 'inline-flex',
                                         alignItems: 'center',
-                                        gap: '0.5rem'
+                                        gap: '0.6rem',
+                                        background: 'rgba(255, 255, 255, 0.8)',
+                                        border: '1px solid rgba(0,0,0,0.05)'
                                     }}
                                 >
-                                    <motion.div
-                                        animate={{ x: ['-200%', '200%'] }}
-                                        transition={{ duration: 2, repeat: Infinity, ease: 'linear', repeatDelay: 1 }}
-                                        style={{
-                                            position: 'absolute',
-                                            top: 0,
-                                            left: 0,
-                                            width: '50%',
-                                            height: '100%',
-                                            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)',
-                                            transform: 'skewX(-20deg)',
-                                            pointerEvents: 'none'
-                                        }}
-                                    />
-                                    View Proof
+                                    {isResolved ? 'View Proof of Work' : 
+                                     (complaint.status?.toLowerCase().includes('progress') ? 'View Progress / Issue' : 'View Issue Photo')}
                                     <ChevronRight size={14} />
                                 </div>
                             </motion.div>
@@ -428,8 +442,8 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                             <motion.div 
                                 layout
                                 style={{
-                                    background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%)',
-                                    padding: '1rem', borderRadius: '16px', border: '1px solid rgba(96, 165, 250, 0.2)',
+                                    background: 'rgba(0, 113, 227, 0.04)',
+                                    padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(0, 113, 227, 0.08)',
                                     marginBottom: '1.25rem', boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.02)'
                                 }}
                             >

@@ -282,7 +282,7 @@ const ReportIssue = () => {
                 transition={{ duration: 0.5 }}
             >
                 <div className="mb-4">
-                    <h1 className="display-5 fw-bold mb-2" style={{ background: 'linear-gradient(135deg, var(--primary-color), var(--accent-1))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    <h1 className="display-5 fw-bold mb-2" style={{ color: 'var(--primary-color)' }}>
                         <i className="bi bi-megaphone me-3"></i>Report a Civic Issue
                     </h1>
                     <p className="text-muted">Help us make your community better by reporting issues locally.</p>
