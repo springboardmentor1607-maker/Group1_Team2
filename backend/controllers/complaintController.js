@@ -1,6 +1,7 @@
 const Complaint = require('../models/Complaint');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const Zone = require('../models/Zone');
 
 const createComplaint = async (req, res) => {
     try {
@@ -8,7 +9,7 @@ const createComplaint = async (req, res) => {
         console.log('Body:', req.body);
         console.log('User from Token:', req.user);
 
-        const { title, type, priority, address, landmark, description, latitude, longitude, photo } = req.body;
+        const { title, type, priority, address, landmark, description, latitude, longitude, photo, location, state } = req.body;
         const user_id = req.user ? req.user.id : null;
         const userName = req.user ? req.user.name : 'A citizen';
 
@@ -34,6 +35,13 @@ const createComplaint = async (req, res) => {
             });
         }
 
+        // Automatically find or create zone based on location string
+        let zone_id = req.body.zone_id;
+        if (location) {
+            const zone = await Zone.findOrCreateByName(location, state);
+            zone_id = zone?.id;
+        }
+
         const complaint = await Complaint.create({
             user_id,
             title,
@@ -44,7 +52,8 @@ const createComplaint = async (req, res) => {
             description,
             latitude,
             longitude,
-            photo
+            photo,
+            zone_id
         });
 
         // Trigger notification for admins
@@ -77,15 +86,16 @@ const createComplaint = async (req, res) => {
 
 const getAllComplaints = async (req, res) => {
     try {
-        console.log(' --- DIAGNOSTIC: getAllComplaints CALLED --- ');
         const currentUserId = req.user ? req.user.id : null;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
+        const zoneId = req.query.zone_id || null;
+        const state = req.query.state || null;
         const offset = (page - 1) * limit;
 
         const [complaints, totalCount] = await Promise.all([
-            Complaint.findAllWithDetails(currentUserId, limit, offset),
-            Complaint.getCount()
+            Complaint.findAllWithDetails(currentUserId, limit, offset, zoneId, state),
+            Complaint.getCount(zoneId, state)
         ]);
 
         res.json({ 
@@ -134,7 +144,9 @@ const getUserComplaints = async (req, res) => {
 
 const getDashboardStats = async (req, res) => {
     try {
-        const stats = await Complaint.getStats();
+        const zoneId = req.query.zone_id || null;
+        const state = req.query.state || null;
+        const stats = await Complaint.getStats(zoneId, state);
         const recent = await Complaint.getRecent();
         const weekly = await Complaint.getWeeklyStats();
 

@@ -8,6 +8,7 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { theme, toggleTheme } = useTheme();
+    const [hoveredIndex, setHoveredIndex] = React.useState(null);
 
     // Define menu items based on user role
     const getMenuItems = () => {
@@ -105,111 +106,206 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                             const Icon = item.icon;
 
                             return (
-                                <motion.button
-                                    key={index}
-                                    onClick={() => navigate(item.path)}
-                                    whileHover={{ scale: 1.02, x: 4 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className={`btn d-flex align-items-center w-100 text-start border-0 rounded-3 mb-1 p-2 position-relative ${isActive
-                                        ? 'nav-link active'
-                                        : 'bg-transparent'
-                                        }`}
-                                    style={{
-                                        background: isActive
-                                            ? 'var(--active-item-bg)'
-                                            : 'transparent',
-                                        color: isActive ? 'var(--active-item-color)' : 'var(--bs-body-color)',
-                                        boxShadow: isActive
-                                            ? '0 4px 12px rgba(66, 133, 244, 0.15)'
-                                            : 'none',
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (!isActive) {
-                                            e.target.style.backgroundColor = 'var(--hover-item-bg)';
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (!isActive) {
-                                            e.target.style.backgroundColor = 'transparent';
-                                        }
-                                    }}
-                                >
-                                    <Icon
-                                        size={18}
-                                        strokeWidth={1.5}
-                                        className={`${isOpen ? 'me-3' : ''} flex-shrink-0`}
-                                        style={{ minWidth: '18px' }}
-                                    />
-                                    {isOpen && (
-                                        <motion.span
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            className="fw-medium"
-                                        >
-                                            {item.label}
-                                        </motion.span>
-                                    )}
-                                    {isActive && (
-                                        <motion.div
-                                            className="position-absolute top-50 translate-middle-y rounded-pill"
-                                            style={{ right: '8px', width: '4px', height: '20px', backgroundColor: 'var(--active-item-color)' }}
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                        />
-                                    )}
-                                </motion.button>
-                            );
-                        })}
-                    </div>
-                </nav>
+                                 <motion.button
+                                     key={index}
+                                     onClick={() => navigate(item.path)}
+                                     whileHover={{ scale: 1.02, x: 4 }}
+                                     whileTap={{ scale: 0.98 }}
+                                     className={`btn d-flex align-items-center w-100 text-start border-0 rounded-3 mb-1 p-2 position-relative ${isActive
+                                         ? 'nav-link active'
+                                         : 'bg-transparent'
+                                         }`}
+                                     style={{
+                                         background: isActive
+                                             ? 'var(--active-item-bg)'
+                                             : 'transparent',
+                                         color: isActive ? 'var(--active-item-color)' : 'var(--bs-body-color)',
+                                         boxShadow: isActive
+                                             ? '0 4px 12px rgba(66, 133, 244, 0.15)'
+                                             : 'none',
+                                         transition: 'all 0.3s ease'
+                                     }}
+                                     onMouseEnter={(e) => {
+                                         if (!isActive) {
+                                             e.target.style.backgroundColor = 'var(--hover-item-bg)';
+                                         }
+                                         if (!isOpen) setHoveredIndex(index);
+                                     }}
+                                     onMouseLeave={(e) => {
+                                         if (!isActive) {
+                                             e.target.style.backgroundColor = 'transparent';
+                                         }
+                                         setHoveredIndex(null);
+                                     }}
+                                 >
+                                     <Icon
+                                         size={18}
+                                         strokeWidth={1.5}
+                                         className={`${isOpen ? 'me-3' : ''} flex-shrink-0`}
+                                         style={{ minWidth: '18px' }}
+                                     />
+                                     {isOpen && (
+                                         <motion.span
+                                             initial={{ opacity: 0 }}
+                                             animate={{ opacity: 1 }}
+                                             className="fw-medium"
+                                         >
+                                             {item.label}
+                                         </motion.span>
+                                     )}
+                                     
+                                     {/* Tooltip for collapsed state */}
+                                     {!isOpen && hoveredIndex === index && (
+                                         <motion.div
+                                             initial={{ opacity: 0, x: -10 }}
+                                             animate={{ opacity: 1, x: 0 }}
+                                             className="position-absolute px-3 py-2 rounded-2 shadow-lg fw-bold"
+                                             style={{
+                                                 left: '70px',
+                                                 backgroundColor: 'var(--hero-gradient)',
+                                                 background: 'var(--hero-gradient)',
+                                                 color: 'white',
+                                                 fontSize: '0.85rem',
+                                                 zIndex: 1100,
+                                                 whiteSpace: 'nowrap',
+                                                 pointerEvents: 'none'
+                                             }}
+                                         >
+                                             {item.label}
+                                             {/* Arrow */}
+                                             <div className="position-absolute top-50 start-0 translate-middle" 
+                                                  style={{ 
+                                                      width: '0', 
+                                                      height: '0', 
+                                                      borderTop: '6px solid transparent',
+                                                      borderBottom: '6px solid transparent',
+                                                      borderRight: '6px solid #4285f4', // Approximate color from gradient start
+                                                      marginLeft: '-2px'
+                                                  }} 
+                                             />
+                                         </motion.div>
+                                     )}
 
-                {/* User Section */}
-                <div className="p-3 border-top" style={{
-                    backgroundColor: 'transparent',
-                    borderColor: 'var(--bs-border-color)'
-                }}>
+                                     {isActive && (
+                                         <motion.div
+                                             className="position-absolute top-50 translate-middle-y rounded-pill"
+                                             style={{ right: '8px', width: '4px', height: '20px', backgroundColor: 'var(--active-item-color)' }}
+                                             initial={{ scale: 0 }}
+                                             animate={{ scale: 1 }}
+                                         />
+                                     )}
+                                 </motion.button>
+                             );
+                         })}
+                     </div>
+                 </nav>
+ 
+                 {/* User Section */}
+                 <div className="p-3 border-top" style={{
+                     backgroundColor: 'transparent',
+                     borderColor: 'var(--bs-border-color)'
+                 }}>
+ 
+                     {/* Theme Toggle Button */}
+                     <motion.button
+                         onClick={toggleTheme}
+                         whileHover={{ scale: 1.02 }}
+                         whileTap={{ scale: 0.98 }}
+                         className={`btn w-100 d-flex align-items-center rounded-3 p-3 mb-2 position-relative ${!isOpen ? 'justify-content-center' : ''}`}
+                         style={{ transition: 'all 0.3s ease', background: 'transparent', color: 'var(--bs-body-color)', border: 'none' }}
+                         onMouseEnter={() => !isOpen && setHoveredIndex('theme')}
+                         onMouseLeave={() => setHoveredIndex(null)}
+                     >
+                         {theme === 'light' ? <Moon size={20} className={`${isOpen ? 'me-3' : ''}`} /> : <Sun size={20} className={`${isOpen ? 'me-3' : ''}`} />}
+                         {isOpen && (
+                             <motion.span
+                                 initial={{ opacity: 0 }}
+                                 animate={{ opacity: 1 }}
+                                 className="fw-medium"
+                             >
+                                 {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+                             </motion.span>
+                         )}
 
-                    {/* Theme Toggle Button */}
-                    <motion.button
-                        onClick={toggleTheme}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`btn w-100 d-flex align-items-center rounded-3 p-3 mb-2 ${!isOpen ? 'justify-content-center' : ''}`}
-                        style={{ transition: 'all 0.3s ease', background: 'transparent', color: 'var(--bs-body-color)', border: 'none' }}
-                        title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-                    >
-                        {theme === 'light' ? <Moon size={20} className={`${isOpen ? 'me-3' : ''}`} /> : <Sun size={20} className={`${isOpen ? 'me-3' : ''}`} />}
-                        {isOpen && (
-                            <motion.span
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="fw-medium"
-                            >
-                                {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
-                            </motion.span>
-                        )}
-                    </motion.button>
+                         {!isOpen && hoveredIndex === 'theme' && (
+                             <motion.div
+                                 initial={{ opacity: 0, x: -10 }}
+                                 animate={{ opacity: 1, x: 0 }}
+                                 className="position-absolute px-3 py-2 rounded-2 shadow-lg fw-bold"
+                                 style={{
+                                     left: '70px',
+                                     background: 'var(--hero-gradient)',
+                                     color: 'white',
+                                     fontSize: '0.85rem',
+                                     zIndex: 1100,
+                                     whiteSpace: 'nowrap',
+                                     pointerEvents: 'none'
+                                 }}
+                             >
+                                 {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+                                 <div className="position-absolute top-50 start-0 translate-middle" 
+                                      style={{ 
+                                          width: '0', 
+                                          height: '0', 
+                                          borderTop: '6px solid transparent',
+                                          borderBottom: '6px solid transparent',
+                                          borderRight: '6px solid #4285f4',
+                                          marginLeft: '-2px'
+                                      }} 
+                                 />
+                             </motion.div>
+                         )}
+                     </motion.button>
+ 
+                     {/* Logout Button */}
+                     <motion.button
+                         onClick={onLogout}
+                         whileHover={{ scale: 1.02 }}
+                         whileTap={{ scale: 0.98 }}
+                         className={`btn text-danger w-100 d-flex align-items-center rounded-3 p-3 position-relative ${!isOpen ? 'justify-content-center' : ''}`}
+                         style={{ transition: 'all 0.3s ease', background: 'transparent', border: 'none' }}
+                         onMouseEnter={() => !isOpen && setHoveredIndex('logout')}
+                         onMouseLeave={() => setHoveredIndex(null)}
+                     >
+                         <LogOut size={20} className={`${isOpen ? 'me-3' : ''}`} />
+                         {isOpen && (
+                             <motion.span
+                                 initial={{ opacity: 0 }}
+                                 animate={{ opacity: 1 }}
+                                 className="fw-medium"
+                             >
+                                 Logout
+                             </motion.span>
+                         )}
 
-                    {/* Logout Button */}
-                    <motion.button
-                        onClick={onLogout}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`btn text-danger w-100 d-flex align-items-center rounded-3 p-3 ${!isOpen ? 'justify-content-center' : ''}`}
-                        style={{ transition: 'all 0.3s ease', background: 'transparent', border: 'none' }}
-                    >
-                        <LogOut size={20} className={`${isOpen ? 'me-3' : ''}`} />
-                        {isOpen && (
-                            <motion.span
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="fw-medium"
-                            >
-                                Logout
-                            </motion.span>
-                        )}
-                    </motion.button>
+                         {!isOpen && hoveredIndex === 'logout' && (
+                             <motion.div
+                                 initial={{ opacity: 0, x: -10 }}
+                                 animate={{ opacity: 1, x: 0 }}
+                                 className="position-absolute px-3 py-2 rounded-2 shadow-lg fw-bold bg-danger"
+                                 style={{
+                                     left: '70px',
+                                     color: 'white',
+                                     fontSize: '0.85rem',
+                                     zIndex: 1100,
+                                     whiteSpace: 'nowrap',
+                                     pointerEvents: 'none'
+                                 }}
+                             >
+                                 Logout
+                                 <div className="position-absolute top-50 start-0 translate-middle" 
+                                      style={{ 
+                                          width: '0', 
+                                          height: '0', 
+                                          borderTop: '6px solid transparent',
+                                          borderBottom: '6px solid transparent',
+                                          borderRight: '6px solid #dc3545',
+                                          marginLeft: '-2px'
+                                      }} 
+                                 />
+                             </motion.div>
+                         )}
+                     </motion.button>
                 </div>
             </motion.aside>
 

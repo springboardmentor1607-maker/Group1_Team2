@@ -1,171 +1,164 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const AuthWrapper = ({ children, mode }) => {
     const isLogin = mode === 'login';
 
     const panelVariants = {
-        login: {
-            x: '0%',
+        login: { 
+            x: 0, 
+            borderRadius: '0 40px 40px 0',
             transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
         },
-        signup: {
-            x: '100%',
+        signup: { 
+            x: '100%', 
+            borderRadius: '40px 0 0 40px',
             transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
         }
     };
 
     const formVariants = {
-        login: {
-            x: '0%',
+        login: { 
+            x: 0, 
+            opacity: 1,
             transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
         },
-        signup: {
-            x: '-100%',
+        signup: { 
+            x: '-100%', 
+            opacity: 1,
             transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
         }
     };
 
     return (
-        <div className="auth-container" style={{ position: 'relative', overflow: 'hidden', height: '100vh', display: 'flex', background: 'var(--bg-primary)' }}>
-            {/* Global Brand Header for Auth Pages */}
-            <div className="position-fixed top-0 start-0 w-100 p-4 d-flex justify-content-between align-items-center" style={{ zIndex: 1000 }}>
-                <Link to="/" className="d-flex align-items-center gap-2 text-decoration-none transition-all hover-opacity-80">
-                    <div className="rounded-2 d-flex align-items-center justify-content-center"
-                        style={{ width: '40px', height: '40px', background: 'var(--hero-gradient)' }}>
-                        <span className="text-white fw-bold fs-5">CS</span>
-                    </div>
-                    <span className="fw-bold fs-4 text-white" style={{ letterSpacing: '-0.02em', filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.2))' }}>CleanStreet</span>
-                </Link>
-                <Link to="/" className="btn btn-outline-light rounded-pill px-4 py-2 fw-semibold shadow-sm" style={{ backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.1)' }}>
-                    Back to Home
-                </Link>
-            </div>
-            {/* Shared Background Mesh (Universal) */}
-            <div className="mesh-background" style={{ opacity: 0.6 }}>
-                <div className="mesh-sphere" style={{ width: '600px', height: '600px', background: 'rgba(0, 113, 227, 0.15)', top: '-10%', right: '-10%', animation: 'meshFloat 20s infinite' }}></div>
-                <div className="mesh-sphere" style={{ width: '500px', height: '500px', background: 'rgba(138, 180, 248, 0.1)', bottom: '-10%', left: '-10%', animation: 'meshFloat 25s infinite reverse' }}></div>
-                <div className="mesh-sphere" style={{ width: '400px', height: '400px', background: 'rgba(66, 133, 244, 0.05)', top: '40%', left: '30%', animation: 'meshFloat 15s infinite' }}></div>
+        <div className="auth-container" style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh', display: 'flex', background: 'var(--bg-primary)' }}>
+            {/* Background Mesh */}
+            <div className="mesh-background" style={{ opacity: 0.4 }}>
+                <div className="mesh-sphere" style={{ width: '600px', height: '600px', background: 'rgba(0, 113, 227, 0.08)', top: '-10%', left: '-10%' }}></div>
+                <div className="mesh-sphere" style={{ width: '500px', height: '500px', background: 'rgba(43, 192, 228, 0.08)', bottom: '-10%', right: '-10%' }}></div>
             </div>
 
-            {/* Visual Panel */}
+            {/* Visual Side (Hidden on mobile) */}
             <motion.div 
-                className="auth-visual-side"
+                className="auth-visual-side d-none d-lg-flex"
                 variants={panelVariants}
                 animate={mode}
-                initial={false}
+                initial={isLogin ? "login" : "signup"}
                 style={{ 
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '50%',
-                    height: '100%',
-                    zIndex: 20,
+                    position: 'absolute', 
+                    top: 0, 
+                    left: 0, 
+                    width: '50%', 
+                    height: '100%', 
+                    zIndex: 20, 
+                    boxShadow: '20px 0 50px rgba(0,0,0,0.05)',
+                    overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: '4rem',
-                    color: 'white',
-                    background: '#0a0e1a',
-                    boxShadow: '20px 0 60px rgba(0,0,0,0.3)'
+                    alignItems: 'center'
                 }}
             >
-                <motion.div
-                    className="auth-visual-bg-wrapper"
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', overflow: 'hidden' }}
-                >
-                    <motion.img 
-                        src="/assets/images/auth-bg.png" 
-                        alt="Pristine Nature"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
-                        animate={{ scale: [1, 1.08, 1], rotate: [0, 1, 0] }}
-                        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                    />
-                    <div className="auth-visual-overlay" style={{ 
+                <div className="auth-visual-overlay" style={{ 
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%)',
+                    zIndex: 1
+                }}></div>
+                <motion.img 
+                    src="/assets/images/auth-bg.png" 
+                    alt="Auth Visual" 
+                    initial={{ scale: 1.1 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 1.5 }}
+                    style={{ 
                         position: 'absolute', 
                         top: 0, 
                         left: 0, 
-                        right: 0, 
-                        bottom: 0, 
-                        backgroundImage: 'url("/Users/gnaneshwar/.gemini/antigravity/brain/34a1a2db-5487-4e0a-9c2c-b044fc9e176c/community_cleaning_street_1774014675532.png")',
-                    }}></div>
-                </motion.div>
+                        width: '100%', 
+                        height: '100%', 
+                        objectFit: 'cover',
+                        filter: 'brightness(0.8) contrast(1.1)'
+                    }} 
+                />
+                
+                <div className="auth-visual-content" style={{ position: 'relative', zIndex: 10, padding: '4rem', textAlign: 'center', color: 'white' }}>
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.8 }}
+                    >
+                        <h2 className="display-4 fw-bold mb-4 tracking-tighter">
+                            {isLogin ? 'CleanStreet' : 'Join the\nMovement'}
+                        </h2>
+                        <p className="lead opacity-90 mb-0 px-4" style={{ lineHeight: '1.6', maxWidth: '450px', margin: '0 auto' }}>
+                            {isLogin 
+                                ? 'Your gateway to a cleaner, smarter city. Manage reports and make a difference.' 
+                                : 'Together, we can build a more beautiful and sustainable future for our community.'}
+                        </p>
+                    </motion.div>
+                </div>
 
-                <motion.div 
-                    className="auth-visual-content"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    key={mode + '-content'}
-                    transition={{ delay: 0.4, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ position: 'relative', zIndex: 2, textAlign: 'center' }}
-                >
-                    <div className="mb-5 d-inline-block p-4 rounded-5 glass-card-premium" style={{ 
-                        border: '1px solid rgba(255,255,255,0.4)', 
-                        background: 'rgba(255,255,255,0.15)',
-                        boxShadow: '0 0 40px rgba(0, 113, 227, 0.3)'
-                    }}>
-                        <span className="h1 fw-bold text-white mb-0" style={{ letterSpacing: '-0.05em', filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.4))' }}>CS</span>
+                <div className="position-absolute bottom-0 start-50 translate-middle-x mb-5" style={{ zIndex: 10 }}>
+                    <div className="d-flex gap-2">
+                        <div className={`rounded-circle ${isLogin ? 'bg-white' : 'bg-white opacity-40'}`} style={{ width: '8px', height: '8px' }}></div>
+                        <div className={`rounded-circle ${!isLogin ? 'bg-white' : 'bg-white opacity-40'}`} style={{ width: '8px', height: '8px' }}></div>
                     </div>
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={mode}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 1.1 }}
-                            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        >
-                            <h2 className="display-3 fw-bold mb-4 text-white" style={{ letterSpacing: '-0.05em', lineHeight: 1.1 }}>
-                                {isLogin ? 'CleanStreet' : 'Join the\nMovement'}
-                            </h2>
-                            <p className="lead text-white-50 mb-0 px-4" style={{ fontSize: '1.25rem', fontWeight: 400, opacity: 0.8 }}>
-                                {isLogin 
-                                    ? 'Your journey to a cleaner, greener community starts with a single step.' 
-                                    : 'Together, we can build a more beautiful and sustainable future for our community.'
-                                }
-                            </p>
-                        </motion.div>
-                    </AnimatePresence>
-                </motion.div>
+                </div>
             </motion.div>
 
-            {/* Form Panel Container */}
-            <div className="auth-form-side-container" style={{ width: '100%', height: '100%', display: 'flex' }}>
-                {/* Spacer for the visual panel */}
-                <div style={{ width: '50%' }}></div>
+            {/* Form Side Container */}
+            <div className="auth-form-side-container" style={{ width: '100%', minHeight: '100vh', display: 'flex' }}>
+                <div className="d-none d-lg-block" style={{ width: '50%' }}></div>
                 
-                {/* Actual Form Panel */}
                 <motion.div 
                     className="auth-form-side"
                     variants={formVariants}
                     animate={mode}
-                    initial={false}
+                    initial={isLogin ? "login" : "signup"}
                     style={{ 
-                        width: '50%', 
-                        height: '100%',
+                        width: '100%',
+                        flex: 1,
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        padding: '3rem',
+                        padding: '4rem 2rem',
                         position: 'relative',
-                        zIndex: 10
+                        zIndex: 10,
+                        overflowY: 'auto'
                     }}
                 >
+                    <div className="position-absolute top-0 end-0 p-4" style={{ zIndex: 30 }}>
+                        <Link to="/" className="text-decoration-none fw-semibold tracking-tight p-2 px-3 rounded-pill glass-surface hover-bg-light transition-all" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,0,0,0.05)' }}>
+                            <i className="bi bi-house-door me-2"></i>Back to Home
+                        </Link>
+                    </div>
+
                     <motion.div 
-                        key={mode}
-                        initial={{ opacity: 0, x: isLogin ? 30 : -30, filter: 'blur(10px)' }}
-                        animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                        transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                        className="auth-card-container"
-                        style={{ width: '100%', maxWidth: isLogin ? '460px' : '580px' }}
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="glass-card-premium w-100" 
+                        style={{ 
+                            maxWidth: isLogin ? '480px' : '640px', 
+                            padding: '3.5rem 2.5rem'
+                        }}
                     >
-                        <div className="glass-card-premium p-4 p-md-5">
-                            <h3 className="display-6 fw-bold text-center mb-5 apple-gradient-text" style={{ fontSize: '2rem' }}>
-                                {isLogin ? 'Welcome Back' : 'Create Account'}
-                            </h3>
-                            {children}
+                        <div className="text-center mb-5">
+                            <span className="badge rounded-pill px-3 py-2 mb-3 shadow-sm" style={{ background: 'rgba(0, 113, 227, 0.1)', color: '#0071e3', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                {isLogin ? 'Welcome Back' : 'Get Started'}
+                            </span>
+                            <h1 className="display-6 fw-bold text-gradient-premium tracking-tighter" style={{ fontSize: '2.2rem' }}>
+                                {isLogin ? 'Sign In' : 'Create Account'}
+                            </h1>
                         </div>
+
+                        {children}
                     </motion.div>
                 </motion.div>
             </div>

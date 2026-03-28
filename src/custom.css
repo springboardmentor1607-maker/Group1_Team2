@@ -86,14 +86,14 @@ body {
     border-right: 1px solid var(--border-light);
 }
 
-.nav-link.active {
+.nav-link.active:not(.nav-tabs .nav-link) {
     background-color: var(--active-item-bg);
     color: var(--active-item-color);
     border-radius: 12px;
     font-weight: 600;
 }
 
-.nav-link:hover:not(.active) {
+.nav-link:hover:not(.active):not(.nav-tabs .nav-link) {
     background-color: var(--hover-item-bg);
     border-radius: 12px;
 }
@@ -137,9 +137,24 @@ body {
 }
 
 .btn-outline-primary:hover {
-    background: var(--text-primary);
-    border-color: var(--text-primary);
-    color: var(--bg-primary);
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important; /* Always white text on primary hover for best contrast */
+    transform: translateY(-2px) scale(1.02);
+}
+
+.btn-outline-success:hover {
+    background: var(--bs-success) !important;
+    border-color: var(--bs-success) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px) scale(1.02);
+}
+
+.btn-outline-info:hover {
+    background: var(--bs-info) !important;
+    border-color: var(--bs-info) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px) scale(1.02);
 }
 
 .btn:active {

@@ -13,8 +13,26 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-function LocationMarker({ onLocationSelect }) {
+function RecenterMap({ lat, lng }) {
+    const map = useMapEvents({});
+    useEffect(() => {
+        if (lat && lng) {
+            map.setView([lat, lng], map.getZoom());
+        }
+    }, [lat, lng, map]);
+    return null;
+}
+
+function LocationMarker({ onLocationSelect, lat, lng }) {
     const [position, setPosition] = useState(null);
+
+    // Sync state with props
+    useEffect(() => {
+        if (lat && lng) {
+            setPosition({ lat, lng });
+        }
+    }, [lat, lng]);
+
     useMapEvents({
         click(e) {
             const { lat, lng } = e.latlng;
@@ -32,8 +50,8 @@ function LocationMarker({ onLocationSelect }) {
     );
 }
 
-export default function MapSection({ onLocationSelect, showComplaints = true }) {
-    const [center] = useState([10.8505, 76.2711]); // Default: Kerala (from user guide)
+export default function MapSection({ onLocationSelect, showComplaints = true, lat, lng }) {
+    const [center] = useState([10.8505, 76.2711]); // Default: Kerala
     const [complaints, setComplaints] = useState([]);
 
     useEffect(() => {
@@ -49,9 +67,7 @@ export default function MapSection({ onLocationSelect, showComplaints = true }) 
         };
         fetchMapData();
         
-        // Auto-refresh every 10 seconds to get latest updates
         const interval = setInterval(fetchMapData, 10000);
-        
         return () => clearInterval(interval);
     }, [showComplaints]);
 
@@ -70,13 +86,14 @@ export default function MapSection({ onLocationSelect, showComplaints = true }) 
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
+                    <RecenterMap lat={lat} lng={lng} />
                     {showComplaints && complaints.map(complaint => {
-                        const lat = parseFloat(complaint.latitude);
-                        const lng = parseFloat(complaint.longitude);
-                        if (isNaN(lat) || isNaN(lng)) return null;
+                        const cLat = parseFloat(complaint.latitude);
+                        const cLng = parseFloat(complaint.longitude);
+                        if (isNaN(cLat) || isNaN(cLng)) return null;
 
                         return (
-                            <Marker key={complaint.id} position={[lat, lng]}>
+                            <Marker key={complaint.id} position={[cLat, cLng]}>
                                 <Popup>
                                     <div className="p-1">
                                         <h6 className="fw-bold mb-1">{complaint.title || 'Untitled'}</h6>
@@ -87,7 +104,7 @@ export default function MapSection({ onLocationSelect, showComplaints = true }) 
                             </Marker>
                         );
                     })}
-                    {onLocationSelect && <LocationMarker onLocationSelect={onLocationSelect} />}
+                    {onLocationSelect && <LocationMarker onLocationSelect={onLocationSelect} lat={lat} lng={lng} />}
                 </MapContainer>
             </div>
         </motion.div>

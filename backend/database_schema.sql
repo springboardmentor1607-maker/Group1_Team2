@@ -64,6 +64,27 @@ VALUES
     (4, 'Broken Street Light', 'Street light has been out for weeks making area unsafe', '789 Oak Street, East Side', '{"lat": 40.7505, "lng": -73.9934}', 'received')
 ON CONFLICT DO NOTHING;
 
+-- Zones Table
+CREATE TABLE IF NOT EXISTS zones (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_zones_name ON zones(name);
+
+-- Sample Zones
+INSERT INTO zones (name, description)
+VALUES 
+    ('Downtown Area', 'Central business district and major commercial hub'),
+    ('Uptown Area', 'Residential and upscale shopping district'),
+    ('East Side', 'Industrial and residential mixed zone'),
+    ('West Side', 'Port area and residential zone'),
+    ('Central Park', 'Large green space and recreational area')
+ON CONFLICT (name) DO NOTHING;
+
 -- Notifications Table
 CREATE TABLE IF NOT EXISTS notifications (
     id SERIAL PRIMARY KEY,

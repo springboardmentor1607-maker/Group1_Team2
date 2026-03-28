@@ -4,4 +4,12 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://lreefiutqhkpjrsfjrwa.supabase.co';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+let supabase;
+try {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+} catch (err) {
+    console.error('Failed to initialize Supabase:', err);
+    supabase = null;
+}
+
+export { supabase };

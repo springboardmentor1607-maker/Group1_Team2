@@ -200,12 +200,10 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
             whileHover={{ y: -5, scale: 1.01 }}
             className="glass-card-premium overflow-hidden position-relative h-100"
             style={{
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.08)'
+                zIndex: 1
             }}
         >
             {/* Focus Mode Navigation Overlay */}

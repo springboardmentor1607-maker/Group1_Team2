@@ -1,11 +1,31 @@
 const { pool } = require('../config/db');
 
 const Complaint = {
-    async create({ user_id, title, type, priority, address, landmark, description, latitude, longitude, photo }) {
+    async create({ user_id, title, type, priority, address, landmark, description, latitude, longitude, photo, zone_id, state }) {
+        let finalZoneId = zone_id;
+        let finalState = state;
+        
+        // Auto-lookup zone_id from reporter's user profile or prompt state if not provided
+        if (!finalZoneId || finalZoneId === '') {
+            try {
+                const userResult = await pool.query('SELECT location, state FROM users WHERE id = $1', [user_id]);
+                const userLocation = userResult.rows[0]?.location;
+                const userState = userResult.rows[0]?.state;
+                
+                if (userLocation) {
+                    const Zone = require('./Zone');
+                    const zone = await Zone.findOrCreateByName(userLocation, finalState || userState);
+                    finalZoneId = zone?.id || null;
+                }
+            } catch (err) {
+                console.error('Error auto-lookup zone_id:', err);
+            }
+        }
+
         const result = await pool.query(
-            `INSERT INTO complaints (user_id, title, type, priority, address, landmark, description, latitude, longitude, photo, status)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'Pending') RETURNING *`,
-            [user_id, title, type, priority, address, landmark, description, latitude, longitude, photo]
+            `INSERT INTO complaints (user_id, title, type, priority, address, landmark, description, latitude, longitude, photo, status, zone_id)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'Pending', $11) RETURNING *`,
+            [user_id, title, type, priority, address, landmark, description, latitude, longitude, photo, finalZoneId]
         );
         return result.rows[0];
     },
@@ -14,15 +34,33 @@ const Complaint = {
         return this.findAllWithDetails(currentUserId, limit, offset);
     },
 
-    async getStats() {
-        const result = await pool.query(`
+    async getStats(zoneId = null, state = null) {
+        let whereClause = 'WHERE 1=1';
+        let params = [];
+        let paramIndex = 1;
+
+        if (zoneId) {
+            whereClause += ` AND c.zone_id = $${paramIndex}`;
+            params.push(zoneId);
+            paramIndex++;
+        } else if (state) {
+            whereClause += ` AND z.state ILIKE $${paramIndex}`;
+            params.push(state);
+            paramIndex++;
+        }
+
+        const query = `
             SELECT 
                 COUNT(*) as total,
-                COUNT(*) FILTER (WHERE LOWER(status) = 'pending' OR status IS NULL OR status = '') as pending,
-                COUNT(*) FILTER (WHERE LOWER(status) = 'in progress' OR LOWER(status) = 'in_progress') as in_progress,
-                COUNT(*) FILTER (WHERE LOWER(status) = 'resolved') as resolved
-            FROM complaints
-        `);
+                COUNT(*) FILTER (WHERE LOWER(c.status) = 'pending' OR c.status IS NULL OR c.status = '') as pending,
+                COUNT(*) FILTER (WHERE LOWER(c.status) = 'in progress' OR LOWER(c.status) = 'in_progress') as in_progress,
+                COUNT(*) FILTER (WHERE LOWER(c.status) = 'resolved') as resolved
+            FROM complaints c
+            LEFT JOIN zones z ON c.zone_id = z.id
+            ${whereClause}
+        `;
+        
+        const result = await pool.query(query, params);
         return result.rows[0];
     },
 
@@ -92,9 +130,10 @@ const Complaint = {
         return result.rows[0];
     },
 
-    async findAllWithDetails(currentUserId = null, limit = 10, offset = 0) {
+    async findAllWithDetails(currentUserId = null, limit = 10, offset = 0, zoneId = null, state = null) {
         let userVoteSelect = '';
         let userVoteJoin = '';
+        let whereClause = 'WHERE 1=1';
         let params = [];
         let paramIndex = 1;
 
@@ -105,12 +144,22 @@ const Complaint = {
             paramIndex++;
         }
 
+        if (zoneId) {
+            whereClause += ` AND c.zone_id = $${paramIndex}`;
+            params.push(zoneId);
+            paramIndex++;
+        } else if (state) {
+            whereClause += ` AND z.state ILIKE $${paramIndex}`;
+            params.push(state);
+            paramIndex++;
+        }
+
         const queryParams = [...params, limit, offset];
         const limitIndex = paramIndex;
         const offsetIndex = paramIndex + 1;
 
         const result = await pool.query(`
-            SELECT c.id, c.user_id, c.title, c.type, c.priority, c.address, c.landmark, c.description, 
+            SELECT c.id, c.user_id, c.zone_id, c.title, c.type, c.priority, c.address, c.landmark, c.description, 
                    c.latitude, c.longitude, c.status, c.created_at, c.updated_at, c.assigned_to,
                    u.name as user_name, u.email as user_email,
                    v.name as volunteer_name, v.email as volunteer_email,
@@ -119,11 +168,13 @@ const Complaint = {
                    COALESCE(comment_counts.total_comments, 0)::int as comments_count,
                    c.photo, c.volunteer_photo,
                    (c.photo IS NOT NULL AND c.photo != '') as has_photo,
-                   (c.volunteer_photo IS NOT NULL AND c.volunteer_photo != '') as has_volunteer_photo
+                   (c.volunteer_photo IS NOT NULL AND c.volunteer_photo != '') as has_volunteer_photo,
+                   z.name as zone_name, z.state
                    ${userVoteSelect}
             FROM complaints c
             LEFT JOIN users u ON c.user_id = u.id
             LEFT JOIN users v ON c.assigned_to = v.id
+            LEFT JOIN zones z ON c.zone_id = z.id
             LEFT JOIN (
                 SELECT complaint_id, 
                        COUNT(*) FILTER (WHERE vote_type = 'upvote') as upvotes_count,
@@ -132,21 +183,33 @@ const Complaint = {
             ) vote_counts ON c.id = vote_counts.complaint_id
             LEFT JOIN (SELECT complaint_id, COUNT(*) as total_comments FROM comments GROUP BY complaint_id) comment_counts ON c.id = comment_counts.complaint_id
             ${userVoteJoin}
+            ${whereClause}
             ORDER BY 
-                c.created_at DESC,
                 CASE 
                     WHEN LOWER(c.priority) = 'critical' THEN 1
                     WHEN LOWER(c.priority) = 'high' THEN 2
                     WHEN LOWER(c.priority) = 'medium' THEN 3
                     WHEN LOWER(c.priority) = 'low' THEN 4
                     ELSE 5
-                END ASC
+                END ASC,
+                c.created_at DESC
             LIMIT $${limitIndex} OFFSET $${offsetIndex}
         `, queryParams);
         return result.rows;
     },
 
-    async getCount() {
+    async getCount(zoneId = null, state = null) {
+        if (zoneId) {
+            const result = await pool.query('SELECT COUNT(*) FROM complaints WHERE zone_id = $1', [zoneId]);
+            return parseInt(result.rows[0].count);
+        } else if (state) {
+            const result = await pool.query(`
+                SELECT COUNT(*) FROM complaints c
+                JOIN zones z ON c.zone_id = z.id
+                WHERE z.state ILIKE $1
+            `, [state]);
+            return parseInt(result.rows[0].count);
+        }
         const result = await pool.query('SELECT COUNT(*) FROM complaints');
         return parseInt(result.rows[0].count);
     },
@@ -168,10 +231,12 @@ const Complaint = {
                    v_user.vote_type as user_vote_type,
                    c.photo, c.volunteer_photo,
                    (c.photo IS NOT NULL AND c.photo != '') as has_photo,
-                   (c.volunteer_photo IS NOT NULL AND c.volunteer_photo != '') as has_volunteer_photo
+                   (c.volunteer_photo IS NOT NULL AND c.volunteer_photo != '') as has_volunteer_photo,
+                   z.name as zone_name, z.state
             FROM complaints c
             LEFT JOIN users u ON c.user_id = u.id
             LEFT JOIN users v ON c.assigned_to = v.id
+            LEFT JOIN zones z ON c.zone_id = z.id
             LEFT JOIN (
                 SELECT complaint_id, 
                        COUNT(*) FILTER (WHERE vote_type = 'upvote') as upvotes_count,
@@ -200,10 +265,12 @@ const Complaint = {
                    v.name as volunteer_name,
                    c.photo, c.volunteer_photo,
                    (c.photo IS NOT NULL AND c.photo != '') as has_photo,
-                   (c.volunteer_photo IS NOT NULL AND c.volunteer_photo != '') as has_volunteer_photo
+                   (c.volunteer_photo IS NOT NULL AND c.volunteer_photo != '') as has_volunteer_photo,
+                   z.name as zone_name, z.state
             FROM complaints c
             LEFT JOIN users u ON c.user_id = u.id
             LEFT JOIN users v ON c.assigned_to = v.id
+            LEFT JOIN zones z ON c.zone_id = z.id
             WHERE c.assigned_to = $1
             ORDER BY c.created_at DESC
         `, [volunteerId]);

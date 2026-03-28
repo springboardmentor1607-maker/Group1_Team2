@@ -1,0 +1,177 @@
+[
+  {
+    "id": 1,
+    "name": "Downtown Area",
+    "state": ""
+  },
+  {
+    "id": 2,
+    "name": "Uptown Area",
+    "state": ""
+  },
+  {
+    "id": 3,
+    "name": "East Side",
+    "state": ""
+  },
+  {
+    "id": 4,
+    "name": "West Side",
+    "state": ""
+  },
+  {
+    "id": 6,
+    "name": "North Sector 1",
+    "state": ""
+  },
+  {
+    "id": 7,
+    "name": "South Sector 4",
+    "state": ""
+  },
+  {
+    "id": 8,
+    "name": "West Ward 2",
+    "state": ""
+  },
+  {
+    "id": 9,
+    "name": "Warangal",
+    "state": ""
+  },
+  {
+    "id": 10,
+    "name": "Delhi",
+    "state": ""
+  },
+  {
+    "id": 11,
+    "name": "Tamil Nadu",
+    "state": ""
+  },
+  {
+    "id": 12,
+    "name": "Ranchi",
+    "state": ""
+  },
+  {
+    "id": 13,
+    "name": "Springfield",
+    "state": ""
+  },
+  {
+    "id": 14,
+    "name": "up",
+    "state": ""
+  },
+  {
+    "id": 15,
+    "name": "warangal",
+    "state": ""
+  },
+  {
+    "id": 17,
+    "name": "Warangal",
+    "state": "Telangana"
+  },
+  {
+    "id": 18,
+    "name": "Indiranagar",
+    "state": "Telangana"
+  },
+  {
+    "id": 19,
+    "name": "Kukatpally",
+    "state": "Telangana"
+  },
+  {
+    "id": 20,
+    "name": "Banjara Hills",
+    "state": "Telangana"
+  },
+  {
+    "id": 21,
+    "name": "Koramangala",
+    "state": "Karnataka"
+  },
+  {
+    "id": 22,
+    "name": "HSR Layout",
+    "state": "Karnataka"
+  },
+  {
+    "id": 23,
+    "name": "Whitefield",
+    "state": "Karnataka"
+  },
+  {
+    "id": 24,
+    "name": "Jayanagar",
+    "state": "Karnataka"
+  },
+  {
+    "id": 25,
+    "name": "Andheri",
+    "state": "Maharashtra"
+  },
+  {
+    "id": 26,
+    "name": "Bandra",
+    "state": "Maharashtra"
+  },
+  {
+    "id": 27,
+    "name": "Pune Central",
+    "state": "Maharashtra"
+  },
+  {
+    "id": 28,
+    "name": "Nagpur South",
+    "state": "Maharashtra"
+  },
+  {
+    "id": 29,
+    "name": "Dwarka",
+    "state": "Delhi"
+  },
+  {
+    "id": 30,
+    "name": "Rohini",
+    "state": "Delhi"
+  },
+  {
+    "id": 31,
+    "name": "Connaught Place",
+    "state": "Delhi"
+  },
+  {
+    "id": 32,
+    "name": "Saket",
+    "state": "Delhi"
+  },
+  {
+    "id": 33,
+    "name": "Adyar",
+    "state": "Tamil Nadu"
+  },
+  {
+    "id": 34,
+    "name": "T. Nagar",
+    "state": "Tamil Nadu"
+  },
+  {
+    "id": 35,
+    "name": "Anna Nagar",
+    "state": "Tamil Nadu"
+  },
+  {
+    "id": 36,
+    "name": "Velachery",
+    "state": "Tamil Nadu"
+  },
+  {
+    "id": 37,
+    "name": "hanamkoda",
+    "state": ""
+  }
+]

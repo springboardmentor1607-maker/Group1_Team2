@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ClipboardList, MapPin, Clock, CheckCircle2, AlertTriangle, User, Phone, Calendar } from 'lucide-react';
+import { ClipboardList, MapPin, Clock, CheckCircle2, AlertTriangle, User, Phone, Calendar, Navigation } from 'lucide-react';
 import { api } from '../lib/api';
 import PageWrapper from '../components/PageWrapper';
 import Skeleton from '../components/Skeleton';
 import { supabase } from '../lib/supabaseClient';
+import RoutingMap from '../components/RoutingMap';
 
 /**
  * Compresses an image File using the Canvas API.
@@ -50,6 +51,9 @@ const VolunteerDashboard = () => {
     const [imageFile, setImageFile] = useState(null);
     const [originalPhoto, setOriginalPhoto] = useState(null);
     const [loadingModalPhoto, setLoadingModalPhoto] = useState(false);
+    const [volunteerLocation, setVolunteerLocation] = useState(null);
+    const [routingComplaint, setRoutingComplaint] = useState(null);
+
 
     useEffect(() => {
         fetchVolunteerComplaints();
@@ -60,12 +64,13 @@ const VolunteerDashboard = () => {
             const fetchWithoutLoading = async () => {
                 try {
                     const response = await api.get('/complaints/volunteer-complaints');
-                    setComplaints(response.data || []);
+                    const data = response.data || [];
+                    setComplaints(data);
 
-                    const total = response.data?.length || 0;
-                    const pending = response.data?.filter(c => c.status?.toLowerCase() === 'pending')?.length || 0;
-                    const inProgress = response.data?.filter(c => c.status?.toLowerCase() === 'in progress' || c.status?.toLowerCase() === 'in_progress')?.length || 0;
-                    const resolved = response.data?.filter(c => c.status?.toLowerCase() === 'resolved')?.length || 0;
+                    const total = data.length || 0;
+                    const pending = data.filter(c => c.status?.toLowerCase() === 'pending')?.length || 0;
+                    const inProgress = data.filter(c => c.status?.toLowerCase() === 'in progress' || c.status?.toLowerCase() === 'in_progress')?.length || 0;
+                    const resolved = data.filter(c => c.status?.toLowerCase() === 'resolved')?.length || 0;
 
                     setStats({ total, pending, inProgress, resolved });
                 } catch (err) {
@@ -78,16 +83,35 @@ const VolunteerDashboard = () => {
         return () => clearInterval(interval);
     }, []);
 
+    useEffect(() => {
+        if (!navigator.geolocation) return;
+
+        const watchId = navigator.geolocation.watchPosition(
+            (position) => {
+                setVolunteerLocation({
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                });
+            },
+            (err) => console.error('Error tracking location:', err),
+            { enableHighAccuracy: true }
+        );
+
+        return () => navigator.geolocation.clearWatch(watchId);
+    }, []);
+
     const fetchVolunteerComplaints = async () => {
+        setLoading(true);
         try {
             const response = await api.get('/complaints/volunteer-complaints');
-            setComplaints(response.data || []);
+            const data = response.data || [];
+            setComplaints(data);
 
             // Calculate stats
-            const total = response.data?.length || 0;
-            const pending = response.data?.filter(c => c.status?.toLowerCase() === 'pending')?.length || 0;
-            const inProgress = response.data?.filter(c => c.status?.toLowerCase() === 'in progress' || c.status?.toLowerCase() === 'in_progress')?.length || 0;
-            const resolved = response.data?.filter(c => c.status?.toLowerCase() === 'resolved')?.length || 0;
+            const total = data.length || 0;
+            const pending = data.filter(c => c.status?.toLowerCase() === 'pending')?.length || 0;
+            const inProgress = data.filter(c => c.status?.toLowerCase() === 'in progress' || c.status?.toLowerCase() === 'in_progress')?.length || 0;
+            const resolved = data.filter(c => c.status?.toLowerCase() === 'resolved')?.length || 0;
 
             setStats({ total, pending, inProgress, resolved });
         } catch (err) {
@@ -338,6 +362,7 @@ const VolunteerDashboard = () => {
                                                     <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>Status</th>
                                                     <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>Citizen Info</th>
                                                     <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>Location</th>
+                                                    <th className="bg-transparent" style={{ color: 'var(--text-primary)' }}>Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -351,29 +376,16 @@ const VolunteerDashboard = () => {
                                                         <td className="bg-transparent">
                                                             <span className="badge bg-secondary">{complaint.type}</span>
                                                         </td>
-                                                        <td className="bg-transparent">{getPriorityBadge(complaint.priority)}</td>
                                                         <td className="bg-transparent">
+                                                            {getPriorityBadge(complaint.priority)}
+                                                        </td>
+                                                        <td className="bg-transparent text-center">
                                                             <span className={
                                                                 complaint.status?.toLowerCase() === 'resolved' ? 'badge bg-success' :
                                                                 (complaint.status?.toLowerCase() === 'in progress' || complaint.status?.toLowerCase() === 'in_progress') ? 'badge bg-info' : 'badge bg-warning'
                                                             }>
                                                                 {complaint.status || 'Pending'}
                                                             </span>
-                                                            {complaint.status?.toLowerCase() !== 'resolved' ? (
-                                                                <button 
-                                                                    className="btn btn-sm btn-outline-primary ms-2"
-                                                                    onClick={() => handleUpdateClick(complaint)}
-                                                                >
-                                                                    Upload Proof
-                                                                </button>
-                                                            ) : (
-                                                                <button 
-                                                                    className="btn btn-sm btn-outline-success ms-2"
-                                                                    onClick={() => handleUpdateClick(complaint)}
-                                                                >
-                                                                    View Details
-                                                                </button>
-                                                            )}
                                                         </td>
                                                         <td className="bg-transparent">
                                                             <div className="d-flex flex-column gap-1">
@@ -388,6 +400,34 @@ const VolunteerDashboard = () => {
                                                                 <MapPin size={12} />
                                                                 {complaint.address?.substring(0, 20)}...
                                                             </small>
+                                                        </td>
+                                                        <td className="bg-transparent">
+                                                            <div className="d-flex flex-column gap-2" style={{ maxWidth: '140px' }}>
+                                                                {complaint.status?.toLowerCase() !== 'resolved' ? (
+                                                                    <button 
+                                                                        className="btn btn-sm btn-primary w-100 py-1 shadow-sm d-flex align-items-center justify-content-center gap-1"
+                                                                        onClick={() => handleUpdateClick(complaint)}
+                                                                    >
+                                                                        <CheckCircle2 size={14} /> Update Proof
+                                                                    </button>
+                                                                ) : (
+                                                                    <button 
+                                                                        className="btn btn-sm btn-outline-success w-100 py-1 d-flex align-items-center justify-content-center gap-1"
+                                                                        onClick={() => handleUpdateClick(complaint)}
+                                                                    >
+                                                                        <ClipboardList size={14} /> View Details
+                                                                    </button>
+                                                                )}
+                                                                
+                                                                {complaint.latitude && complaint.longitude && (
+                                                                    <button 
+                                                                        className="btn btn-sm btn-outline-info w-100 py-1 d-flex align-items-center justify-content-center gap-1"
+                                                                        onClick={() => setRoutingComplaint(complaint)}
+                                                                    >
+                                                                        <Navigation size={14} /> View Route
+                                                                    </button>
+                                                                )}
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -455,10 +495,22 @@ const VolunteerDashboard = () => {
 
                                     <div className="mb-3">
                                         <label className="form-label text-muted">Location</label>
-                                        <p className="small mb-1 d-flex align-items-center gap-1" style={{ color: 'var(--text-primary)' }}>
-                                            <MapPin size={14} />
-                                            {selectedComplaintForUpdate.address}
-                                        </p>
+                                        <div className="d-flex align-items-center justify-content-between gap-2">
+                                            <p className="small mb-1 d-flex align-items-center gap-1" style={{ color: 'var(--text-primary)' }}>
+                                                <MapPin size={14} />
+                                                {selectedComplaintForUpdate.address}
+                                            </p>
+                                            {selectedComplaintForUpdate.latitude && selectedComplaintForUpdate.longitude && (
+                                                <button 
+                                                    type="button"
+                                                    className="btn btn-sm btn-outline-info d-flex align-items-center gap-1 rounded-pill px-3"
+                                                    onClick={() => setRoutingComplaint(selectedComplaintForUpdate)}
+                                                    style={{ fontSize: '0.75rem' }}
+                                                >
+                                                    <Navigation size={12} /> View Route
+                                                </button>
+                                            )}
+                                        </div>
                                         {selectedComplaintForUpdate.landmark && (
                                             <p className="small text-muted mb-0 ms-4">Near: {selectedComplaintForUpdate.landmark}</p>
                                         )}
@@ -542,6 +594,78 @@ const VolunteerDashboard = () => {
                                         </>
                                     )}
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {routingComplaint && (
+                <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered">
+                        <div className="modal-content border-0 shadow-lg" style={{ background: 'var(--bg-primary)', color: 'var(--bs-body-color)' }}>
+                            <div className="modal-header border-bottom border-light p-4">
+                                <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
+                                    <Navigation className="text-primary" size={24} />
+                                    Navigation to Complaint #{routingComplaint.id}
+                                </h5>
+                                <button type="button" className="btn-close btn-close-white" onClick={() => setRoutingComplaint(null)}></button>
+                            </div>
+                            <div className="modal-body p-4">
+                                <div className="mb-4">
+                                    <h6 className="fw-bold mb-1">{routingComplaint.title}</h6>
+                                    <p className="text-muted small mb-0 d-flex align-items-center gap-1">
+                                        <MapPin size={14} /> {routingComplaint.address}
+                                    </p>
+                                </div>
+                                
+                                <div className="position-relative">
+                                    <RoutingMap 
+                                        volunteerLoc={volunteerLocation} 
+                                        complaintLoc={{ lat: parseFloat(routingComplaint.latitude), lng: parseFloat(routingComplaint.longitude) }} 
+                                        complaintTitle={routingComplaint.title}
+                                    />
+                                    
+                                    {!volunteerLocation && (
+                                        <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-end justify-content-center p-4" style={{ pointerEvents: 'none' }}>
+                                            <div className="bg-white p-3 rounded-pill shadow-lg border border-primary border-opacity-25 d-flex align-items-center gap-2 animate-pulse" style={{ pointerEvents: 'auto' }}>
+                                                <div className="spinner-grow spinner-grow-sm text-primary" role="status"></div>
+                                                <span className="small fw-semibold">Acquiring your GPS position...</span>
+                                                <button 
+                                                    className="btn btn-sm btn-link p-0 text-decoration-none ms-2"
+                                                    onClick={() => {
+                                                        navigator.geolocation.getCurrentPosition(
+                                                            (pos) => setVolunteerLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                                                            (err) => alert("Please allow location access in your browser.")
+                                                        );
+                                                    }}
+                                                >
+                                                    Retry
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <div className="mt-4 p-3 bg-primary bg-opacity-10 rounded-3 border border-primary border-opacity-25">
+                                    <div className="d-flex gap-3 align-items-start">
+                                        <Navigation className="text-primary mt-1" size={20} />
+                                        <div>
+                                            <p className="mb-0 fw-semibold text-primary">Live Tracking Active</p>
+                                            <p className="small text-muted mb-0">The map will update your position as you move towards the complaint location.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer border-top border-light p-3">
+                                <button type="button" className="btn btn-secondary px-4 rounded-pill" onClick={() => setRoutingComplaint(null)}>Close Map</button>
+                                <a 
+                                    href={`https://www.google.com/maps/dir/?api=1&destination=${routingComplaint.latitude},${routingComplaint.longitude}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="btn btn-primary px-4 rounded-pill d-flex align-items-center gap-2"
+                                >
+                                    Open in Google Maps
+                                </a>
                             </div>
                         </div>
                     </div>
