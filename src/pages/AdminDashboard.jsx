@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users, FileText, UserCheck, AlertTriangle, Settings, Eye, UserPlus, CheckCircle, Map, Download, Trash2, Edit, Plus, BarChart2 } from 'lucide-react';
+import { Users, FileText, UserCheck, AlertTriangle, Settings, Eye, UserPlus, CheckCircle, Map, Download, Trash2, Edit, Plus, BarChart2, RefreshCcw } from 'lucide-react';
 import { api } from '../lib/api';
 import PageWrapper from '../components/PageWrapper';
 import Skeleton from '../components/Skeleton';
 
 
 const AdminDashboard = () => {
-    const [stats, setStats] = useState({ total: 0, pending: 0, inProgress: 0, resolved: 0 });
+    const [stats, setStats] = useState({ total: 0, pending: 0, in_progress: 0, resolved: 0 });
     const [complaints, setComplaints] = useState([]);
     const [users, setUsers] = useState([]);
     const [volunteers, setVolunteers] = useState([]);
@@ -63,7 +63,7 @@ const AdminDashboard = () => {
                     ]);
                     setComplaints(complaintsRes.data || []);
                     setUsers(usersRes.users || []);
-                    setStats(statsRes.stats || { total: 0, pending: 0, inProgress: 0, resolved: 0 });
+                    setStats(statsRes.stats || { total: 0, pending: 0, in_progress: 0, resolved: 0 });
                 } catch (err) {
                     console.error('Error refreshing admin data:', err);
                 }
@@ -108,9 +108,9 @@ const AdminDashboard = () => {
         fetchModalPhotos();
     }, [selectedComplaint?.id, selectedComplaint?.photo, selectedComplaint?.volunteer_photo]);
 
-    const fetchAdminData = async (page = 1, isLoadMore = false) => {
+    const fetchAdminData = async (page = 1, isLoadMore = false, silent = false) => {
         try {
-            if (page === 1 && !isLoadMore) setLoading(true);
+            if (page === 1 && !isLoadMore && !silent) setLoading(true);
             const zoneQuery = zoneFilter && zoneFilter !== 'All' ? `zone_id=${zoneFilter}` : '';
             const stateQuery = stateFilter && stateFilter !== 'All' ? `state=${stateFilter}` : '';
             const queryStr = [zoneQuery, stateQuery].filter(Boolean).join('&');
@@ -131,7 +131,7 @@ const AdminDashboard = () => {
             setUsers(usersRes.users || []);
             const volunteersList = usersRes.users?.filter(user => user.role === 'volunteer') || [];
             setVolunteers(volunteersList);
-            setStats(statsRes.stats || { total: 0, pending: 0, inProgress: 0, resolved: 0 });
+            setStats(statsRes.stats || { total: 0, pending: 0, in_progress: 0, resolved: 0 });
             setZones(zonesRes.zones || []);
             
             if (complaintsRes.pagination) {
@@ -157,11 +157,12 @@ const AdminDashboard = () => {
             complaintId,
             volunteerId
         });
-        // Refresh admin data
-        fetchAdminData();
+        // Refresh admin data silently in the background
+        fetchAdminData(1, false, true);
+        
         // Update selected complaint with new volunteer info if modal is open
         if (selectedComplaint && selectedComplaint.id === complaintId) {
-            const updated = res.data && res.data.data ? res.data.data : {};
+            const updated = res.data || {};
             setSelectedComplaint(prev => ({
                 ...prev,
                 volunteer_name: updated.volunteer_name || prev.volunteer_name,
@@ -179,7 +180,7 @@ const AdminDashboard = () => {
     const updateComplaintStatus = async (complaintId, newStatus) => {
         try {
             await api.put(`/complaints/${complaintId}/status`, { status: newStatus });
-            fetchAdminData();
+            fetchAdminData(1, false, true); // Silent refresh
             setSelectedComplaint(null);
         } catch (err) {
             console.error('Error updating status:', err);
@@ -193,7 +194,7 @@ const AdminDashboard = () => {
                 user_id: userId,
                 role
             });
-            fetchAdminData(); // Refresh data
+            fetchAdminData(1, false, true); // Silent refresh
         } catch (err) {
             console.error('Error updating user role:', err);
             alert('Failed to update user role');
@@ -280,7 +281,7 @@ const AdminDashboard = () => {
         if (!window.confirm('Are you sure you want to delete this zone?')) return;
         try {
             await api.delete(`/zones/${id}`);
-            fetchAdminData();
+            fetchAdminData(1, false, true); // Silent refresh
         } catch (err) {
             console.error('Error deleting zone:', err);
             alert('Failed to delete zone');
@@ -291,7 +292,7 @@ const AdminDashboard = () => {
         if (!window.confirm('Are you sure you want to delete this user?')) return;
         try {
             await api.delete(`/auth/admin/users/${id}`);
-            fetchAdminData();
+            fetchAdminData(1, false, true); // Silent refresh
         } catch (err) {
             console.error('Error deleting user:', err);
             alert('Failed to delete user');
@@ -304,7 +305,7 @@ const AdminDashboard = () => {
                 user_id: userId,
                 ...userData
             });
-            fetchAdminData();
+            fetchAdminData(1, false, true); // Silent refresh
             setIsEditingUser(null);
         } catch (err) {
             console.error('Error updating user:', err);
@@ -403,14 +404,15 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="row g-4 mb-5">
+                <div className="row g-4 row-cols-1 row-cols-md-3 row-cols-lg-5 mb-5">
                     {[
                         { title: 'Total Complaints', value: stats.total, icon: FileText, color: 'text-primary', bg: 'rgba(66, 133, 244, 0.12)' },
                         { title: 'Pending', value: stats.pending, icon: AlertTriangle, color: 'text-warning', bg: 'rgba(255, 193, 7, 0.12)' },
-                        { title: 'Volunteers', value: volunteers.length, icon: Users, color: 'text-info', bg: 'rgba(13, 202, 240, 0.12)' },
-                        { title: 'Resolved', value: stats.resolved, icon: UserCheck, color: 'text-success', bg: 'rgba(25, 135, 84, 0.12)' }
+                        { title: 'In Progress', value: stats.in_progress, icon: RefreshCcw, color: 'text-info', bg: 'rgba(13, 202, 240, 0.12)' },
+                        { title: 'Resolved', value: stats.resolved, icon: UserCheck, color: 'text-success', bg: 'rgba(25, 135, 84, 0.12)' },
+                        { title: 'Volunteers', value: volunteers.length, icon: Users, color: 'text-secondary', bg: 'rgba(108, 117, 125, 0.12)' }
                     ].map((item, idx) => (
-                        <div className="col-md-3" key={idx}>
+                        <div className="col" key={idx}>
                             <motion.div 
                                 whileHover={{ y: -8, scale: 1.02 }}
                                 className="glass-card-premium h-100"
@@ -430,8 +432,8 @@ const AdminDashboard = () => {
                                          }}>
                                         <item.icon size={28} className={item.color} />
                                     </div>
-                                    <h2 className="fw-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{item.value}</h2>
-                                    <p className="text-muted small fw-bold text-uppercase tracking-wider mb-0" style={{ opacity: 0.8 }}>{item.title}</p>
+                                    <h2 className="fw-bold mb-1 text-gradient-premium" style={{ fontSize: '1.75rem', letterSpacing: '-0.02em' }}>{item.value}</h2>
+                                    <p className="text-muted small fw-bold text-uppercase tracking-widest mb-0" style={{ fontSize: '0.65rem', opacity: 0.7 }}>{item.title}</p>
                                 </div>
                             </motion.div>
                         </div>
@@ -442,33 +444,41 @@ const AdminDashboard = () => {
                 <div className="row">
                     <div className="col-12">
                         <div className="card border-0 shadow" style={{ background: 'var(--card-bg)' }}>
-                            <div className="card-header border-bottom border-secondary" style={{ background: 'transparent' }}>
+                            <div className="card-header border-0" style={{ background: 'transparent' }}>
                                 <nav>
-                                    <div className="nav nav-tabs" role="tablist">
-                                        <button
-                                            className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
-                                            onClick={() => setActiveTab('overview')}
-                                        >
-                                            <FileText size={16} className="me-2" />Complaints Overview
-                                        </button>
-                                        <button
-                                            className={`nav-link ${activeTab === 'users' ? 'active' : ''}`}
-                                            onClick={() => setActiveTab('users')}
-                                        >
-                                            <Users size={16} className="me-2" />User Management
-                                        </button>
-                                        <button
-                                            className={`nav-link ${activeTab === 'volunteers' ? 'active' : ''}`}
-                                            onClick={() => setActiveTab('volunteers')}
-                                        >
-                                            <UserCheck size={16} className="me-2" />Volunteer Management
-                                        </button>
-                                        <button
-                                            className={`nav-link ${activeTab === 'zones' ? 'active' : ''}`}
-                                            onClick={() => setActiveTab('zones')}
-                                        >
-                                            <Map size={16} className="me-2" />Zone Management
-                                        </button>
+                                    <div className="nav nav-tabs border-0 gap-3 px-3 py-2" role="tablist">
+                                        {[
+                                            { id: 'overview', label: 'Complaints Overview', icon: FileText, color: 'primary' },
+                                            { id: 'users', label: 'User Management', icon: Users, color: 'danger' },
+                                            { id: 'volunteers', label: 'Volunteer Management', icon: UserCheck, color: 'success' },
+                                            { id: 'zones', label: 'Zone Management', icon: Map, color: 'info' }
+                                        ].map((tab) => (
+                                            <motion.button
+                                                key={tab.id}
+                                                whileHover={{ 
+                                                    y: -3, 
+                                                    scale: 1.02,
+                                                    boxShadow: '0 8px 20px rgba(0,0,0,0.1)'
+                                                }}
+                                                whileTap={{ scale: 0.98 }}
+                                                className={`nav-link border-0 rounded-premium px-4 py-2 d-flex align-items-center transition-all ${
+                                                    activeTab === tab.id 
+                                                    ? `glass-card-premium shadow-sm text-${tab.color} active` 
+                                                    : 'text-muted opacity-75'
+                                                }`}
+                                                onClick={() => setActiveTab(tab.id)}
+                                                style={{
+                                                    background: activeTab === tab.id ? `var(--${tab.color}-subtle)` : 'transparent',
+                                                    border: activeTab === tab.id ? `1px solid var(--bs-${tab.color})` : '1px solid transparent',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: '600',
+                                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                                                }}
+                                            >
+                                                <tab.icon size={18} className="me-2" />
+                                                {tab.label}
+                                            </motion.button>
+                                        ))}
                                     </div>
                                 </nav>
                             </div>
@@ -1021,7 +1031,7 @@ const AdminDashboard = () => {
                                 <div className="p-3 rounded border border-secondary" style={{ background: 'rgba(255,255,255,0.05)' }}>
                                     <div className="d-flex justify-content-between align-items-center mb-3">
                                         <h6 className="mb-0">Volunteer Assignment</h6>
-                                        {!isAssigning && (
+                                        {!isAssigning && selectedComplaint.status?.toLowerCase() !== 'resolved' && (
                                             <button className="btn btn-sm btn-outline-info" onClick={() => setIsAssigning(true)}>
                                                 {selectedComplaint.assigned_to ? 'Change Volunteer' : 'Assign Volunteer'}
                                             </button>
@@ -1037,28 +1047,73 @@ const AdminDashboard = () => {
                                             )}
                                         </p>
                                     ) : (
-                                        <div className="d-flex gap-2">
-                                            <select className="form-select" id="volunteerSelect" defaultValue={selectedComplaint.assigned_to || ''}>
-                                                <option value="">-- Select Volunteer --</option>
-                                                {volunteers.map(volunteer => (
-                                                    <option key={volunteer.id} value={volunteer.id}>
-                                                        {volunteer.name} ({volunteer.email})
-                                                    </option>
-                                                ))}
-                                            </select>
+                                        <div>
+                                            {(() => {
+                                                const localVolunteers = volunteers.filter(v => 
+                                                    v.state === selectedComplaint.state && 
+                                                    (v.location === selectedComplaint.zone_name || (!v.location && !selectedComplaint.zone_name))
+                                                );
+                                                const stateVolunteers = volunteers.filter(v => v.state === selectedComplaint.state);
+                                                const finalVolunteers = localVolunteers.length > 0 ? localVolunteers : stateVolunteers;
+                                                const isFallback = localVolunteers.length === 0 && stateVolunteers.length > 0;
+
+                                                return (
+                                                    <>
+                                                        <div className={`p-2 mb-3 border rounded small d-flex align-items-center gap-2 ${isFallback ? 'bg-warning bg-opacity-10 border-warning border-opacity-25 text-warning' : 'bg-primary bg-opacity-10 border-primary border-opacity-25 text-primary'}`}>
+                                                            <i className={`bi ${isFallback ? 'bi-exclamation-triangle' : 'bi-info-circle'}`}></i>
+                                                            <span>
+                                                                {isFallback 
+                                                                    ? `No local volunteers. Showing all in ${selectedComplaint.state}`
+                                                                    : `Showing volunteers for ${selectedComplaint.state} / ${selectedComplaint.zone_name}`
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <div className="volunteer-selection-ghost-grid list-group overflow-auto" style={{ maxHeight: '300px' }}>
+                                                            {finalVolunteers.length === 0 ? (
+                                                                <div className="text-center py-4 border border-secondary border-dashed rounded bg-dark bg-opacity-50">
+                                                                    <p className="text-muted mb-0 small">No volunteers found in this State.</p>
+                                                                    <button 
+                                                                        className="btn btn-link btn-sm text-info text-decoration-none mt-2"
+                                                                        onClick={() => setIsAssigning(false)}
+                                                                    >
+                                                                        Go back
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                finalVolunteers.map(volunteer => {
+                                                                    const activeCount = complaints.filter(c => c.assigned_to === volunteer.id && c.status?.toLowerCase() !== 'resolved').length;
+                                                                    const workloadColor = activeCount >= 5 ? 'danger' : activeCount >= 3 ? 'warning' : 'success';
+                                                                    
+                                                                    return (
+                                                                        <button
+                                                                            key={volunteer.id}
+                                                                            className={`list-group-item list-group-item-action bg-dark bg-opacity-50 border-secondary d-flex justify-content-between align-items-center hover-lift py-3 mb-2 rounded border`}
+                                                                            onClick={() => assignVolunteer(selectedComplaint.id, volunteer.id)}
+                                                                        >
+                                                                            <div className="d-flex flex-column gap-1">
+                                                                                <div className="d-flex align-items-center gap-2">
+                                                                                    <span className="fw-bold text-body">{volunteer.name}</span>
+                                                                                    {isFallback && <span className="badge bg-secondary opacity-50" style={{ fontSize: '0.6rem' }}>{volunteer.location || 'State-wide'}</span>}
+                                                                                </div>
+                                                                                <small className="text-muted">{volunteer.email}</small>
+                                                                            </div>
+                                                                            <div className="text-end">
+                                                                                <span className={`badge bg-${workloadColor} bg-opacity-10 text-${workloadColor} border border-${workloadColor} border-opacity-25 rounded-pill`}>
+                                                                                    {activeCount} active tasks
+                                                                                </span>
+                                                                            </div>
+                                                                        </button>
+                                                                    );
+                                                                })
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
+                                            
                                             <button 
-                                                className="btn btn-primary text-nowrap"
-                                                onClick={() => {
-                                                    const select = document.getElementById('volunteerSelect');
-                                                    if (select.value) {
-                                                        assignVolunteer(selectedComplaint.id, select.value);
-                                                    }
-                                                }}
-                                            >
-                                                Save Assignee
-                                            </button>
-                                            <button 
-                                                className="btn btn-outline-secondary"
+                                                className="btn btn-sm btn-outline-secondary mt-3"
                                                 onClick={() => setIsAssigning(false)}
                                             >
                                                 Cancel

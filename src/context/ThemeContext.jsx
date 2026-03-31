@@ -3,19 +3,18 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-    const [theme, setTheme] = useState(() => {
-        return localStorage.getItem('bs-theme') || 'light';
-    });
+    // Force light mode permanently
+    const [theme] = useState('light');
 
     useEffect(() => {
         const root = window.document.documentElement;
-        // Set Bootstrap's data-bs-theme attribute
-        root.setAttribute('data-bs-theme', theme);
-        localStorage.setItem('bs-theme', theme);
-    }, [theme]);
+        root.setAttribute('data-bs-theme', 'light');
+        localStorage.setItem('bs-theme', 'light');
+    }, []);
 
     const toggleTheme = () => {
-        setTheme((prev) => (prev === "light" ? "dark" : "light"));
+        // Function disabled as dark mode is being removed
+        console.log("Theme toggle is disabled; dark mode is removed.");
     };
 
     return (

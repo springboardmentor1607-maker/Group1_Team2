@@ -162,10 +162,9 @@ body {
 }
 
 
-/* Scrollbar */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+/* Scrollbar style removed to avoid conflicts */
+@media (min-width: 992px) {
+    /* Potential other styles here */
 }
 
 /* Remove Bootstrap solid background overrides to show mesh gradient underneath */
@@ -181,18 +180,7 @@ body {
     background-color: transparent !important;
 }
 
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(128, 128, 128, 0.2);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(128, 128, 128, 0.4);
-}
+/* Scrollbar track styles removed to avoid conflicts */
 
 /* ===============================
    MAP COMPONENT FIXES

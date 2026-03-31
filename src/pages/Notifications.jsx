@@ -156,13 +156,13 @@ export default function Notifications() {
                         <div className="card-header bg-transparent border-bottom p-3 d-flex align-items-center justify-content-between">
                             <div className="nav nav-pills gap-2">
                                 <button 
-                                    className={`nav-link py-1 px-3 rounded-pill small ${filter === 'all' ? 'active bg-primary' : 'text-secondary'}`}
+                                    className={`nav-link py-1 px-3 rounded-pill small ${filter === 'all' ? 'active bg-primary text-white' : 'text-secondary'}`}
                                     onClick={() => setFilter('all')}
                                 >
                                     All
                                 </button>
                                 <button 
-                                    className={`nav-link py-1 px-3 rounded-pill small ${filter === 'unread' ? 'active bg-primary' : 'text-secondary'}`}
+                                    className={`nav-link py-1 px-3 rounded-pill small ${filter === 'unread' ? 'active bg-primary text-white' : 'text-secondary'}`}
                                     onClick={() => setFilter('unread')}
                                 >
                                     Unread
@@ -170,13 +170,13 @@ export default function Notifications() {
                                 {userRole === 'admin' && (
                                     <>
                                         <button 
-                                            className={`nav-link py-1 px-3 rounded-pill small ${filter === 'citizen' ? 'active bg-primary' : 'text-secondary'}`}
+                                            className={`nav-link py-1 px-3 rounded-pill small ${filter === 'citizen' ? 'active bg-primary text-white' : 'text-secondary'}`}
                                             onClick={() => setFilter('citizen')}
                                         >
                                             Citizen Reports
                                         </button>
                                         <button 
-                                            className={`nav-link py-1 px-3 rounded-pill small ${filter === 'volunteer' ? 'active bg-primary' : 'text-secondary'}`}
+                                            className={`nav-link py-1 px-3 rounded-pill small ${filter === 'volunteer' ? 'active bg-primary text-white' : 'text-secondary'}`}
                                             onClick={() => setFilter('volunteer')}
                                         >
                                             Volunteer Activity
@@ -184,9 +184,7 @@ export default function Notifications() {
                                     </>
                                 )}
                             </div>
-                            <button className="btn btn-light btn-sm rounded-pill p-2 d-flex align-items-center justify-content-center">
-                                <Filter size={14} />
-                            </button>
+
                         </div>
 
                         <div className="card-body p-0">

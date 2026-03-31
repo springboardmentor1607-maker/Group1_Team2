@@ -21,6 +21,9 @@ function Complaints() {
         return params.get('view') === 'my' ? 'my' : 'all';
     });
     const [pagination, setPagination] = React.useState({ page: 1, pages: 1, total: 0 });
+    const [zones, setZones] = React.useState([]);
+    const [stateFilter, setStateFilter] = React.useState('All');
+    const [zoneFilter, setZoneFilter] = React.useState('All');
 
     // Check URL parameters for view mode
     React.useEffect(() => {
@@ -38,33 +41,16 @@ function Complaints() {
     React.useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                // Use cached stats if fresh (< 5 min old) to avoid redundant API calls
-                const STATS_TTL_MS = 5 * 60 * 1000;
-                const cachedRaw = sessionStorage.getItem('complaintsStats');
-                let statsData = null;
+                const [profileRes, zonesRes] = await Promise.all([
+                    api.get('/auth/profile'),
+                    api.get('/zones')
+                ]);
 
-                if (cachedRaw) {
-                    const cached = JSON.parse(cachedRaw);
-                    if (Date.now() - cached.timestamp < STATS_TTL_MS) {
-                        statsData = cached.stats;
-                    }
-                }
-
-                const profileRes = await api.get('/auth/profile');
-
-                if (!statsData) {
-                    const statsRes = await api.get('/complaints/stats');
-                    statsData = {
-                        total: statsRes.stats?.total || 0,
-                        pending: statsRes.stats?.pending || 0,
-                        inProgress: statsRes.stats?.in_progress || 0,
-                        resolved: statsRes.stats?.resolved || 0
-                    };
-                    sessionStorage.setItem('complaintsStats', JSON.stringify({ stats: statsData, timestamp: Date.now() }));
-                }
-
-                setStats(statsData);
+                setZones(zonesRes.zones || []);
                 setUser(profileRes.user);
+                
+                // Fetch stats with initial filters (All)
+                await fetchStats('All', 'All');
             } catch (err) {
                 console.error('Error fetching initial page data:', err);
             }
@@ -72,21 +58,65 @@ function Complaints() {
         fetchInitialData();
     }, []);
 
-    React.useEffect(() => {
-        const fetchComplaints = async () => {
-            try {
-                setLoading(true);
-                const complaintsEndpoint = viewMode === 'my' ? '/complaints/my-complaints' : '/complaints';
-                const res = await api.get(`${complaintsEndpoint}?page=1&limit=10`);
-                setComplaints(res.data || []);
-                setPagination(res.pagination || { page: 1, pages: 1, total: 0 });
-            } catch (err) {
-                console.error('Error fetching complaints:', err);
-            } finally {
-                setLoading(false);
+    const fetchStats = async (state, zoneId) => {
+        try {
+            const query = [];
+            if (zoneId !== 'All') query.push(`zone_id=${zoneId}`);
+            if (state !== 'All') query.push(`state=${state}`);
+            const queryStr = query.length > 0 ? `?${query.join('&')}` : '';
+            
+            const statsRes = await api.get(`/complaints/stats${queryStr}`);
+            const statsData = {
+                total: statsRes.stats?.total || 0,
+                pending: statsRes.stats?.pending || 0,
+                inProgress: statsRes.stats?.in_progress || 0,
+                resolved: statsRes.stats?.resolved || 0
+            };
+            setStats(statsData);
+            
+            // Only cache if no filters
+            if (state === 'All' && zoneId === 'All') {
+                sessionStorage.setItem('complaintsStats', JSON.stringify({ stats: statsData, timestamp: Date.now() }));
             }
-        };
-        fetchComplaints();
+        } catch (err) {
+            console.error('Error fetching stats:', err);
+        }
+    };
+
+    const fetchComplaints = async (page = 1, isLoadMore = false) => {
+        try {
+            if (!isLoadMore) setLoading(true);
+            else setLoadingMore(true);
+
+            const query = [`page=${page}`, 'limit=10'];
+            if (viewMode === 'all') {
+                if (zoneFilter !== 'All') query.push(`zone_id=${zoneFilter}`);
+                if (stateFilter !== 'All') query.push(`state=${stateFilter}`);
+            }
+            
+            const queryStr = `?${query.join('&')}`;
+            const complaintsEndpoint = viewMode === 'my' ? '/complaints/my-complaints' : '/complaints';
+            const res = await api.get(`${complaintsEndpoint}${queryStr}`);
+            
+            if (isLoadMore) {
+                setComplaints(prev => [...prev, ...(res.data || [])]);
+            } else {
+                setComplaints(res.data || []);
+            }
+            setPagination(res.pagination || { page: 1, pages: 1, total: 0 });
+        } catch (err) {
+            console.error('Error fetching complaints:', err);
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchComplaints(1, false);
+        if (viewMode === 'all') {
+            fetchStats(stateFilter, zoneFilter);
+        }
 
         // Auto-refresh every 3 minutes — only when tab is visible
         const interval = setInterval(() => {
@@ -94,10 +124,17 @@ function Complaints() {
 
             const fetchWithoutLoading = async () => {
                 try {
+                    const query = ['page=1', 'limit=10'];
+                    if (viewMode === 'all') {
+                        if (zoneFilter !== 'All') query.push(`zone_id=${zoneFilter}`);
+                        if (stateFilter !== 'All') query.push(`state=${stateFilter}`);
+                    }
+                    const queryStr = `?${query.join('&')}`;
                     const complaintsEndpoint = viewMode === 'my' ? '/complaints/my-complaints' : '/complaints';
+                    
                     const [complaintsRes, statsRes] = await Promise.all([
-                        api.get(`${complaintsEndpoint}?page=1&limit=10`),
-                        api.get('/complaints/stats')
+                        api.get(`${complaintsEndpoint}${queryStr}`),
+                        api.get(`/complaints/stats${queryStr}`)
                     ]);
 
                     // Only update if we are on the first page
@@ -116,8 +153,6 @@ function Complaints() {
                         resolved: statsRes.stats?.resolved || 0
                     };
                     setStats(freshStats);
-                    // Keep cache fresh
-                    sessionStorage.setItem('complaintsStats', JSON.stringify({ stats: freshStats, timestamp: Date.now() }));
                 } catch (err) {
                     console.error('Error refreshing complaints:', err);
                 }
@@ -126,24 +161,11 @@ function Complaints() {
         }, 180_000); // 3 minutes
 
         return () => clearInterval(interval);
-    }, [viewMode]);
+    }, [viewMode, stateFilter, zoneFilter]);
 
-    const handleLoadMore = async () => {
+    const handleLoadMore = () => {
         if (loadingMore || pagination.page >= pagination.pages) return;
-
-        try {
-            setLoadingMore(true);
-            const nextPage = pagination.page + 1;
-            const complaintsEndpoint = viewMode === 'my' ? '/complaints/my-complaints' : '/complaints';
-            const res = await api.get(`${complaintsEndpoint}?page=${nextPage}&limit=10`);
-            
-            setComplaints(prev => [...prev, ...(res.data || [])]);
-            setPagination(res.pagination || { ...pagination, page: nextPage });
-        } catch (err) {
-            console.error('Error loading more complaints:', err);
-        } finally {
-            setLoadingMore(false);
-        }
+        fetchComplaints(pagination.page + 1, true);
     };
 
     const handleViewModeChange = (mode) => {
@@ -280,8 +302,85 @@ function Complaints() {
                     </div>
                 </div>
 
-                {/* Show stats only for all complaints view */}
-                {viewMode === 'all' && <StatsSection stats={stats} />}
+                {/* Statistics & Filters Control */}
+                {viewMode === 'all' && (
+                    <div className="mb-5">
+                        <StatsSection stats={stats} />
+                        
+                        <div className="d-flex justify-content-center mt-4">
+                            <div 
+                                className="glass-card-premium p-2 px-4 d-inline-flex flex-wrap align-items-center gap-3 shadow-sm rounded-pill"
+                                style={{ 
+                                    border: '1px solid rgba(255, 255, 255, 0.4)',
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                    maxWidth: '100%'
+                                }}
+                            >
+                                <div className="d-flex align-items-center gap-2 border-end pe-3 border-secondary border-opacity-25">
+                                    <Filter size={16} className="text-primary opacity-75" />
+                                    <span className="fw-bold small text-uppercase tracking-wider opacity-75" style={{ fontSize: '0.65rem' }}>Filter</span>
+                                </div>
+
+                                <div className="d-flex flex-wrap gap-2 align-items-center">
+                                    {/* State Filter */}
+                                    <div className="d-flex align-items-center gap-2 bg-dark bg-opacity-10 dark-theme-bg p-1 px-3 rounded-pill border border-secondary border-opacity-25">
+                                        <MapPin size={14} className="text-primary opacity-75" />
+                                        <select 
+                                            className="form-select form-select-sm border-0 shadow-none fw-bold bg-transparent py-0"
+                                            style={{ width: '130px', cursor: 'pointer', color: 'inherit', fontSize: '0.8rem' }}
+                                            value={stateFilter}
+                                            onChange={(e) => {
+                                                setStateFilter(e.target.value);
+                                                setZoneFilter('All');
+                                                setPagination(prev => ({ ...prev, page: 1 }));
+                                            }}
+                                        >
+                                            <option value="All" style={{ background: 'var(--bg-primary)' }}>All States</option>
+                                            {[...new Set(zones.map(z => z.state).filter(Boolean))].sort().map(state => (
+                                                <option key={state} value={state} style={{ background: 'var(--bg-primary)' }}>{state}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Zone Filter */}
+                                    <div className="d-flex align-items-center gap-2 bg-dark bg-opacity-10 dark-theme-bg p-1 px-3 rounded-pill border border-secondary border-opacity-25">
+                                        <Users size={14} className="text-primary opacity-75" />
+                                        <select 
+                                            className="form-select form-select-sm border-0 shadow-none fw-bold bg-transparent py-0"
+                                            style={{ width: '130px', cursor: 'pointer', color: 'inherit', fontSize: '0.8rem' }}
+                                            value={zoneFilter}
+                                            onChange={(e) => {
+                                                setZoneFilter(e.target.value);
+                                                setPagination(prev => ({ ...prev, page: 1 }));
+                                            }}
+                                        >
+                                            <option value="All" style={{ background: 'var(--bg-primary)' }}>All Zones</option>
+                                            {zones
+                                                .filter(z => stateFilter === 'All' || z.state === stateFilter)
+                                                .map(zone => (
+                                                <option key={zone.id} value={zone.id} style={{ background: 'var(--bg-primary)' }}>{zone.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    
+                                    {(stateFilter !== 'All' || zoneFilter !== 'All') && (
+                                        <button 
+                                            className="btn btn-link btn-sm p-0 ms-2 text-decoration-none text-danger fw-bold small"
+                                            style={{ fontSize: '0.75rem' }}
+                                            onClick={() => {
+                                                setStateFilter('All');
+                                                setZoneFilter('All');
+                                                setPagination(prev => ({ ...prev, page: 1 }));
+                                            }}
+                                        >
+                                            Reset
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Complaints Count */}
                 <div className="mb-3">
@@ -291,7 +390,7 @@ function Complaints() {
                 </div>
 
                 {/* Complaints Grid */}
-                <div className="row g-4">
+                <div className="row g-4 align-items-start">
                     {complaints.length === 0 ? (
                         <div className="col-12">
                             <div className="text-center py-5">

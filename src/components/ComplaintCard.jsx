@@ -277,115 +277,119 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                 )}
             </AnimatePresence>
 
-            {hasAnyPhoto && (
-                <motion.div 
-                    layout
-                    onClick={!isPhotoFocused ? fetchPhoto : undefined}
-                    animate={{
-                        height: isPhotoFocused ? '500px' : (photoData?.photo ? '240px' : '160px'),
-                    }}
-                    transition={{
-                        layout: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-                        height: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
-                    }}
-                    style={{
-                        width: '100%', 
-                        backgroundColor: 'var(--bg-secondary)',
-                        borderBottom: isPhotoFocused ? 'none' : '1px solid var(--border-color)',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        cursor: !photoData || !isPhotoFocused ? 'zoom-in' : 'default',
-                        zIndex: 2
-                    }}
-                >
-                    {loadingPhoto ? (
-                        <div className="h-100"><Skeleton width="100%" height="100%" /></div>
-                    ) : (isRevealed && (photoData?.photo || photoData?.volunteer_photo)) ? (
-                        <div className="h-100 position-relative">
-                            <motion.img 
-                                initial={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
-                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                                src={displayPhoto}
-                                alt="Complaint"
-                                className="w-100 h-100 object-fit-cover"
-                            />
-                            {photoData.volunteer_photo && (
-                                <div 
-                                    className="position-absolute top-0 end-0 p-2 z-10"
-                                    onClick={e => e.stopPropagation()}
-                                >
-                                    <div className="d-flex flex-column gap-2 align-items-end">
-                                        <span className={`badge ${isShowingProof ? 'bg-success' : 'bg-primary'} shadow-lg border border-white border-opacity-25`} style={{ backdropFilter: 'blur(8px)', padding: '8px 12px' }}>
-                                            {isShowingProof ? (
-                                                <><CheckCircle size={14} className="me-1" /> Proof of Work</>
-                                            ) : (
-                                                <><Clock size={14} className="me-1" /> Original Issue</>
-                                            )}
-                                        </span>
-                                        
-                                        {photoData.volunteer_photo && photoData.photo && (
-                                            <button 
-                                                className="btn btn-sm btn-light rounded-pill shadow-sm py-1 px-3 border-0 bg-white"
-                                                style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--primary-color)' }}
-                                                onClick={() => setViewingOriginal(!viewingOriginal)}
-                                            >
-                                                Switch to {viewingOriginal ? 'Proof' : 'Original'}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div 
-                            className="d-flex flex-column align-items-center justify-content-center h-100 p-4 cursor-pointer"
-                            onClick={fetchPhoto}
-                            style={{
-                                background: 'radial-gradient(circle at center, rgba(128, 128, 128, 0.08) 0%, rgba(0, 0, 0, 0.03) 100%)',
-                                position: 'relative',
-                                overflow: 'hidden'
-                            }}
-                        >
-                            <motion.div
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="d-flex flex-column align-items-center gap-3"
+            <motion.div 
+                layout
+                onClick={!isPhotoFocused ? fetchPhoto : undefined}
+                animate={{
+                    height: isPhotoFocused ? '500px' : '240px',
+                }}
+                transition={{
+                    layout: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+                    height: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+                }}
+                style={{
+                    width: '100%', 
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderBottom: isPhotoFocused ? 'none' : '1px solid var(--border-color)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    cursor: !hasAnyPhoto || !isPhotoFocused ? 'zoom-in' : 'default',
+                    zIndex: 2
+                }}
+            >
+                {loadingPhoto ? (
+                    <div className="h-100"><Skeleton width="100%" height="100%" /></div>
+                ) : (isRevealed && (photoData?.photo || photoData?.volunteer_photo)) ? (
+                    <div className="h-100 position-relative">
+                        <motion.img 
+                            initial={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
+                            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            src={displayPhoto}
+                            alt="Complaint"
+                            className="w-100 h-100 object-fit-cover"
+                        />
+                        {photoData.volunteer_photo && (
+                            <div 
+                                className="position-absolute top-0 end-0 p-2 z-10"
+                                onClick={e => e.stopPropagation()}
                             >
-                                <div 
-                                    className="rounded-circle d-flex align-items-center justify-content-center mb-1 shadow-lg"
-                                    style={{ 
-                                        width: '64px', height: '64px', 
-                                        background: 'rgba(255, 255, 255, 0.05)',
-                                        backdropFilter: 'blur(12px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                                        color: 'var(--primary-color)'
-                                    }}
-                                >
-                                    <ImageIcon size={32} strokeWidth={1.5} className="opacity-75" />
+                                <div className="d-flex flex-column gap-2 align-items-end">
+                                    <span className={`badge ${isShowingProof ? 'bg-success' : 'bg-primary'} shadow-lg border border-white border-opacity-25`} style={{ backdropFilter: 'blur(8px)', padding: '8px 12px' }}>
+                                        {isShowingProof ? (
+                                            <><CheckCircle size={14} className="me-1" /> Proof of Work</>
+                                        ) : (
+                                            <><Clock size={14} className="me-1" /> Original Issue</>
+                                        )}
+                                    </span>
+                                    
+                                    {photoData.volunteer_photo && photoData.photo && (
+                                        <button 
+                                            className="btn btn-sm btn-light rounded-pill shadow-sm py-1 px-3 border-0 bg-white"
+                                            style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'var(--primary-color)' }}
+                                            onClick={() => setViewingOriginal(!viewingOriginal)}
+                                        >
+                                            Switch to {viewingOriginal ? 'Proof' : 'Original'}
+                                        </button>
+                                    )}
                                 </div>
-                                <div 
-                                    className="px-4 py-2 rounded-pill fw-bold position-relative overflow-hidden glass-surface shadow-lg"
-                                    style={{
-                                        color: 'var(--text-primary)',
-                                        fontSize: '0.85rem',
-                                        letterSpacing: '0.5px',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '0.6rem',
-                                        background: 'rgba(255, 255, 255, 0.8)',
-                                        border: '1px solid rgba(0,0,0,0.05)'
-                                    }}
-                                >
-                                    {isResolved ? 'View Proof of Work' : 
-                                     (complaint.status?.toLowerCase().includes('progress') ? 'View Progress / Issue' : 'View Issue Photo')}
-                                    <ChevronRight size={14} />
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
-                </motion.div>
-            )}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div 
+                        className="d-flex flex-column align-items-center justify-content-center h-100 p-4 cursor-pointer"
+                        onClick={hasAnyPhoto ? fetchPhoto : undefined}
+                        style={{
+                            background: 'radial-gradient(circle at center, rgba(0, 113, 227, 0.05) 0%, rgba(0, 0, 0, 0.03) 100%)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}
+                    >
+                        <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="d-flex flex-column align-items-center gap-3 text-center"
+                        >
+                            <div 
+                                className="rounded-circle d-flex align-items-center justify-content-center mb-1 shadow-sm"
+                                style={{ 
+                                    width: '64px', height: '64px', 
+                                    background: 'rgba(255, 255, 255, 0.2)',
+                                    backdropFilter: 'blur(12px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                                    color: 'var(--primary-color)'
+                                }}
+                            >
+                                <ImageIcon size={32} strokeWidth={1.5} className="opacity-75" />
+                            </div>
+                            <div 
+                                className="px-4 py-2 rounded-pill fw-bold position-relative overflow-hidden glass-surface shadow-sm"
+                                style={{
+                                    color: 'var(--text-primary)',
+                                    fontSize: '0.85rem',
+                                    letterSpacing: '0.5px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.6rem',
+                                    background: 'rgba(255, 255, 255, 0.8)',
+                                    border: '1px solid rgba(0,0,0,0.05)'
+                                }}
+                            >
+                                {hasAnyPhoto ? (
+                                    <>
+                                        {isResolved ? 'View Proof of Work' : 
+                                         (complaint.status?.toLowerCase().includes('progress') ? 'View Progress / Issue' : 'View Issue Photo')}
+                                        <ChevronRight size={14} />
+                                    </>
+                                ) : (
+                                    <>No Photo Uploaded</>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </motion.div>
             <motion.div 
                 layout
                 className="card-body p-4 d-flex flex-column" 
@@ -412,20 +416,23 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
 
                     <motion.h5 layout className="fw-bold mb-2 text-truncate" style={{ color: 'var(--text-primary)' }}>{complaint.title}</motion.h5>
 
-                    <motion.div layout className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-                        <span className="badge bg-secondary bg-opacity-10 text-secondary small">{complaint.type || 'Other'}</span>
-                        <span>•</span><Clock size={14} /><span className="small">{formatDate(complaint.created_at)}</span>
-                    </motion.div>
-
-                    <motion.div layout className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-                        <User size={14} /><span className="small">Reported by: {complaint.user_name || 'Unknown'}</span>
-                    </motion.div>
-
-                    {complaint.volunteer_name && (
-                        <motion.div layout className="d-flex align-items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-                            <User size={14} /><span className="small">Assigned to: {complaint.volunteer_name}</span>
+                    <div style={{ minHeight: '80px' }} className="mb-2">
+                        <motion.div layout className="d-flex align-items-center gap-2 mb-1" style={{ color: 'var(--text-muted)' }}>
+                            <span className="badge bg-secondary bg-opacity-10 text-secondary small">{complaint.type || 'Other'}</span>
+                            <span>•</span><Clock size={14} /><span className="small">{formatDate(complaint.created_at)}</span>
                         </motion.div>
-                    )}
+
+                        <motion.div layout className="d-flex align-items-center gap-2 mb-1" style={{ color: 'var(--text-muted)' }}>
+                            <User size={14} /><span className="small">Reported by: {complaint.user_name || 'Unknown'}</span>
+                        </motion.div>
+
+                        <motion.div layout className="d-flex align-items-center gap-2 mb-1" style={{ color: 'var(--text-muted)' }}>
+                            <User size={14} />
+                            <span className="small">
+                                {complaint.volunteer_name ? `Assigned to: ${complaint.volunteer_name}` : "Pending Assignment"}
+                            </span>
+                        </motion.div>
+                    </div>
 
                     <motion.div layout className="d-flex align-items-start gap-2 mb-3">
                         <MapPin size={14} className="mt-1 flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
@@ -436,23 +443,23 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                     </motion.div>
 
                     <div className="mt-auto">
-                        {complaint.description && (
-                            <motion.div 
-                                layout
-                                style={{
-                                    background: 'rgba(0, 113, 227, 0.04)',
-                                    padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(0, 113, 227, 0.08)',
-                                    marginBottom: '1.25rem', boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.02)'
-                                }}
-                            >
-                                <p className="small mb-0" style={{
-                                    display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
-                                    overflow: 'hidden', lineHeight: '1.6', fontWeight: '500', color: 'var(--text-primary)'
-                                }}>
-                                    {complaint.description}
-                                </p>
-                            </motion.div>
-                        )}
+                        <motion.div 
+                            layout
+                            style={{
+                                background: 'rgba(0, 113, 227, 0.04)',
+                                padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(0, 113, 227, 0.08)',
+                                marginBottom: '1.25rem', boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.02)',
+                                height: '110px' // Guaranteed area for description
+                            }}
+                        >
+                            <p className="small mb-0" style={{
+                                display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden', lineHeight: '1.6', fontWeight: '500', color: 'var(--text-primary)',
+                                opacity: complaint.description ? 1 : 0.5
+                            }}>
+                                {complaint.description || "No description provided."}
+                            </p>
+                        </motion.div>
 
                         <motion.div layout className="d-flex align-items-center gap-3 mt-auto">
                             <div className="d-flex align-items-center gap-2">

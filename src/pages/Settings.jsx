@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useTheme } from '../context/ThemeContext';
-import { Moon, Sun } from 'lucide-react';
 import PageWrapper from '../components/PageWrapper';
 
 function Settings() {
-    const { theme, toggleTheme } = useTheme();
     const [notifications, setNotifications] = useState({
         email: true,
         push: false,

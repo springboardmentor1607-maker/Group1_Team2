@@ -310,28 +310,28 @@ const VolunteerDashboard = () => {
                     <div className="col-md-3">
                         <div className="glass-card-premium h-100 p-4 text-center">
                                 <ClipboardList size={32} className="text-primary mb-2" />
-                                <h3 className="fw-bold">{stats.total}</h3>
+                                <h3 className="fw-bold" style={{ color: 'var(--text-primary)' }}>{stats.total}</h3>
                                 <p className="text-muted mb-0">Total Assigned</p>
                         </div>
                     </div>
                     <div className="col-md-3">
                         <div className="glass-card-premium h-100 p-4 text-center">
                                 <Clock size={32} className="text-warning mb-2" />
-                                <h3 className="fw-bold">{stats.pending}</h3>
+                                <h3 className="fw-bold" style={{ color: 'var(--text-primary)' }}>{stats.pending}</h3>
                                 <p className="text-muted mb-0">Pending</p>
                         </div>
                     </div>
                     <div className="col-md-3">
                         <div className="glass-card-premium h-100 p-4 text-center">
                                 <AlertTriangle size={32} className="text-info mb-2" />
-                                <h3 className="fw-bold">{stats.inProgress}</h3>
+                                <h3 className="fw-bold" style={{ color: 'var(--text-primary)' }}>{stats.inProgress}</h3>
                                 <p className="text-muted mb-0">In Progress</p>
                         </div>
                     </div>
                     <div className="col-md-3">
                         <div className="glass-card-premium h-100 p-4 text-center">
                                 <CheckCircle2 size={32} className="text-success mb-2" />
-                                <h3 className="fw-bold">{stats.resolved}</h3>
+                                <h3 className="fw-bold" style={{ color: 'var(--text-primary)' }}>{stats.resolved}</h3>
                                 <p className="text-muted mb-0">Resolved</p>
                         </div>
                     </div>

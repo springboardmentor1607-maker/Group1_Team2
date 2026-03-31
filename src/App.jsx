@@ -35,16 +35,7 @@ function AppContent({ isAuthenticated, handleLogin, handleLogout, getDashboardRo
                 {/* Public Routes */}
                 <Route
                     path="/"
-                    element={
-                        isAuthenticated ? (
-                            <Navigate 
-                                to={getDashboardRoute()} 
-                                replace 
-                            />
-                        ) : (
-                            <LandingPage />
-                        )
-                    }
+                    element={<LandingPage />}
                 />
                 <Route
                     path="/login"

@@ -92,10 +92,19 @@ const AuthWrapper = ({ children, mode }) => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3, duration: 0.8 }}
                     >
-                        <h2 className="display-4 fw-bold mb-4 tracking-tighter">
+                        <h2 className="display-4 fw-bold mb-4 tracking-tighter" style={{ 
+                            color: '#ffffff', 
+                            textShadow: '0 4px 30px rgba(0,0,0,0.5)',
+                            whiteSpace: 'pre-line' 
+                        }}>
                             {isLogin ? 'CleanStreet' : 'Join the\nMovement'}
                         </h2>
-                        <p className="lead opacity-90 mb-0 px-4" style={{ lineHeight: '1.6', maxWidth: '450px', margin: '0 auto' }}>
+                        <p className="lead fw-medium opacity-90 mb-0 px-4" style={{ 
+                            lineHeight: '1.6', 
+                            maxWidth: '450px', 
+                            margin: '0 auto',
+                            textShadow: '0 2px 10px rgba(0,0,0,0.3)'
+                        }}>
                             {isLogin 
                                 ? 'Your gateway to a cleaner, smarter city. Manage reports and make a difference.' 
                                 : 'Together, we can build a more beautiful and sustainable future for our community.'}
@@ -134,7 +143,13 @@ const AuthWrapper = ({ children, mode }) => {
                     }}
                 >
                     <div className="position-absolute top-0 end-0 p-4" style={{ zIndex: 30 }}>
-                        <Link to="/" className="text-decoration-none fw-semibold tracking-tight p-2 px-3 rounded-pill glass-surface hover-bg-light transition-all" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,0,0,0.05)' }}>
+                        <Link to="/" className="text-decoration-none fw-semibold tracking-tight p-2 px-3 rounded-pill glass-surface transition-all" 
+                              style={{ 
+                                  fontSize: '0.85rem', 
+                                  color: 'var(--text-primary)', 
+                                  background: 'var(--bg-card)', 
+                                  border: '1px solid var(--border-glass)' 
+                              }}>
                             <i className="bi bi-house-door me-2"></i>Back to Home
                         </Link>
                     </div>

@@ -39,7 +39,7 @@ export const ToastProvider = ({ children }) => {
     }, []);
 
     const location = useLocation();
-    const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+    const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/';
 
     return (
         <ToastContext.Provider value={{ addToast, removeToast, updateNotifications, allNotifications, unreadCount }}>

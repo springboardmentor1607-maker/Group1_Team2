@@ -323,7 +323,7 @@ const ReportIssue = () => {
         <PageWrapper className="container-lg px-3 px-md-4 py-3">
             <div>
                 <div className="mb-5">
-                    <h1 className="display-4 fw-bold mb-2 apple-hero-text">File a Civic Report</h1>
+                    <h1 className="display-4 fw-bold mb-2 text-primary tracking-tight">File a Civic Report</h1>
                     <p className="text-muted fs-5">Help us build a cleaner, safer community by reporting local infrastructure or sanitation issues.</p>
                 </div>
 
@@ -480,11 +480,23 @@ const ReportIssue = () => {
                                 )}
                             </div>
                             {/* Map Section */}
-                            <div className="col-12">
-                                <label className="form-label fw-bold">Location on Map</label>
-                                <div style={{ minHeight: '300px' }} className="rounded-4 overflow-hidden border-0 shadow-md">
-                                    <MapSection onLocationSelect={handleLocationSelect} showComplaints={false} lat={formData.latitude} lng={formData.longitude} />
-                                </div>
+                            <div className="col-12 mt-2">
+                                <label className="form-label fw-bold mb-3 d-flex align-items-center">
+                                    <MapPin size={18} className="me-2 text-primary" />
+                                    Specify Location on Map
+                                </label>
+                                <MapSection 
+                                    onLocationSelect={handleLocationSelect} 
+                                    showComplaints={false} 
+                                    lat={formData.latitude} 
+                                    lng={formData.longitude} 
+                                    hideHeader={true}
+                                    height="400px"
+                                />
+                                <p className="small text-muted mt-2">
+                                    <i className="bi bi-info-circle me-1"></i>
+                                    Click on the map to precisely mark the issue location.
+                                </p>
                             </div>
 
                             <div className="col-12 mt-5 text-center">

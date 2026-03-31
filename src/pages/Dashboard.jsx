@@ -42,14 +42,24 @@ export default function Dashboard() {
 
                 // Transform recent complaints into activity format
                 const recentComplaints = statsData.recent || [];
-                const formattedActivities = recentComplaints.map(complaint => ({
-                    id: complaint.id,
-                    type: complaint.status?.toLowerCase() || 'pending',
-                    message: complaint.title,
-                    time: new Date(complaint.created_at).toLocaleDateString(),
-                    statusText: complaint.status || 'Pending',
-                    category: complaint.type
-                }));
+                const formattedActivities = recentComplaints.map(complaint => {
+                    const status = (complaint.status || 'Pending').toLowerCase();
+                    let iconType = 'pending';
+                    if (status.includes('progress')) iconType = 'progress';
+                    else if (status.includes('resolved')) iconType = 'resolved';
+
+                    return {
+                        id: complaint.id,
+                        type: iconType,
+                        message: complaint.title || 'Untitled Issue',
+                        time: complaint.created_at ? new Date(complaint.created_at).toLocaleDateString(undefined, { 
+                            month: 'short', 
+                            day: 'numeric' 
+                        }) : 'N/A',
+                        statusText: complaint.status || 'Pending',
+                        category: complaint.type || 'Other'
+                    };
+                });
 
                 setActivities(formattedActivities);
                 setWeeklyData(statsData.weekly || []);
@@ -156,19 +166,7 @@ export default function Dashboard() {
                 </div>
                 <div className="col-lg-4 d-flex flex-column gap-4">
                     <CleanlinessScore score={Math.round((stats.resolved / (stats.total || 1)) * 100)} />
-                    <RecentActivity activities={(activities || []).map(a => {
-                        let statusText = (a.status || 'Pending');
-                        if (statusText === 'In Progress') statusText = 'Progress';
-
-                        return {
-                            id: a.id,
-                            type: statusText.toLowerCase().replace(' ', '-'),
-                            statusText: statusText,
-                            category: a.type || 'Other',
-                            message: a.title || 'Untitled Issue',
-                            time: a.created_at ? new Date(a.created_at).toLocaleDateString() : 'N/A'
-                        };
-                    })} />
+                    <RecentActivity activities={activities} />
                 </div>
             </div>
 
@@ -184,8 +182,8 @@ export default function Dashboard() {
                         onClick={() => navigate('/complaints')}
                         className="btn btn-white w-100 h-100 p-3 shadow-sm rounded-xl"
                     >
-                        <div className="mx-auto w-10 h-10 bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center mb-2">
-                            <List className="w-5 h-5 text-primary" />
+                        <div className="mx-auto bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center mb-2" style={{ width: '40px', height: '40px' }}>
+                            <List size={20} className="text-primary" />
                         </div>
                         <span className="small fw-medium text-body-secondary">
                             View All
@@ -195,8 +193,8 @@ export default function Dashboard() {
 
                 <div>
                     <button className="btn btn-white w-100 h-100 p-3 shadow-sm rounded-xl">
-                        <div className="mx-auto w-10 h-10 bg-success-subtle rounded-circle d-flex align-items-center justify-content-center mb-2">
-                            <MapIcon className="w-5 h-5 text-success" />
+                        <div className="mx-auto bg-success-subtle rounded-circle d-flex align-items-center justify-content-center mb-2" style={{ width: '40px', height: '40px' }}>
+                            <MapIcon size={20} className="text-success" />
                         </div>
                         <span className="small fw-medium text-body-secondary">
                             Map View
@@ -206,8 +204,8 @@ export default function Dashboard() {
 
                 <div>
                     <button className="btn btn-white w-100 h-100 p-3 shadow-sm rounded-xl">
-                        <div className="mx-auto w-10 h-10 bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center mb-2">
-                            <Plus className="w-5 h-5 text-primary" />
+                        <div className="mx-auto bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center mb-2" style={{ width: '40px', height: '40px' }}>
+                            <Plus size={20} className="text-primary" />
                         </div>
                         <span className="small fw-medium text-body-secondary">
                             Report

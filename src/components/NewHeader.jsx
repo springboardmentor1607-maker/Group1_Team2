@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
-import { Menu, Sun, Moon, Search, Bell, ChevronDown } from 'lucide-react';
+import { Menu, Search, Bell, ChevronDown } from 'lucide-react';
 import NotificationCenter from './NotificationCenter';
 import { useEffect } from 'react';
 import { useToast } from '../context/ToastContext';
 
 const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
-    const { theme, toggleTheme } = useTheme();
     const { unreadCount } = useToast();
     const location = useLocation();
     const [showNotifications, setShowNotifications] = useState(false);
@@ -141,17 +139,6 @@ const NewHeader = ({ toggleSidebar, user, sidebarWidth = 80 }) => {
                         onClose={() => setShowNotifications(false)} 
                     />
                 </div>
-
-                {/* Theme Toggle */}
-                <motion.button
-                    onClick={toggleTheme}
-                    className="btn btn-light rounded-3 p-2 border-0"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    style={{ backgroundColor: 'var(--hover-item-bg)' }}
-                >
-                    {theme === 'light' ? <Moon size={18} strokeWidth={1.5} /> : <Sun size={18} strokeWidth={1.5} />}
-                </motion.button>
 
                 {/* Divider */}
                 <div

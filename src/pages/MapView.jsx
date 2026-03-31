@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import MapSection from '../components/MapSection';
 import PageWrapper from '../components/PageWrapper';
 
 function MapView() {
+    const [filters, setFilters] = useState({
+        garbage: true,
+        streetlight: true,
+        pothole: true
+    });
+
+    const handleFilterChange = (e) => {
+        const { id, checked } = e.target;
+        setFilters(prev => ({
+            ...prev,
+            [id]: checked
+        }));
+    };
+
     return (
         <PageWrapper className="container-fluid px-3 px-md-4 py-3">
             <motion.div
@@ -21,8 +35,8 @@ function MapView() {
                 <div className="row g-3">
                     {/* Map Section */}
                     <div className="col-12 col-lg-9">
-                        <div style={{ height: 'calc(100vh - 250px)', minHeight: '500px' }}>
-                            <MapSection />
+                        <div style={{ height: 'calc(100vh - 250px)', minHeight: '550px' }}>
+                            <MapSection activeFilters={filters} height="100%" />
                         </div>
                     </div>
 
@@ -33,22 +47,40 @@ function MapView() {
                                 <h5 className="fw-semibold mb-3">
                                     <i className="bi bi-funnel me-2 text-primary"></i>Filters
                                 </h5>
-                                <div className="d-flex flex-column gap-2">
-                                    <div className="form-check">
-                                        <input className="form-check-input" type="checkbox" id="garbage" defaultChecked />
-                                        <label className="form-check-label" htmlFor="garbage">
+                                <div className="d-flex flex-column gap-3">
+                                    <div className="form-check custom-checkbox">
+                                        <input 
+                                            className="form-check-input shadow-none" 
+                                            type="checkbox" 
+                                            id="garbage" 
+                                            checked={filters.garbage}
+                                            onChange={handleFilterChange}
+                                        />
+                                        <label className="form-check-label fw-medium" htmlFor="garbage" style={{ cursor: 'pointer' }}>
                                             <i className="bi bi-trash text-danger me-2"></i>Garbage
                                         </label>
                                     </div>
-                                    <div className="form-check">
-                                        <input className="form-check-input" type="checkbox" id="streetlight" defaultChecked />
-                                        <label className="form-check-label" htmlFor="streetlight">
+                                    <div className="form-check custom-checkbox">
+                                        <input 
+                                            className="form-check-input shadow-none" 
+                                            type="checkbox" 
+                                            id="streetlight" 
+                                            checked={filters.streetlight}
+                                            onChange={handleFilterChange}
+                                        />
+                                        <label className="form-check-label fw-medium" htmlFor="streetlight" style={{ cursor: 'pointer' }}>
                                             <i className="bi bi-lightbulb text-warning me-2"></i>Street Lights
                                         </label>
                                     </div>
-                                    <div className="form-check">
-                                        <input className="form-check-input" type="checkbox" id="pothole" defaultChecked />
-                                        <label className="form-check-label" htmlFor="pothole">
+                                    <div className="form-check custom-checkbox">
+                                        <input 
+                                            className="form-check-input shadow-none" 
+                                            type="checkbox" 
+                                            id="pothole" 
+                                            checked={filters.pothole}
+                                            onChange={handleFilterChange}
+                                        />
+                                        <label className="form-check-label fw-medium" htmlFor="pothole" style={{ cursor: 'pointer' }}>
                                             <i className="bi bi-exclamation-triangle text-info me-2"></i>Potholes
                                         </label>
                                     </div>
@@ -61,18 +93,18 @@ function MapView() {
                                 <h5 className="fw-semibold mb-3">
                                     <i className="bi bi-info-circle me-2 text-primary"></i>Map Legend
                                 </h5>
-                                <div className="d-flex flex-column gap-2 small">
+                                <div className="d-flex flex-column gap-3 small">
                                     <div className="d-flex align-items-center">
-                                        <span className="badge bg-danger rounded-circle" style={{ width: '12px', height: '12px' }}></span>
-                                        <span className="ms-2">Critical Issues</span>
+                                        <span className="badge bg-danger rounded-circle p-2" style={{ width: '14px', height: '14px' }}></span>
+                                        <span className="ms-2 fw-medium">Critical Issues</span>
                                     </div>
                                     <div className="d-flex align-items-center">
-                                        <span className="badge bg-warning rounded-circle" style={{ width: '12px', height: '12px' }}></span>
-                                        <span className="ms-2">Pending Issues</span>
+                                        <span className="badge bg-warning rounded-circle p-2" style={{ width: '14px', height: '14px' }}></span>
+                                        <span className="ms-2 fw-medium">Pending Issues</span>
                                     </div>
                                     <div className="d-flex align-items-center">
-                                        <span className="badge bg-success rounded-circle" style={{ width: '12px', height: '12px' }}></span>
-                                        <span className="ms-2">Resolved Issues</span>
+                                        <span className="badge bg-success rounded-circle p-2" style={{ width: '14px', height: '14px' }}></span>
+                                        <span className="ms-2 fw-medium">Resolved Issues</span>
                                     </div>
                                 </div>
                             </div>
@@ -83,4 +115,5 @@ function MapView() {
         </PageWrapper>
     );
 }
+
 export default MapView;
