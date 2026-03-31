@@ -48,6 +48,7 @@ exports.register = async (req, res) => {
             email,
             password: hashedPassword,
             location,
+            state,
             role,
             phone
         });
@@ -68,6 +69,7 @@ exports.register = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 location: user.location,
+                state: user.state,
                 phone: user.phone,
                 createdAt: user.created_at
             }
@@ -102,7 +104,19 @@ exports.login = async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, location: user.location || '', phone: user.phone || '', createdAt: user.created_at } });
+        res.json({ 
+            token, 
+            user: { 
+                id: user.id, 
+                name: user.name, 
+                email: user.email, 
+                role: user.role, 
+                location: user.location || '', 
+                state: user.state || '',
+                phone: user.phone || '', 
+                createdAt: user.created_at 
+            } 
+        });
 
     } catch (err) {
         console.error(err);
@@ -126,6 +140,7 @@ exports.getProfile = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 location: user.location,
+                state: user.state,
                 phone: user.phone,
                 createdAt: user.created_at
             }
@@ -159,7 +174,8 @@ exports.updateProfile = async (req, res) => {
             name,
             email,
             phone: phone || '',
-            location: location || ''
+            location: location || '',
+            state: state || ''
         });
 
         res.json({
@@ -170,6 +186,7 @@ exports.updateProfile = async (req, res) => {
                 email: updatedUser.email,
                 role: updatedUser.role,
                 location: updatedUser.location,
+                state: updatedUser.state,
                 phone: updatedUser.phone,
                 createdAt: updatedUser.created_at
             }
