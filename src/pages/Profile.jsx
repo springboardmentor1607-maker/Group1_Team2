@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import PageWrapper from "../components/PageWrapper";
+import Skeleton from "../components/Skeleton";
 
 export default function Profile() {
   const [formData, setFormData] = useState({
@@ -68,11 +69,37 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="d-flex align-items-center justify-content-center vh-100">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+      <PageWrapper className="container py-4">
+        <Skeleton width="200px" height="3rem" variant="title" className="mb-4" />
+        
+        <div className="row g-4">
+          <div className="col-12 col-md-4">
+            <div className="card border shadow-sm p-4 rounded-xl h-100">
+              <div className="d-flex flex-column align-items-center">
+                <Skeleton width="5rem" height="5rem" variant="circle" className="mb-3" />
+                <Skeleton width="150px" height="1.5rem" className="mb-2" />
+                <Skeleton width="100px" height="1rem" className="mb-3" />
+                <Skeleton width="80px" height="2rem" />
+              </div>
+            </div>
+          </div>
+
+          <div className="col-12 col-md-8">
+            <div className="card border shadow-sm p-4 rounded-xl">
+              <Skeleton width="200px" height="1.8rem" className="mb-4" />
+              <div className="row g-3">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="col-md-6">
+                    <Skeleton width="100%" height="2.5rem" />
+                  </div>
+                ))}
+              </div>
+              <Skeleton width="100%" height="8rem" className="mt-3" />
+              <Skeleton width="150px" height="3rem" className="mt-4" />
+            </div>
+          </div>
         </div>
-      </div>
+      </PageWrapper>
     );
   }
 

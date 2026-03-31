@@ -11,7 +11,7 @@ const ChartCard = ({ title, children, delay }) => (
             className="card border-0 shadow-lg p-4 rounded-xl h-100"
         >
             <h3 className="fs-5 fw-semibold text-body mb-4">{title}</h3>
-            <div className="w-100 h-64">
+            <div className="w-100" style={{ height: '300px' }}>
                 {children}
             </div>
         </motion.div>

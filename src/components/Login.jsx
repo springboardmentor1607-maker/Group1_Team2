@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 import PageWrapper from './PageWrapper';
+import AuthWrapper from './AuthWrapper';
 
 function Login({ onLogin }) {
     const [email, setEmail] = useState('')
@@ -62,6 +64,8 @@ function Login({ onLogin }) {
 
         if (!password) {
             newErrors.password = 'Password is required'
+        } else if (!isPasswordValid) {
+            newErrors.password = 'Password must meet all requirements'
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -104,50 +108,86 @@ function Login({ onLogin }) {
     }
 
     return (
-        <PageWrapper className="auth-card">
-            <div className="card">
-                <div className="card-body">
-                    <h2 className="card-title text-center mb-4">Login to CleanStreet</h2>
-                    <form onSubmit={handleSubmit}>
-                        <div className="mb-3">
-                            <label htmlFor="loginEmail" className="form-label">Email</label>
-                            <input
-                                type="email"
-                                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                                id="loginEmail"
-                                placeholder="Enter your email"
-                                value={email}
-                                onChange={handleEmailChange}
-                            />
-                            {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
-                        </div>
-                        <div className="mb-4">
-                            <label htmlFor="loginPassword" className="form-label">Password</label>
-                            <input
-                                type="password"
-                                className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                                id="loginPassword"
-                                placeholder="Enter your password"
-                                value={password}
-                                onChange={handlePasswordChange}
-                                onFocus={() => setPasswordFocused(true)}
-                                onBlur={() => setPasswordFocused(false)}
-                            />
-                            {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
-                        </div>
-                        <button type="submit" className="btn btn-primary w-100 mb-3">Login</button>
-                        <div className="text-center">
-                            <small className="text-muted">
-                                Don't have an account?{' '}
-                                <Link to="/signup" className="text-decoration-none">
-                                    Register
-                                </Link>
+        <AuthWrapper mode="login">
+            <form onSubmit={handleSubmit}>
+                <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="mb-4"
+                >
+                    <label htmlFor="loginEmail" className="form-label text-muted fw-semibold">Email Address</label>
+                    <input
+                        type="email"
+                        className={`form-control glass-input py-3 mb-1 ${errors.email ? 'is-invalid border-danger' : ''}`}
+                        id="loginEmail"
+                        placeholder="name@example.com"
+                        value={email}
+                        onChange={handleEmailChange}
+                    />
+                    {errors.email && <div className="text-danger small mt-2 fw-medium">{errors.email}</div>}
+                </motion.div>
+                <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="mb-4"
+                >
+                    <label htmlFor="loginPassword" className="form-label text-muted fw-semibold">Password</label>
+                    <input
+                        type="password"
+                        className={`form-control glass-input py-3 mb-1 ${errors.password ? 'is-invalid border-danger' : ''}`}
+                        id="loginPassword"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={handlePasswordChange}
+                        onFocus={() => setPasswordFocused(true)}
+                        onBlur={() => setPasswordFocused(false)}
+                    />
+                    {errors.password && <div className="text-danger small mt-2 fw-medium">{errors.password}</div>}
+                    {passwordFocused && (
+                        <div className="mt-2">
+                            <small className={passwordValidation.minLength ? 'text-success' : 'text-danger'}>
+                                {passwordValidation.minLength ? '✓' : '✗'} At least 8 characters
+                            </small>
+                            <br />
+                            <small className={passwordValidation.hasCapital ? 'text-success' : 'text-danger'}>
+                                {passwordValidation.hasCapital ? '✓' : '✗'} At least 1 capital letter
+                            </small>
+                            <br />
+                            <small className={passwordValidation.hasSpecial ? 'text-success' : 'text-danger'}>
+                                {passwordValidation.hasSpecial ? '✓' : '✗'} At least 1 special character (!@#$%^&*...)
                             </small>
                         </div>
-                    </form>
-                </div>
-            </div>
-        </PageWrapper>
+                    )}
+                </motion.div>
+                <motion.button 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    whileHover={{ scale: 1.02, translateY: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit" 
+                    className="btn btn-primary w-100 py-3 mb-4 rounded-4 fw-bold shadow-lg border-0 shimmer-button"
+                    style={{ background: 'var(--primary-color)', letterSpacing: '0.01em' }}
+                >
+                    Log In
+                </motion.button>
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-center"
+                >
+                    <span className="text-muted fw-medium">
+                        Don't have an account?{' '}
+                        <Link to="/signup" className="text-primary fw-bold text-decoration-none">
+                            Create one
+                        </Link>
+                    </span>
+                </motion.div>
+            </form>
+        </AuthWrapper>
     )
 }
 

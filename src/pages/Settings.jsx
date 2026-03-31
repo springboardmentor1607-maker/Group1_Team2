@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useTheme } from '../context/ThemeContext';
-import { Moon, Sun } from 'lucide-react';
 import PageWrapper from '../components/PageWrapper';
 
 function Settings() {
-    const { theme, toggleTheme } = useTheme();
     const [notifications, setNotifications] = useState({
         email: true,
         push: false,
@@ -19,7 +16,7 @@ function Settings() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <h1 className="display-5 fw-bold mb-2" style={{ background: 'linear-gradient(135deg, var(--primary-color), var(--accent-1))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                <h1 className="display-5 fw-bold mb-2" style={{ color: 'var(--primary-color)' }}>
                     <i className="bi bi-gear me-3"></i>Settings
                 </h1>
                 <p className="text-muted mb-4">Manage your account preferences and settings</p>

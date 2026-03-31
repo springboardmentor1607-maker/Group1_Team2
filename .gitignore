@@ -34,4 +34,3 @@ lerna-debug.log*
 
 # Temporary files
 *.tmp
-node_modules

@@ -5,12 +5,12 @@ import { CheckCircle, AlertCircle, Clock, Info } from 'lucide-react';
 const ActivityItem = ({ type, message, time, statusText, category }) => {
     const getIcon = () => {
         switch (type) {
-            case 'resolved': return <CheckCircle className="w-5 h-5 text-success" />;
-            case 'new': return <AlertCircle className="w-5 h-5 text-danger" />;
-            case 'progress': return <Clock className="w-5 h-5 text-primary" />;
-            case 'in-progress': return <Clock className="w-5 h-5 text-primary" />;
-            case 'pending': return <Clock className="w-5 h-5 text-warning" />;
-            default: return <Info className="w-5 h-5 text-secondary" />;
+            case 'resolved': return <CheckCircle size={20} className="text-success" />;
+            case 'new': return <AlertCircle size={20} className="text-danger" />;
+            case 'progress': return <Clock size={20} className="text-primary" />;
+            case 'in-progress': return <Clock size={20} className="text-primary" />;
+            case 'pending': return <Clock size={20} className="text-warning" />;
+            default: return <Info size={20} className="text-secondary" />;
         }
     };
 

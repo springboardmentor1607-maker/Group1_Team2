@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Zone = require('../models/Zone');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -25,7 +26,7 @@ const verifyToken = (req, res, next) => {
 // REGISTER
 exports.register = async (req, res) => {
     try {
-        const { name, email, password, location, role, phone } = req.body;
+        const { name, email, password, location, state, role, phone } = req.body;
 
         const existing = await User.findByEmail(email);
 
@@ -36,12 +37,18 @@ exports.register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Ensure zone exists for the given location
+        if (location) {
+            await Zone.findOrCreateByName(location, state);
+        }
+
         // Creating user
         const user = await User.create({
             name,
             email,
             password: hashedPassword,
             location,
+            state,
             role,
             phone
         });
@@ -53,7 +60,20 @@ exports.register = async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        res.status(201).json({ token, message: 'User registered successfully' });
+        res.status(201).json({ 
+            token, 
+            message: 'User registered successfully',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                location: user.location,
+                state: user.state,
+                phone: user.phone,
+                createdAt: user.created_at
+            }
+        });
 
     } catch (err) {
         console.error(err);
@@ -84,7 +104,19 @@ exports.login = async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, location: user.location || '', phone: user.phone || '', createdAt: user.created_at } });
+        res.json({ 
+            token, 
+            user: { 
+                id: user.id, 
+                name: user.name, 
+                email: user.email, 
+                role: user.role, 
+                location: user.location || '', 
+                state: user.state || '',
+                phone: user.phone || '', 
+                createdAt: user.created_at 
+            } 
+        });
 
     } catch (err) {
         console.error(err);
@@ -108,6 +140,7 @@ exports.getProfile = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 location: user.location,
+                state: user.state,
                 phone: user.phone,
                 createdAt: user.created_at
             }
@@ -121,7 +154,7 @@ exports.getProfile = async (req, res) => {
 // UPDATE PROFILE
 exports.updateProfile = async (req, res) => {
     try {
-        const { name, email, phone, location } = req.body;
+        const { name, email, phone, location, state } = req.body;
         const userId = req.user.id;
 
         // Check if email is being changed and if it already exists
@@ -132,11 +165,17 @@ exports.updateProfile = async (req, res) => {
             }
         }
 
+        // Ensure zone exists for the new location
+        if (location) {
+            await Zone.findOrCreateByName(location, state);
+        }
+
         const updatedUser = await User.updateProfile(userId, {
             name,
             email,
             phone: phone || '',
-            location: location || ''
+            location: location || '',
+            state: state || ''
         });
 
         res.json({
@@ -147,6 +186,7 @@ exports.updateProfile = async (req, res) => {
                 email: updatedUser.email,
                 role: updatedUser.role,
                 location: updatedUser.location,
+                state: updatedUser.state,
                 phone: updatedUser.phone,
                 createdAt: updatedUser.created_at
             }
@@ -237,5 +277,92 @@ exports.updateUserRole = async (req, res) => {
         res.status(500).json({
             message: 'Server error while updating user role'
         });
+    }
+};
+
+// Admin: Update user by admin
+exports.updateUserByAdmin = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const { user_id, name, email, phone, location, state, role } = req.body;
+
+        if (!user_id) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        // Ensure zone exists for the given location
+        if (location) {
+            await Zone.findOrCreateByName(location, state);
+        }
+
+        const updatedUser = await User.updateByAdmin(user_id, {
+            name,
+            email,
+            phone,
+            location,
+            state,
+            role
+        });
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const { password, ...safeUser } = updatedUser;
+
+        res.json({
+            success: true,
+            message: 'User updated successfully',
+            user: safeUser
+        });
+    } catch (error) {
+        console.error('Update user by admin error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Admin: Delete user
+exports.deleteUser = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const { id } = req.params;
+
+        const deleted = await User.delete(id);
+
+        if (!deleted) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({
+            success: true,
+            message: 'User deleted successfully'
+        });
+    } catch (error) {
+        console.error('Delete user error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// GET USER STATS (Public)
+exports.getUserStats = async (req, res) => {
+    try {
+        const stats = await User.getStats();
+        res.json({
+            success: true,
+            stats: {
+                volunteers: parseInt(stats.volunteers_count, 10) || 0,
+                citizens: parseInt(stats.citizens_count, 10) || 0,
+                total: parseInt(stats.total_users, 10) || 0
+            }
+        });
+    } catch (err) {
+        console.error('Get user stats error:', err);
+        res.status(500).json({ message: 'Server error while fetching stats' });
     }
 };

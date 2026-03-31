@@ -81,5 +81,21 @@ export const api = {
             throw new Error(error.message || `API request failed with status ${response.status}`);
         }
         return response.json();
+    },
+
+    download: async (endpoint) => {
+        const response = await fetch(`${BASE_URL}${endpoint}`, {
+            headers: getHeaders()
+        });
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('isAuthenticated');
+            window.location.href = '/login';
+            return;
+        }
+        if (!response.ok) {
+            throw new Error(`Download failed with status ${response.status}`);
+        }
+        return response.blob();
     }
 };

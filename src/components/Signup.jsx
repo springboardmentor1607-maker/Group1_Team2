@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../lib/api';
 import PageWrapper from './PageWrapper';
+import AuthWrapper from './AuthWrapper';
 
 function Signup({ onLogin }) {
     const [formData, setFormData] = useState({
@@ -10,7 +12,9 @@ function Signup({ onLogin }) {
         email: '',
         phone: '',
         password: '',
-        role: 'citizen'
+        role: 'citizen',
+        location: '',
+        state: ''
     })
     const navigate = useNavigate();
 
@@ -28,7 +32,9 @@ function Signup({ onLogin }) {
         username: '',
         email: '',
         phone: '',
-        password: ''
+        password: '',
+        location: '',
+        state: ''
     })
 
     useEffect(() => {
@@ -60,7 +66,7 @@ function Signup({ onLogin }) {
     const handleSubmit = (e) => {
         e.preventDefault()
 
-        const { fullName, username, email, phone, password } = formData
+        const { fullName, username, email, phone, password, location } = formData
         const newErrors = {}
 
         // Validation
@@ -100,6 +106,14 @@ function Signup({ onLogin }) {
             }
         }
 
+        if (!location) {
+            newErrors.location = 'Location is required';
+        }
+
+        if (!formData.state) {
+            newErrors.state = 'State is required';
+        }
+
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors)
             return
@@ -110,29 +124,38 @@ function Signup({ onLogin }) {
         const registerUser = async () => {
             try {
                 // Map fullName to name for backend
-                const { fullName, email, password, role, phone } = formData;
+                const { fullName, email, password, role, phone, location, state } = formData;
                 const response = await api.post('/auth/register', {
                     name: fullName,
                     email,
                     password,
                     role,
-                    phone
+                    phone,
+                    location,
+                    state
                 });
 
                 // Store token and auth state
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('isAuthenticated', 'true');
 
-                // Store user role (from form selection)
-                localStorage.setItem('userRole', role);
+                // Store user role (from form selection or response)
+                const userRole = response.user?.role || role;
+                localStorage.setItem('userRole', userRole);
+
+                if (response.user) {
+                    localStorage.setItem('userData', JSON.stringify(response.user));
+                }
 
                 if (onLogin) {
                     onLogin();
                 }
 
                 // Redirect based on role
-                if (role === 'admin') {
+                if (userRole === 'admin') {
                     navigate('/admin');
+                } else if (userRole === 'volunteer') {
+                    navigate('/volunteer');
                 } else {
                     navigate('/dashboard');
                 }
@@ -145,131 +168,285 @@ function Signup({ onLogin }) {
         registerUser();
     }
 
+    const [isDetecting, setIsDetecting] = useState(false);
+    const detectLocation = () => {
+        if (!navigator.geolocation) {
+            setErrors(prev => ({ ...prev, location: 'Geolocation not supported' }));
+            return;
+        }
+
+        setIsDetecting(true);
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                try {
+                    const response = await api.get(`/zones/reverse-geocode?lat=${latitude}&lon=${longitude}`);
+                    if (response.data && response.data.success) {
+                        // Priority for zone: neighborhood info -> first part of address -> state -> "Unknown Area"
+                        const detectedState = response.data.state || '';
+                        const detectedZone = response.data.zone || 
+                                           (response.data.address ? response.data.address.split(',')[0] : '') || 
+                                           detectedState || 
+                                           'Detected Area';
+                        
+                        setFormData(prev => ({
+                            ...prev,
+                            location: detectedZone,
+                            state: detectedState || prev.state
+                        }));
+                        
+                        // Clear errors for these fields
+                        setErrors(prev => ({ ...prev, location: '', state: '' }));
+                    }
+                } catch (err) {
+                    console.error('Error in reverse geocoding:', err);
+                    setErrors(prev => ({ ...prev, location: 'Could not resolve address' }));
+                } finally {
+                    setIsDetecting(false);
+                }
+            },
+            (err) => {
+                console.error('Geolocation error:', err);
+                setErrors(prev => ({ ...prev, location: 'Location access denied. Please enter your area manually.' }));
+                setIsDetecting(false);
+            },
+            { timeout: 10000, enableHighAccuracy: true }
+        );
+    };
+
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 15 },
+        visible: { 
+            opacity: 1, 
+            y: 0,
+            transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+        }
+    };
+
     return (
-        <PageWrapper className="auth-card">
-            <div className="card">
-                <div className="card-body">
-                    <h2 className="card-title text-center mb-4">Register for CleanStreet</h2>
-                    <form onSubmit={handleSubmit}>
-                        <div className="mb-3">
-                            <label htmlFor="signupFullName" className="form-label">Full Name</label>
+        <AuthWrapper mode="signup">
+            <motion.form 
+                onSubmit={handleSubmit}
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
+                <div className="row g-4">
+                    {/* Full Name */}
+                    <motion.div variants={itemVariants} className="col-12">
+                        <div className="form-floating glass-input-group">
                             <input
                                 type="text"
-                                className={`form-control ${errors.fullName ? 'is-invalid' : ''}`}
+                                className={`form-control glass-input ${errors.fullName ? 'is-invalid border-danger' : ''}`}
                                 id="signupFullName"
                                 name="fullName"
-                                placeholder="Enter your full name"
+                                placeholder="John Doe"
                                 value={formData.fullName}
                                 onChange={handleChange}
                             />
-                            {errors.fullName && <div className="text-danger small mt-1">{errors.fullName}</div>}
+                            <label htmlFor="signupFullName" className="text-muted">Full Name</label>
+                            {errors.fullName && <div className="text-danger small mt-1 px-2 fw-medium">{errors.fullName}</div>}
                         </div>
+                    </motion.div>
 
-                        <div className="mb-3">
-                            <label htmlFor="signupUsername" className="form-label">Username</label>
+                    {/* Username & Phone Number */}
+                    <motion.div variants={itemVariants} className="col-md-6">
+                        <div className="form-floating glass-input-group">
                             <input
                                 type="text"
-                                className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+                                className={`form-control glass-input ${errors.username ? 'is-invalid border-danger' : ''}`}
                                 id="signupUsername"
                                 name="username"
-                                placeholder="Choose a username"
+                                placeholder="johndoe123"
                                 value={formData.username}
                                 onChange={handleChange}
                             />
-                            {errors.username && <div className="text-danger small mt-1">{errors.username}</div>}
+                            <label htmlFor="signupUsername" className="text-muted">Username</label>
+                            {errors.username && <div className="text-danger small mt-1 px-2 fw-medium">{errors.username}</div>}
                         </div>
+                    </motion.div>
 
-                        <div className="mb-3">
-                            <label htmlFor="signupEmail" className="form-label">Email</label>
+                    <motion.div variants={itemVariants} className="col-md-6">
+                        <div className="form-floating glass-input-group">
+                            <input
+                                type="tel"
+                                className={`form-control glass-input ${errors.phone ? 'is-invalid border-danger' : ''}`}
+                                id="signupPhone"
+                                name="phone"
+                                placeholder="(555) 000-0000"
+                                value={formData.phone}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="signupPhone" className="text-muted">Phone Number</label>
+                            {errors.phone && <div className="text-danger small mt-1 px-2 fw-medium">{errors.phone}</div>}
+                        </div>
+                    </motion.div>
+
+                    {/* Email */}
+                    <motion.div variants={itemVariants} className="col-12">
+                        <div className="form-floating glass-input-group">
                             <input
                                 type="email"
-                                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                                className={`form-control glass-input ${errors.email ? 'is-invalid border-danger' : ''}`}
                                 id="signupEmail"
                                 name="email"
-                                placeholder="Enter your email"
+                                placeholder="name@example.com"
                                 value={formData.email}
                                 onChange={handleChange}
                             />
-                            {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
+                            <label htmlFor="signupEmail" className="text-muted">Email Address</label>
+                            {errors.email && <div className="text-danger small mt-1 px-2 fw-medium">{errors.email}</div>}
                         </div>
-                        <div className="mb-3">
-                            <label htmlFor="signupRole" className="form-label">I am registering as</label>
+                    </motion.div>
+
+                    {/* Account Type */}
+                    <motion.div variants={itemVariants} className="col-md-6">
+                        <div className="form-floating glass-input-group">
                             <select
-                                className="form-control"
+                                className="form-select glass-input h-auto fw-medium"
                                 id="signupRole"
                                 name="role"
                                 value={formData.role}
                                 onChange={handleChange}
+                                style={{ paddingTop: '1.625rem', paddingBottom: '0.625rem', color: 'var(--text-primary)' }}
                             >
-                                <option value="citizen">Citizen (File complaints)</option>
-                                <option value="volunteer">Volunteer (Handle complaints)</option>
-                                <option value="admin">Admin (Manage system)</option>
+                                <option value="citizen">Citizen</option>
+                                <option value="volunteer">Volunteer</option>
+                                <option value="admin">Admin</option>
                             </select>
-                            <small className="text-muted">Citizens file complaints. Volunteers update work progress. Admins manage the entire system.</small>
+                            <label htmlFor="signupRole" className="text-muted">Account Type</label>
                         </div>
+                    </motion.div>
 
-                        <div className="mb-3">
-                            <label htmlFor="signupPhone" className="form-label">Phone Number</label>
+                    {/* State */}
+                    <motion.div variants={itemVariants} className="col-md-6 text-start">
+                        <div className="form-floating glass-input-group">
                             <input
-                                type="tel"
-                                className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
-                                id="signupPhone"
-                                name="phone"
-                                placeholder="Enter your phone number"
-                                value={formData.phone}
+                                type="text"
+                                className={`form-control glass-input ${errors.state ? 'is-invalid border-danger' : ''} ${isDetecting ? 'opacity-75' : ''}`}
+                                id="signupState"
+                                name="state"
+                                placeholder="Your state"
+                                value={formData.state}
                                 onChange={handleChange}
+                                disabled={isDetecting}
                             />
-                            {errors.phone && <div className="text-danger small mt-1">{errors.phone}</div>}
+                            <label htmlFor="signupState" className="text-muted small">State</label>
+                            {errors.state && <div className="text-danger small mt-1 px-2 fw-medium">{errors.state}</div>}
                         </div>
+                    </motion.div>
 
-                        <div className="mb-4">
-                            <label htmlFor="signupPassword" className="form-label">Password</label>
+                    {/* Location */}
+                    <motion.div variants={itemVariants} className="col-md-6 text-start">
+                        <div className="form-floating glass-input-group position-relative">
+                            <input
+                                type="text"
+                                className={`form-control glass-input ${formData.location && !errors.location ? 'border-success border-opacity-50' : ''} ${errors.location ? 'is-invalid border-danger' : ''} ${isDetecting ? 'opacity-75' : ''}`}
+                                id="signupLocation"
+                                name="location"
+                                placeholder={isDetecting ? "Detecting location..." : "Your area/zone"}
+                                value={formData.location}
+                                onChange={handleChange}
+                                disabled={isDetecting}
+                            />
+                            <label htmlFor="signupLocation" className="text-muted small">
+                                {isDetecting ? "Searching..." : "Location/Zone"}
+                            </label>
+                            <button 
+                                type="button" 
+                                onClick={detectLocation}
+                                disabled={isDetecting}
+                                className={`btn btn-link btn-sm p-0 position-absolute end-0 top-50 translate-middle-y me-3 text-primary text-decoration-none z-3 ${isDetecting ? 'opacity-50' : ''}`}
+                                style={{ pointerEvents: 'auto' }}
+                            >
+                                {isDetecting ? (
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                ) : (
+                                    <i className="bi bi-crosshair fs-6"></i>
+                                )}
+                            </button>
+                            {errors.location && <div className="text-danger small mt-1 px-2 fw-medium">{errors.location}</div>}
+                        </div>
+                    </motion.div>
+
+                    {/* Password */}
+                    <motion.div variants={itemVariants} className="col-12">
+                        <div className="form-floating glass-input-group mb-2">
                             <input
                                 type="password"
-                                className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                                className={`form-control glass-input ${errors.password ? 'is-invalid border-danger' : ''}`}
                                 id="signupPassword"
                                 name="password"
-                                placeholder="Create a password"
+                                placeholder="Create a secure password"
                                 value={formData.password}
                                 onChange={handleChange}
                                 onFocus={() => setPasswordFocused(true)}
                                 onBlur={() => setPasswordFocused(false)}
                             />
-                            {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
+                            <label htmlFor="signupPassword" className="text-muted">Password</label>
+                            {errors.password && <div className="text-danger small mt-1 px-2 fw-medium">{errors.password}</div>}
+                        </div>
+
+                        <AnimatePresence>
                             {passwordFocused && (
-                                <div className="mt-2">
-                                    <small className={passwordValidation.minLength ? 'text-success' : 'text-danger'}>
-                                        {passwordValidation.minLength ? '✓' : '✗'} At least 8 characters
-                                    </small>
-                                    <br />
-                                    <small className={passwordValidation.hasCapital ? 'text-success' : 'text-danger'}>
-                                        {passwordValidation.hasCapital ? '✓' : '✗'} At least 1 capital letter
-                                    </small>
-                                    <br />
-                                    <small className={passwordValidation.hasSpecial ? 'text-success' : 'text-danger'}>
-                                        {passwordValidation.hasSpecial ? '✓' : '✗'} At least 1 special character (!@#$%^&*...)
-                                    </small>
-                                </div>
+                                <motion.div 
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="px-3"
+                                >
+                                    <div className="d-flex flex-wrap gap-x-4 py-2">
+                                        <small className={`d-flex align-items-center gap-1 ${passwordValidation.minLength ? 'text-success' : 'text-danger'} opacity-75`} style={{ fontSize: '0.75rem' }}>
+                                            <i className={`bi bi-${passwordValidation.minLength ? 'check-circle' : 'x-circle'}`}></i> 8+ chars
+                                        </small>
+                                        <small className={`d-flex align-items-center gap-1 ${passwordValidation.hasCapital ? 'text-success' : 'text-danger'} opacity-75`} style={{ fontSize: '0.75rem' }}>
+                                            <i className={`bi bi-${passwordValidation.hasCapital ? 'check-circle' : 'x-circle'}`}></i> 1 Capital
+                                        </small>
+                                        <small className={`d-flex align-items-center gap-1 ${passwordValidation.hasSpecial ? 'text-success' : 'text-danger'} opacity-75`} style={{ fontSize: '0.75rem' }}>
+                                            <i className={`bi bi-${passwordValidation.hasSpecial ? 'check-circle' : 'x-circle'}`}></i> 1 Special
+                                        </small>
+                                    </div>
+                                </motion.div>
                             )}
-                        </div>
-                        <button
-                            type="submit"
-                            className="btn btn-primary w-100 mb-3"
-                        >
-                            Register
-                        </button>
-                        <div className="text-center">
-                            <small className="text-muted">
-                                Already have an account?{' '}
-                                <Link to="/login" className="text-decoration-none">
-                                    Login
-                                </Link>
-                            </small>
-                        </div>
-                    </form>
+                        </AnimatePresence>
+                    </motion.div>
                 </div>
-            </div>
-        </PageWrapper>
+                
+                <motion.button
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.01, translateY: -1 }}
+                    whileTap={{ scale: 0.99 }}
+                    type="submit"
+                    className="btn btn-primary w-100 py-3 mt-4 rounded-4 fw-bold shadow-premium border-0 shimmer-button"
+                    style={{ background: 'var(--primary-color)', letterSpacing: '0.01em', fontSize: '1rem' }}
+                >
+                    Create Account
+                </motion.button>
+                
+                <motion.div 
+                    variants={itemVariants}
+                    className="text-center mt-5"
+                >
+                    <span className="text-muted fw-medium small">
+                        Already have an account?{' '}
+                        <Link to="/login" className="text-primary fw-bold text-decoration-none hover-underline">
+                            Log In
+                        </Link>
+                    </span>
+                </motion.div>
+            </motion.form>
+        </AuthWrapper>
     )
 }
 
