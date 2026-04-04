@@ -44,7 +44,7 @@ function Logo({ size = 32, textColor = 'inherit' }) {
                 <circle cx="18" cy="11" r="1" fill="white" />
             </svg>
 
-            <span className="brand-text" style={{ color: textColor }}>
+            <span className="brand-text fw-800" style={{ color: 'var(--text-primary)', marginLeft: '4px' }}>
                 CleanStreet
             </span>
         </div>

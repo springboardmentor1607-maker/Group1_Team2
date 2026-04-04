@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // Root Integrity Fix
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import DashboardLayout from './components/DashboardLayout';
@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import ReportIssue from './pages/ReportIssue';
 import AdminDashboard from './pages/AdminDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
+import CompleteProfile from './pages/CompleteProfile';
 import Notifications from './pages/Notifications';
 import LandingPage from './pages/LandingPage';
 import { ToastProvider } from './context/ToastContext';
@@ -46,7 +47,7 @@ function AppContent({ isAuthenticated, handleLogin, handleLogout, getDashboardRo
                                 replace 
                             />
                         ) : (
-                            <Login onLogin={handleLogin} />
+                            <Login onLogin={handleLogin} getDashboardRoute={getDashboardRoute} />
                         )
                     }
                 />
@@ -59,8 +60,16 @@ function AppContent({ isAuthenticated, handleLogin, handleLogout, getDashboardRo
                                 replace 
                             />
                         ) : (
-                            <Signup onLogin={handleLogin} />
+                            <Signup onLogin={handleLogin} getDashboardRoute={getDashboardRoute} />
                         )
+                    }
+                />
+                <Route
+                    path="/complete-profile"
+                    element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated}>
+                            <CompleteProfile />
+                        </ProtectedRoute>
                     }
                 />
 
@@ -95,43 +104,57 @@ function AppContent({ isAuthenticated, handleLogin, handleLogout, getDashboardRo
 
 function App() {
     // Initialize auth state from localStorage to persist login across refreshes
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem('user');
+        try {
+            return savedUser ? JSON.parse(savedUser) : null;
+        } catch (err) {
+            console.error('Error parsing user from localStorage:', err);
+            return null;
+        }
+    });
+
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
         const auth = localStorage.getItem('isAuthenticated') === 'true';
         const hasToken = !!localStorage.getItem('token');
-        return auth && hasToken;
+        return auth && hasToken && !!user;
     });
 
-    const handleLogin = () => {
+    const handleLogin = (userData) => {
         setIsAuthenticated(true);
+        setUser(userData);
         localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('user', JSON.stringify(userData));
     };
 
     const handleLogout = () => {
         setIsAuthenticated(false);
-        localStorage.removeItem('isAuthenticated');
+        setUser(null);
         localStorage.removeItem('token');
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('userData');
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('user');
     };
 
     const getDashboardRoute = () => {
-        const role = localStorage.getItem('userRole');
-        if (role === 'admin') return '/admin';
-        if (role === 'volunteer') return '/volunteer';
-        return '/dashboard';
+        if (!user) return '/login';
+        switch (user.role) {
+            case 'admin': return '/admin';
+            case 'volunteer': return '/volunteer';
+            default: return '/dashboard';
+        }
     };
 
     return (
-        <Router>
-            <ToastProvider>
+        <ToastProvider>
+            <Router>
                 <AppContent 
                     isAuthenticated={isAuthenticated} 
                     handleLogin={handleLogin} 
                     handleLogout={handleLogout} 
                     getDashboardRoute={getDashboardRoute} 
                 />
-            </ToastProvider>
-        </Router>
+            </Router>
+        </ToastProvider>
     );
 }
 

@@ -74,15 +74,15 @@ const getSummaryReport = async (req, res) => {
         res.json({
             success: true,
             report: {
-                totalComplaints: parseInt(stats.total) || 0,
+                totalComplaints: parseInt(stats?.total) || 0,
                 statusBreakdown: {
-                    pending: parseInt(stats.pending) || 0,
-                    in_progress: parseInt(stats.in_progress) || 0,
-                    resolved: parseInt(stats.resolved) || 0
+                    pending: parseInt(stats?.pending) || 0,
+                    in_progress: parseInt(stats?.in_progress) || 0,
+                    resolved: parseInt(stats?.resolved) || 0
                 },
-                typeBreakdown: typeCount,
-                zoneBreakdown: zoneBreakdownRes.rows,
-                weeklyStats: weekly
+                typeBreakdown: typeCount || {},
+                zoneBreakdown: zoneBreakdownRes.rows || [],
+                weeklyStats: weekly || []
             }
         });
     } catch (err) {
@@ -134,9 +134,9 @@ const getVolunteerReport = async (req, res) => {
         res.json({
             success: true,
             report: {
-                summary: statsRes.rows[0],
-                volunteers: volunteerListRes.rows,
-                locationDistribution: locationRes.rows
+                summary: statsRes.rows[0] || { total_volunteers: 0, active_volunteers: 0 },
+                volunteers: volunteerListRes.rows || [],
+                locationDistribution: locationRes.rows || []
             }
         });
     } catch (err) {

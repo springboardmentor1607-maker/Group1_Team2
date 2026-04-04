@@ -360,3 +360,54 @@
         border-width: 2px;
     }
 }
+
+/* ===============================
+   ADMIN COMMAND CENTER
+   =============================== */
+
+.admin-command-center {
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-command-center .glass-card-premium {
+    border-radius: 24px;
+    background: rgba(var(--bg-card-rgb), 0.05);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.admin-command-center h1.display-4 {
+    letter-spacing: -0.05em;
+    font-weight: 800;
+}
+
+.recharts-cartesian-grid-horizontal line {
+    stroke: rgba(255, 255, 255, 0.05);
+}
+
+.recharts-legend-item-text {
+    color: var(--text-secondary) !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.recharts-tooltip-wrapper {
+    outline: none !important;
+}
+
+.admin-command-center .rounded-xl {
+    border-radius: 20px;
+}
+
+@keyframes pulse-soft {
+    0% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 0.4; transform: scale(1); }
+}
+
+.animate-pulse-soft {
+    animation: pulse-soft 3s ease-in-out infinite;
+}

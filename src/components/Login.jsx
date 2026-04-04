@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
 import { api } from '../lib/api';
 import PageWrapper from './PageWrapper';
 import AuthWrapper from './AuthWrapper';
+import { useToast } from '../context/ToastContext';
 
-function Login({ onLogin }) {
+function Login({ onLogin, getDashboardRoute }) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [errors, setErrors] = useState({
@@ -13,6 +15,7 @@ function Login({ onLogin }) {
         password: ''
     })
     const navigate = useNavigate();
+    const { showToast } = useToast();
 
     const [passwordValidation, setPasswordValidation] = useState({
         minLength: false,
@@ -89,23 +92,68 @@ function Login({ onLogin }) {
                 }
 
                 if (onLogin) {
-                    onLogin();
+                    onLogin(response.user);
                 }
 
-                // Redirect based on role
-                if (response.user && response.user.role === 'admin') {
-                    navigate('/admin');
+                // Use the getDashboardRoute helper for consistent redirection
+                if (getDashboardRoute) {
+                    navigate(getDashboardRoute());
                 } else {
-                    navigate('/dashboard');
+                    // Fallback
+                    const userRole = response.user?.role || 'citizen';
+                    if (userRole === 'admin') navigate('/admin');
+                    else if (userRole === 'volunteer') navigate('/volunteer');
+                    else navigate('/dashboard');
                 }
             } catch (err) {
                 console.error('Login error:', err);
-                setErrors({ ...errors, password: 'Invalid email or password' });
+                showToast(err.response?.data?.message || 'Login failed. Please check your credentials.', 'error');
             }
         };
 
         loginUser();
     }
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        try {
+            console.log('Google login success, verifying with backend...');
+            const response = await api.post('/auth/google', { 
+                token: credentialResponse.credential 
+            });
+
+            // Store token and auth state
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('isAuthenticated', 'true');
+
+            // Store user data including role
+            if (response.user) {
+                localStorage.setItem('userRole', response.user.role);
+                localStorage.setItem('userData', JSON.stringify(response.user));
+            }
+
+            if (onLogin) {
+                onLogin(response.user);
+            }
+
+            // Use the getDashboardRoute helper for consistent redirection
+            if (getDashboardRoute) {
+                navigate(getDashboardRoute());
+            } else {
+                // Fallback
+                const role = response.user?.role || 'citizen';
+                if (role === 'admin') navigate('/admin');
+                else navigate('/dashboard');
+            }
+        } catch (err) {
+            console.error('Google login backend error:', err);
+            showToast(err.response?.data?.message || 'Google authentication failed. Please try again.', 'error');
+        }
+    };
+
+    const handleGoogleError = () => {
+        console.error('Google login failed');
+        showToast('Login with Google failed. Please try again.', 'error');
+    };
 
     return (
         <AuthWrapper mode="login">
@@ -167,12 +215,40 @@ function Login({ onLogin }) {
                     transition={{ delay: 0.3 }}
                     whileHover={{ scale: 1.02, translateY: -2 }}
                     whileTap={{ scale: 0.98 }}
-                    type="submit" 
+                    type="submit"
                     className="btn btn-primary w-100 py-3 mb-4 rounded-4 fw-bold shadow-lg border-0 shimmer-button"
                     style={{ background: 'var(--primary-color)', letterSpacing: '0.01em' }}
                 >
-                    Log In
+                    Sign In
                 </motion.button>
+
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.35 }}
+                    className="mb-4 d-flex align-items-center"
+                >
+                    <hr className="flex-grow-1 border-secondary opacity-25" />
+                    <span className="px-3 text-muted small fw-bold">OR CONTINUE WITH</span>
+                    <hr className="flex-grow-1 border-secondary opacity-25" />
+                </motion.div>
+
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="mb-4 d-flex justify-content-center google-login-container"
+                >
+                    <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        useOneTap
+                        theme="filled_blue"
+                        shape="pill"
+                        text="signin_with"
+                        width="100%"
+                    />
+                </motion.div>
                 <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
