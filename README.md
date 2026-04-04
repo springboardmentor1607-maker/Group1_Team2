@@ -7,7 +7,11 @@ Currently, two official plugins are available:
 - **Aman-Raj**: Backend development (Node.js/Express, Authentication API)
 - **Ansel**: Frontend authentication components (Login/Signup, Navbar, Theme system) 
 - **Krishika**: Frontend dashboard components (Analytics, Maps, Charts with Tailwind CSS)
-- **eshwar**:database(postgresql)
+- **eshwar**:database(postgresql) - Developed Admin Dashboard with advanced features  
+- Integrated OpenStreetMap & LocationIQ for map-based tracking  
+- Implemented complaint view, detail, and proof update modules  
+- Improved UI/UX and frontend functionality  
+- Connected frontend with backend APIs and database  
 
 ## React Compiler
 
