@@ -15,6 +15,11 @@ const AuthWrapper = ({ children, mode }) => {
             x: '100%', 
             borderRadius: '40px 0 0 40px',
             transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
+        },
+        'complete-profile': {
+             x: '100%', 
+             borderRadius: '40px 0 0 40px',
+             transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
         }
     };
 
@@ -25,6 +30,11 @@ const AuthWrapper = ({ children, mode }) => {
             transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
         },
         signup: { 
+            x: '-100%', 
+            opacity: 1,
+            transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
+        },
+        'complete-profile': {
             x: '-100%', 
             opacity: 1,
             transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
@@ -66,8 +76,8 @@ const AuthWrapper = ({ children, mode }) => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%)',
-                    zIndex: 1
+                    background: 'linear-gradient(135deg, rgba(10, 14, 26, 0.5) 0%, rgba(10, 14, 26, 0.2) 100%)',
+                    zIndex: 2
                 }}></div>
                 <motion.img 
                     src="/assets/images/auth-bg.png" 
@@ -82,7 +92,8 @@ const AuthWrapper = ({ children, mode }) => {
                         width: '100%', 
                         height: '100%', 
                         objectFit: 'cover',
-                        filter: 'brightness(0.8) contrast(1.1)'
+                        opacity: 0.9,
+                        zIndex: 1
                     }} 
                 />
                 
@@ -135,10 +146,11 @@ const AuthWrapper = ({ children, mode }) => {
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '4rem 2rem',
+                        justifyContent: 'flex-start',
+                        padding: '6rem 2rem',
                         position: 'relative',
                         zIndex: 10,
+                        overflowX: 'hidden',
                         overflowY: 'auto'
                     }}
                 >
@@ -166,10 +178,10 @@ const AuthWrapper = ({ children, mode }) => {
                     >
                         <div className="text-center mb-5">
                             <span className="badge rounded-pill px-3 py-2 mb-3 shadow-sm" style={{ background: 'rgba(0, 113, 227, 0.1)', color: '#0071e3', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                                {isLogin ? 'Welcome Back' : 'Get Started'}
+                                {isLogin ? 'Welcome Back' : mode === 'complete-profile' ? 'Profile Setup' : 'Get Started'}
                             </span>
                             <h1 className="display-6 fw-bold text-gradient-premium tracking-tighter" style={{ fontSize: '2.2rem' }}>
-                                {isLogin ? 'Sign In' : 'Create Account'}
+                                {isLogin ? 'Sign In' : mode === 'complete-profile' ? 'Finish Your Setup' : 'Create Account'}
                             </h1>
                         </div>
 

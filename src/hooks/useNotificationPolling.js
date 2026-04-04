@@ -6,7 +6,7 @@ import { useToast } from '../context/ToastContext';
 const POLL_INTERVAL_MS = 120_000;
 
 export const useNotificationPolling = () => {
-    const { addToast, updateNotifications } = useToast();
+    const { showToast } = useToast();
     const lastIdRef = useRef(null);
     const intervalRef = useRef(null);
 
@@ -33,10 +33,8 @@ export const useNotificationPolling = () => {
             const res = await api.get('/notifications?limit=10');
             if (res.success && res.data) {
                 const notifications = res.data;
-                const unreadCount = res.unreadCount || 0;
 
-                // Update the global context with latest info for the bubble
-                updateNotifications(notifications, unreadCount);
+                // Removed undefined updateNotifications call
 
                 if (notifications.length === 0) return;
 
@@ -51,11 +49,10 @@ export const useNotificationPolling = () => {
                     const newNotifications = notifications.filter(n => n.id > lastIdRef.current);
 
                     newNotifications.reverse().forEach(notif => {
-                        addToast({
-                            title: notif.title || 'New Notification',
-                            message: notif.message,
-                            type: getToastType(notif.type)
-                        });
+                        showToast(
+                            notif.message,
+                            getToastType(notif.type)
+                        );
                     });
 
                     lastIdRef.current = latestNotif.id;

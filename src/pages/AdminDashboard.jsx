@@ -4,9 +4,13 @@ import { Users, FileText, UserCheck, AlertTriangle, Settings, Eye, UserPlus, Che
 import { api } from '../lib/api';
 import PageWrapper from '../components/PageWrapper';
 import Skeleton from '../components/Skeleton';
+import { generateVisualImpactReport } from '../lib/ImpactReportGenerator';
+import { useToast } from '../context/ToastContext';
+import { X, Search } from 'lucide-react';
 
 
 const AdminDashboard = () => {
+    const { showToast } = useToast();
     const [stats, setStats] = useState({ total: 0, pending: 0, in_progress: 0, resolved: 0 });
     const [complaints, setComplaints] = useState([]);
     const [users, setUsers] = useState([]);
@@ -173,7 +177,7 @@ const AdminDashboard = () => {
         setIsAssigning(false);
     } catch (err) {
         console.error('Error assigning volunteer:', err);
-        alert('Failed to assign volunteer');
+        showToast('Failed to assign volunteer', 'error');
     }
 };
 
@@ -184,7 +188,7 @@ const AdminDashboard = () => {
             setSelectedComplaint(null);
         } catch (err) {
             console.error('Error updating status:', err);
-            alert('Failed to update status');
+            showToast('Failed to update status', 'error');
         }
     };
 
@@ -197,7 +201,7 @@ const AdminDashboard = () => {
             fetchAdminData(1, false, true); // Silent refresh
         } catch (err) {
             console.error('Error updating user role:', err);
-            alert('Failed to update user role');
+            showToast('Failed to update user role', 'error');
         }
     };
 
@@ -213,7 +217,27 @@ const AdminDashboard = () => {
             a.remove();
         } catch (err) {
             console.error('Error downloading CSV:', err);
-            alert('Failed to download report');
+            showToast('Failed to download report', 'error');
+        }
+    };
+
+    const handleDownloadImpactPDF = async () => {
+        try {
+            // We need both summary and volunteer reports for a complete picture
+            const [summaryRes, volunteerRes] = await Promise.all([
+                api.get('/reports/summary'),
+                api.get('/reports/volunteers')
+            ]);
+            
+            if (summaryRes.success && volunteerRes.success) {
+                generateVisualImpactReport(summaryRes.report, volunteerRes.report);
+            } else {
+                throw new Error('Could not fetch report data');
+            }
+            showToast('Visual Impact Report generated successfully', 'success');
+        } catch (err) {
+            console.error('Error generating PDF:', err);
+            showToast('Failed to generate Visual Impact Report', 'error');
         }
     };
 
@@ -224,7 +248,7 @@ const AdminDashboard = () => {
             setShowVisualReport(true);
         } catch (err) {
             console.error('Error fetching summary report:', err);
-            alert('Failed to generate summary report');
+            showToast('Failed to generate summary report', 'error');
         }
     };
 
@@ -235,7 +259,7 @@ const AdminDashboard = () => {
             setShowVolunteerReport(true);
         } catch (err) {
             console.error('Error fetching volunteer report:', err);
-            alert('Failed to generate volunteer report');
+            showToast('Failed to generate volunteer report', 'error');
         }
     };
 
@@ -251,7 +275,7 @@ const AdminDashboard = () => {
             a.remove();
         } catch (err) {
             console.error('Error downloading Volunteer CSV:', err);
-            alert('Failed to download volunteer report');
+            showToast('Failed to download volunteer report', 'error');
         }
     };
 
@@ -262,7 +286,7 @@ const AdminDashboard = () => {
             setIsAddingZone(false);
         } catch (err) {
             console.error('Error adding zone:', err);
-            alert(err.response?.data?.message || 'Failed to add zone');
+            showToast(err.response?.data?.message || 'Failed to add zone', 'error');
         }
     };
 
@@ -273,7 +297,7 @@ const AdminDashboard = () => {
             setIsEditingZone(null);
         } catch (err) {
             console.error('Error updating zone:', err);
-            alert('Failed to update zone');
+            showToast('Failed to update zone', 'error');
         }
     };
 
@@ -284,7 +308,7 @@ const AdminDashboard = () => {
             fetchAdminData(1, false, true); // Silent refresh
         } catch (err) {
             console.error('Error deleting zone:', err);
-            alert('Failed to delete zone');
+            showToast('Failed to delete zone', 'error');
         }
     };
 
@@ -295,7 +319,7 @@ const AdminDashboard = () => {
             fetchAdminData(1, false, true); // Silent refresh
         } catch (err) {
             console.error('Error deleting user:', err);
-            alert('Failed to delete user');
+            showToast('Failed to delete user', 'error');
         }
     };
 
@@ -309,7 +333,7 @@ const AdminDashboard = () => {
             setIsEditingUser(null);
         } catch (err) {
             console.error('Error updating user:', err);
-            alert('Failed to update user');
+            showToast('Failed to update user', 'error');
         }
     };
 
@@ -396,11 +420,12 @@ const AdminDashboard = () => {
                 <div className="mb-4">
                     <h1 className="display-5 fw-bold mb-2 d-flex align-items-center apple-gradient-text" style={{
                         letterSpacing: '-0.03em',
-                        textShadow: '0 10px 30px rgba(66, 133, 244, 0.1)'
+                        color: 'var(--primary-color)'
                     }}>
-                        <Settings className="me-3 text-primary opacity-90" size={40} />Admin Panel
+                        <Settings className="me-3 text-primary opacity-90" size={40} />
+                        Admin Panel
                     </h1>
-                    <p className="text-muted">Manage complaints, users, and volunteers</p>
+                    <p className="text-muted fw-medium fs-5">Manage complaints, users, and volunteers</p>
                 </div>
 
                 {/* Stats Cards */}
@@ -416,10 +441,6 @@ const AdminDashboard = () => {
                             <motion.div 
                                 whileHover={{ y: -8, scale: 1.02 }}
                                 className="glass-card-premium h-100"
-                                style={{ 
-                                    border: '1px solid rgba(255, 255, 255, 0.4)',
-                                    boxShadow: '0 20px 40px rgba(0,0,0,0.06)'
-                                }}
                             >
                                 <div className="card-body p-4 d-flex flex-column align-items-center text-center">
                                     <div className={`p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center shadow-sm`}
@@ -432,7 +453,7 @@ const AdminDashboard = () => {
                                          }}>
                                         <item.icon size={28} className={item.color} />
                                     </div>
-                                    <h2 className="fw-bold mb-1 text-gradient-premium" style={{ fontSize: '1.75rem', letterSpacing: '-0.02em' }}>{item.value}</h2>
+                                     <h2 className="fw-bolder mb-1" style={{ color: '#0f172a', fontSize: '1.85rem', letterSpacing: '-0.03em' }}>{item.value}</h2>
                                     <p className="text-muted small fw-bold text-uppercase tracking-widest mb-0" style={{ fontSize: '0.65rem', opacity: 0.7 }}>{item.title}</p>
                                 </div>
                             </motion.div>
@@ -485,21 +506,28 @@ const AdminDashboard = () => {
                             <div className="card-body">
                                 {activeTab === 'overview' && (
                                     <div className="mt-4">
-                                         <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-                                             <div>
-                                                 <h5 className="mb-1 fw-bold">Recent Complaints Breakdown</h5>
-                                                 <p className="small text-muted mb-0">Monitor and manage community reports</p>
-                                             </div>
-                                             
-                                             <div className="d-flex flex-wrap gap-2 align-items-center bg-dark bg-opacity-25 p-2 rounded-3 border border-secondary border-opacity-25">
-                                                 {/* Action Group */}
-                                                 <div className="d-flex gap-2 pe-3 border-end border-secondary border-opacity-50 me-2">
+                                         <div className="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+                                             <div className="d-flex flex-wrap align-items-center gap-4">
+                                                 <div>
+                                                     <h5 className="mb-1 fw-bold">Recent Complaints Breakdown</h5>
+                                                     <p className="small text-muted mb-0">Monitor and manage community reports</p>
+                                                 </div>
+                                                 
+                                                 {/* Action Group - Moved to Left */}
+                                                 <div className="d-flex gap-2 p-1 glass-card-premium rounded-3 border-0">
                                                      <button 
                                                         className="btn btn-sm btn-outline-success border-0 d-flex align-items-center gap-1 hover-lift px-3" 
                                                         onClick={handleDownloadCSV}
                                                         title="Export to CSV"
                                                      >
                                                          <Download size={14} /> <span className="d-none d-lg-inline">Export</span>
+                                                     </button>
+                                                     <button 
+                                                        className="btn btn-sm btn-outline-info border-0 d-flex align-items-center gap-1 hover-lift px-3" 
+                                                        onClick={handleDownloadImpactPDF}
+                                                        title="Download Visual Impact PDF"
+                                                     >
+                                                         <FileText size={14} /> <span className="d-none d-lg-inline">Impact PDF</span>
                                                      </button>
                                                      <button 
                                                         className="btn btn-sm btn-outline-primary border-0 d-flex align-items-center gap-1 hover-lift px-3" 
@@ -509,7 +537,9 @@ const AdminDashboard = () => {
                                                          <BarChart2 size={14} /> <span className="d-none d-lg-inline">Reports</span>
                                                      </button>
                                                  </div>
-
+                                             </div>
+                                             
+                                             <div className="d-flex flex-wrap gap-2 align-items-center glass-card-premium p-2 rounded-3 border-0">
                                                  {/* State Filter */}
                                                  <div className="d-flex align-items-center gap-2 me-3 ps-2">
                                                      <i className="bi bi-geo-alt text-primary opacity-75"></i>
@@ -591,6 +621,22 @@ const AdminDashboard = () => {
                                                          );
                                                      })}
                                                  </div>
+
+                                                 {(stateFilter !== 'All' || zoneFilter !== 'All' || statusFilter !== 'All') && (
+                                                     <button 
+                                                         className="btn btn-sm btn-outline-danger border-0 d-flex align-items-center gap-1 px-3 hover-lift ms-2"
+                                                         onClick={() => {
+                                                             setStateFilter('All');
+                                                             setZoneFilter('All');
+                                                             setStatusFilter('All');
+                                                             setCurrentPage(1);
+                                                             showToast('Filters cleared', 'info');
+                                                         }}
+                                                         title="Clear all filters"
+                                                     >
+                                                         <X size={14} /> <span className="d-none d-lg-inline">Clear All</span>
+                                                     </button>
+                                                 )}
                                              </div>
                                          </div>
                                         <div className="table-responsive">
@@ -612,8 +658,14 @@ const AdminDashboard = () => {
                                                         .filter(c => statusFilter === 'All' || c.status?.toLowerCase() === statusFilter.toLowerCase())
                                                         .length === 0 ? (
                                                         <tr>
-                                                            <td colSpan="8" className="text-center text-muted py-4">
-                                                                No {statusFilter !== 'All' ? statusFilter.toLowerCase() : ''} complaints found
+                                                            <td colSpan="8" className="text-center py-5">
+                                                                <div className="d-flex flex-column align-items-center opacity-50">
+                                                                    <div className="p-4 bg-dark bg-opacity-10 rounded-circle mb-3">
+                                                                        <Search size={48} className="text-muted" />
+                                                                    </div>
+                                                                    <h5 className="fw-bold mb-1">No reports found</h5>
+                                                                    <p className="small mb-0">Try adjusting your filters or checking another zone</p>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     ) : (
@@ -950,12 +1002,12 @@ const AdminDashboard = () => {
             {selectedComplaint && (
                 <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                        <div className="modal-content" style={{ background: 'var(--bg-primary)', color: 'var(--bs-body-color)', zIndex: 1050, position: 'relative' }}>
+                        <div className="modal-content" style={{ background: '#ffffff', color: 'var(--bs-body-color)', zIndex: 1050, position: 'relative' }}>
                             <div className="modal-header border-bottom border-secondary">
                                 <h5 className="modal-title">Complaint Details - #{selectedComplaint.id}</h5>
                                 <button
                                     type="button"
-                                    className="btn-close btn-close-white"
+                                    className="btn-close"
                                     onClick={() => {
                                         setSelectedComplaint(null);
                                         setIsAssigning(false);
@@ -988,13 +1040,13 @@ const AdminDashboard = () => {
                                 </div>
                                 <div className="mb-4">
                                     <h6 className="text-muted mb-1">Description</h6>
-                                    <p className="bg-dark p-3 rounded">{selectedComplaint.description}</p>
+                                    <p className="bg-light text-dark p-3 rounded border border-light">{selectedComplaint.description}</p>
                                 </div>
 
                                 {/* Images Comparison */}
                                 <div className="row g-4 mb-4">
                                     <div className="col-md-6">
-                                        <div className="card h-100 border-secondary" style={{ background: 'var(--bg-primary)' }}>
+                                        <div className="card h-100 border-secondary" style={{ background: '#ffffff' }}>
                                             <div className="card-header border-bottom border-secondary bg-transparent">
                                                 <h6 className="mb-0 text-center">Original Issue (Citizen)</h6>
                                             </div>
@@ -1010,7 +1062,7 @@ const AdminDashboard = () => {
                                         </div>
                                     </div>
                                     <div className="col-md-6">
-                                        <div className="card h-100 border-secondary" style={{ background: 'var(--bg-primary)' }}>
+                                        <div className="card h-100 border-secondary" style={{ background: '#ffffff' }}>
                                             <div className="card-header border-bottom border-secondary bg-transparent">
                                                 <h6 className="mb-0 text-center">Proof of Work (Volunteer)</h6>
                                             </div>
@@ -1028,7 +1080,7 @@ const AdminDashboard = () => {
                                 </div>
 
                                 {/* Assignment Section */}
-                                <div className="p-3 rounded border border-secondary" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                <div className="p-3 rounded border border-secondary" style={{ background: '#f8f9fa' }}>
                                     <div className="d-flex justify-content-between align-items-center mb-3">
                                         <h6 className="mb-0">Volunteer Assignment</h6>
                                         {!isAssigning && selectedComplaint.status?.toLowerCase() !== 'resolved' && (
@@ -1154,10 +1206,10 @@ const AdminDashboard = () => {
             {isEditingUser && (
                 <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1060 }}>
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content" style={{ background: 'var(--bg-primary)', color: 'var(--bs-body-color)' }}>
+                        <div className="modal-content" style={{ background: '#ffffff', color: 'var(--bs-body-color)' }}>
                             <div className="modal-header border-bottom border-secondary">
                                 <h5 className="modal-title">Edit User - {isEditingUser.name}</h5>
-                                <button type="button" className="btn-close btn-close-white" onClick={() => setIsEditingUser(null)}></button>
+                                <button type="button" className="btn-close" onClick={() => setIsEditingUser(null)}></button>
                             </div>
                             <form onSubmit={(e) => {
                                 e.preventDefault();
@@ -1211,10 +1263,10 @@ const AdminDashboard = () => {
             {(isAddingZone || isEditingZone) && (
                 <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1060 }}>
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content" style={{ background: 'var(--bg-primary)', color: 'var(--bs-body-color)' }}>
+                        <div className="modal-content" style={{ background: '#ffffff', color: 'var(--bs-body-color)' }}>
                             <div className="modal-header border-bottom border-secondary">
                                 <h5 className="modal-title">{isAddingZone ? 'Add New Zone' : 'Edit Zone'}</h5>
-                                <button type="button" className="btn-close btn-close-white" onClick={() => { setIsAddingZone(false); setIsEditingZone(null); }}></button>
+                                <button type="button" className="btn-close" onClick={() => { setIsAddingZone(false); setIsEditingZone(null); }}></button>
                             </div>
                             <form onSubmit={(e) => {
                                 e.preventDefault();
@@ -1251,12 +1303,12 @@ const AdminDashboard = () => {
             {showVisualReport && reportSummary && (
                 <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1070 }}>
                     <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                        <div className="modal-content" style={{ background: 'var(--bg-primary)', color: 'var(--bs-body-color)' }}>
+                        <div className="modal-content" style={{ background: '#ffffff', color: 'var(--bs-body-color)' }}>
                             <div className="modal-header border-bottom border-secondary">
                                 <h5 className="modal-title d-flex align-items-center">
                                     <BarChart2 className="me-2 text-primary" /> Visual Insights & Analytics
                                 </h5>
-                                <button type="button" className="btn-close btn-close-white" onClick={() => setShowVisualReport(false)}></button>
+                                <button type="button" className="btn-close" onClick={() => setShowVisualReport(false)}></button>
                             </div>
                             <div className="modal-body p-4">
                                 <div className="row g-4">
@@ -1370,12 +1422,12 @@ const AdminDashboard = () => {
             {showVolunteerReport && volunteerReport && (
                 <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 1080 }}>
                     <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                        <div className="modal-content border-0" style={{ background: 'var(--bg-primary)', color: 'var(--bs-body-color)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                        <div className="modal-content border-0" style={{ background: '#ffffff', color: 'var(--bs-body-color)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
                             <div className="modal-header border-bottom border-secondary py-3">
                                 <h5 className="modal-title d-flex align-items-center fw-bold">
                                     <UserCheck className="me-2 text-success" /> Volunteer Performance & Impact Report
                                 </h5>
-                                <button type="button" className="btn-close btn-close-white" onClick={() => setShowVolunteerReport(false)}></button>
+                                <button type="button" className="btn-close" onClick={() => setShowVolunteerReport(false)}></button>
                             </div>
                             <div className="modal-body p-4">
                                 {/* Summary Stats */}
@@ -1407,7 +1459,7 @@ const AdminDashboard = () => {
                                 <div className="row g-4">
                                     {/* Location Distribution */}
                                     <div className="col-md-4">
-                                        <div className="card h-100 border-secondary bg-transparent bg-opacity-10">
+                                        <div className="card h-100 border-secondary bg-white">
                                             <div className="card-header border-bottom border-secondary bg-transparent py-3">
                                                 <h6 className="mb-0 fw-bold d-flex align-items-center">
                                                     <Map size={18} className="me-2 text-info" /> Volunteer Distribution
@@ -1428,14 +1480,14 @@ const AdminDashboard = () => {
 
                                     {/* Detailed Volunteer Table */}
                                     <div className="col-md-8">
-                                        <div className="card h-100 border-secondary bg-transparent bg-opacity-10">
-                                            <div className="card-header border-bottom border-secondary bg-transparent py-3 d-flex justify-content-between align-items-center">
+                                        <div className="card h-100 border-secondary bg-white">
+                                            <div className="card-header border-bottom border-secondary bg-white py-3 d-flex justify-content-between align-items-center">
                                                 <h6 className="mb-0 fw-bold">Performance Breakdown</h6>
                                             </div>
                                             <div className="card-body p-0">
                                                 <div className="table-responsive">
-                                                    <table className="table table-hover table-dark table-sm mb-0" style={{ fontSize: '0.85rem' }}>
-                                                        <thead className="bg-dark">
+                                                    <table className="table table-hover table-sm mb-0" style={{ fontSize: '0.85rem' }}>
+                                                        <thead className="bg-light">
                                                             <tr>
                                                                 <th className="ps-3 py-3">Volunteer</th>
                                                                 <th className="py-3">Assignments</th>

@@ -6,13 +6,13 @@ const User = {
         return name.trim().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
     },
 
-    async create({ name, email, password, location, state, role, profile_photo, phone }) {
-        const normalizedLocation = this.normalizeName(location);
-        const normalizedState = this.normalizeName(state);
+    async create({ name, email, password, location, state, role, profile_photo, phone, google_id }) {
+        const normalizedLocation = location ? this.normalizeName(location) : '';
+        const normalizedState = state ? this.normalizeName(state) : '';
         const result = await pool.query(
-            `INSERT INTO users (name, email, password, location, state, role, profile_photo, phone)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-            [name, email, password, normalizedLocation, normalizedState, role || 'citizen', profile_photo || '', phone || '']
+            `INSERT INTO users (name, email, password, location, state, role, profile_photo, phone, google_id)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+            [name, email, password || null, normalizedLocation, normalizedState, role || 'citizen', profile_photo || '', phone || '', google_id || null]
         );
 
         return result.rows[0];
@@ -24,6 +24,28 @@ const User = {
             [email]
         );
 
+        return result.rows[0];
+    },
+
+    async findByGoogleId(googleId) {
+        const result = await pool.query(
+            `SELECT * FROM users WHERE google_id=$1`,
+            [googleId]
+        );
+
+        return result.rows[0];
+    },
+
+    async linkGoogleAccount(id, googleId, profilePhoto) {
+        const result = await pool.query(
+            `UPDATE users 
+             SET google_id = $1, 
+                 profile_photo = COALESCE($2, profile_photo),
+                 updated_at = CURRENT_TIMESTAMP 
+             WHERE id = $3 
+             RETURNING *`,
+            [googleId, profilePhoto, id]
+        );
         return result.rows[0];
     },
 
@@ -104,7 +126,19 @@ const User = {
              FROM users`
         );
         return result.rows[0];
+    },
+
+    async findRecent(limit = 10) {
+        const result = await pool.query(
+            `SELECT id, name, email, role, created_at 
+             FROM users 
+             ORDER BY created_at DESC 
+             LIMIT $1`,
+            [limit]
+        );
+        return result.rows;
     }
 };
+
 
 module.exports = User;

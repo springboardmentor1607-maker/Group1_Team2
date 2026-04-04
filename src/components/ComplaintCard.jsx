@@ -8,12 +8,12 @@ import Skeleton from './Skeleton';
 const getStatusBadge = (status) => {
     const s = (status || 'pending').toLowerCase();
     const statusMap = {
-        'pending': 'status-pending',
-        'progress': 'status-progress',
-        'in progress': 'status-progress',
-        'resolved': 'status-resolved',
+        'pending': 'text-warning fw-bold small',
+        'progress': 'text-primary fw-bold small',
+        'in progress': 'text-primary fw-bold small',
+        'resolved': 'text-success fw-bold small',
     };
-    return `status-badge ${statusMap[s] || 'status-pending'}`;
+    return `${statusMap[s] || 'text-warning fw-bold small'}`;
 };
 
 const getPriorityBadge = (priority) => {
@@ -338,7 +338,7 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                     </div>
                 ) : (
                     <div 
-                        className="d-flex flex-column align-items-center justify-content-center h-100 p-4 cursor-pointer"
+                        className="d-flex flex-column align-items-center justify-content-center h-100 p-4 cursor-pointer text-decoration-none"
                         onClick={hasAnyPhoto ? fetchPhoto : undefined}
                         style={{
                             background: 'radial-gradient(circle at center, rgba(0, 113, 227, 0.05) 0%, rgba(0, 0, 0, 0.03) 100%)',
@@ -354,32 +354,32 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                             <div 
                                 className="rounded-circle d-flex align-items-center justify-content-center mb-1 shadow-sm"
                                 style={{ 
-                                    width: '64px', height: '64px', 
-                                    background: 'rgba(255, 255, 255, 0.2)',
+                                    width: '56px', height: '56px', 
+                                    background: 'rgba(255, 255, 255, 0.4)',
                                     backdropFilter: 'blur(12px)',
-                                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                                    border: '1px solid rgba(255, 255, 255, 0.5)',
                                     color: 'var(--primary-color)'
                                 }}
                             >
-                                <ImageIcon size={32} strokeWidth={1.5} className="opacity-75" />
+                                <ImageIcon size={28} strokeWidth={1.5} className="opacity-75" />
                             </div>
                             <div 
-                                className="px-4 py-2 rounded-pill fw-bold position-relative overflow-hidden glass-surface shadow-sm"
+                                className="px-4 py-2 rounded-pill fw-bold position-relative overflow-hidden shadow-sm"
                                 style={{
                                     color: 'var(--text-primary)',
-                                    fontSize: '0.85rem',
+                                    fontSize: '0.8rem',
                                     letterSpacing: '0.5px',
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: '0.6rem',
-                                    background: 'rgba(255, 255, 255, 0.8)',
+                                    background: 'rgba(255, 255, 255, 0.9)',
                                     border: '1px solid rgba(0,0,0,0.05)'
                                 }}
                             >
                                 {hasAnyPhoto ? (
                                     <>
                                         {isResolved ? 'View Proof of Work' : 
-                                         (complaint.status?.toLowerCase().includes('progress') ? 'View Progress / Issue' : 'View Issue Photo')}
+                                            (complaint.status?.toLowerCase().includes('progress') ? 'View Progress / Issue' : 'View Issue Photo')}
                                         <ChevronRight size={14} />
                                     </>
                                 ) : (
@@ -403,48 +403,49 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                 style={{ flex: 1, position: 'relative', zIndex: 1, overflow: 'hidden' }}
             >
                 <div style={{ display: isPhotoFocused ? 'none' : 'block' }}>
-                    <motion.div layout className="d-flex justify-content-between align-items-start mb-3">
+                    <div className="d-flex justify-content-between align-items-start mb-3">
                         <div className="d-flex align-items-center gap-2">
                             <span className="badge bg-primary bg-opacity-10 text-primary fs-6">#{complaint.id}</span>
                             <span className={getPriorityBadge(complaint.priority)}>{complaint.priority || 'Medium'}</span>
                         </div>
                         <div className="d-flex align-items-center gap-2">
                             {getStatusIcon(complaint.status)}
-                            <span className={getStatusBadge(complaint.status)}>{complaint.status || 'Pending'}</span>
+                            <span className={getStatusBadge(complaint.status)} style={{ textTransform: 'capitalize' }}>
+                                {complaint.status || 'Pending'}
+                            </span>
                         </div>
-                    </motion.div>
+                    </div>
 
-                    <motion.h5 layout className="fw-bold mb-2 text-truncate" style={{ color: 'var(--text-primary)' }}>{complaint.title}</motion.h5>
+                    <h5 className="fw-bold mb-2 text-truncate" style={{ color: '#111827' }}>{complaint.title}</h5>
 
                     <div style={{ minHeight: '80px' }} className="mb-2">
-                        <motion.div layout className="d-flex align-items-center gap-2 mb-1" style={{ color: 'var(--text-muted)' }}>
+                        <div className="d-flex align-items-center gap-2 mb-1" style={{ color: 'var(--text-muted)' }}>
                             <span className="badge bg-secondary bg-opacity-10 text-secondary small">{complaint.type || 'Other'}</span>
                             <span>•</span><Clock size={14} /><span className="small">{formatDate(complaint.created_at)}</span>
-                        </motion.div>
+                        </div>
 
-                        <motion.div layout className="d-flex align-items-center gap-2 mb-1" style={{ color: 'var(--text-muted)' }}>
+                        <div className="d-flex align-items-center gap-2 mb-1" style={{ color: 'var(--text-muted)' }}>
                             <User size={14} /><span className="small">Reported by: {complaint.user_name || 'Unknown'}</span>
-                        </motion.div>
+                        </div>
 
-                        <motion.div layout className="d-flex align-items-center gap-2 mb-1" style={{ color: 'var(--text-muted)' }}>
+                        <div className="d-flex align-items-center gap-2 mb-1" style={{ color: 'var(--text-muted)' }}>
                             <User size={14} />
                             <span className="small">
                                 {complaint.volunteer_name ? `Assigned to: ${complaint.volunteer_name}` : "Pending Assignment"}
                             </span>
-                        </motion.div>
+                        </div>
                     </div>
 
-                    <motion.div layout className="d-flex align-items-start gap-2 mb-3">
+                    <div className="d-flex align-items-start gap-2 mb-3">
                         <MapPin size={14} className="mt-1 flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
                         <div className="small" style={{ color: 'var(--text-muted)' }}>
                             <div>{complaint.address}</div>
                             {complaint.landmark && <div className="opacity-75">Near: {complaint.landmark}</div>}
                         </div>
-                    </motion.div>
+                    </div>
 
                     <div className="mt-auto">
-                        <motion.div 
-                            layout
+                        <div 
                             style={{
                                 background: 'rgba(0, 113, 227, 0.04)',
                                 padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(0, 113, 227, 0.08)',
@@ -454,14 +455,14 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                         >
                             <p className="small mb-0" style={{
                                 display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden', lineHeight: '1.6', fontWeight: '500', color: 'var(--text-primary)',
+                                overflow: 'hidden', lineHeight: '1.6', fontWeight: '500', color: '#1f2937',
                                 opacity: complaint.description ? 1 : 0.5
                             }}>
                                 {complaint.description || "No description provided."}
                             </p>
-                        </motion.div>
+                        </div>
 
-                        <motion.div layout className="d-flex align-items-center gap-3 mt-auto">
+                        <div className="d-flex align-items-center gap-3 mt-auto">
                             <div className="d-flex align-items-center gap-2">
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
@@ -532,7 +533,7 @@ const ComplaintCard = ({ complaint, viewMode, index, onDelete }) => {
                                     </motion.button>
                                 )}
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
 
                     {/* Comments Section */}

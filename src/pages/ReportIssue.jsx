@@ -7,6 +7,7 @@ import { api } from '../lib/api';
 import { supabase } from '../lib/supabaseClient';
 import { motion } from 'framer-motion';
 import MapSection from '../components/MapSection';
+import { useToast } from '../context/ToastContext';
 
 const compressImage = (file, maxWidth = 800, quality = 0.75) => {
     return new Promise((resolve, reject) => {
@@ -33,12 +34,14 @@ const compressImage = (file, maxWidth = 800, quality = 0.75) => {
 
 const ReportIssue = () => {
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [userRole, setUserRole] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [imageFile, setImageFile] = useState(null);
     const [isDetecting, setIsDetecting] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -60,6 +63,19 @@ const ReportIssue = () => {
         setLoading(false);
     }, []);
 
+    // Unsaved changes guard
+    useEffect(() => {
+        const isDirty = formData.title || formData.description || formData.address;
+        const handleBeforeUnload = (e) => {
+            if (isDirty && !isSuccess) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [formData, isSuccess]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -80,7 +96,7 @@ const ReportIssue = () => {
 
     const detectLocation = () => {
         if (!navigator.geolocation) {
-            alert('Geolocation is not supported by your browser.');
+            showToast('Geolocation is not supported by your browser.', 'error');
             return;
         }
         setIsDetecting(true);
@@ -105,7 +121,7 @@ const ReportIssue = () => {
                 } catch (err) {
                     console.error('Reverse geocoding error:', err);
                     setFormData(prev => ({ ...prev, latitude, longitude }));
-                    alert(`Location detected but address could not be fetched: ${err.message}`);
+                    showToast(`Location detected but address could not be fetched`, 'warning');
                 } finally {
                     setIsDetecting(false);
                 }
@@ -136,7 +152,7 @@ const ReportIssue = () => {
                         },
                         (err2) => {
                             setIsDetecting(false);
-                            alert("Location services are currently unavailable on your device. Please use 'Find on Map' or click the map manually.");
+                            showToast("Location services are currently unavailable. Please click the map manually.", "warning");
                         },
                         { timeout: 10000, enableHighAccuracy: false }
                     );
@@ -151,18 +167,16 @@ const ReportIssue = () => {
                             msg = "The request to get user location timed out.";
                             break;
                     }
-                    alert(msg);
+                    showToast(msg, 'error');
                 }
             },
             { timeout: 15000, enableHighAccuracy: true }
         );
     };
 
-    const [isSuccess, setIsSuccess] = useState(false);
-
     const geocodeAddress = async () => {
         if (!formData.address) {
-            alert('Please enter an address first.');
+            showToast('Please enter an address first.', 'warning');
             return;
         }
         setIsDetecting(true);
@@ -187,7 +201,7 @@ const ReportIssue = () => {
                 }
             }
         } catch (err) {
-            alert('Could not find that address on the map. Please try a more specific address or click on the map.');
+            showToast('Could not find that address. Please try clicking the map manually.', 'warning');
         } finally {
             setIsDetecting(false);
         }
@@ -239,10 +253,13 @@ const ReportIssue = () => {
             const submissionData = { ...formData, photo: finalPhotoUrl };
             await api.post('/complaints', submissionData);
             setIsSuccess(true);
+            showToast('Report submitted successfully!', 'success');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
             console.error('Submission error:', err);
-            setError(err.message || 'Failed to submit complaint. Please try again.');
+            const msg = err.message || 'Failed to submit complaint. Please try again.';
+            setError(msg);
+            showToast(msg, 'error');
         } finally {
             setSubmitting(false);
         }

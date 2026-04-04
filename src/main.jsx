@@ -8,6 +8,7 @@ import 'leaflet/dist/leaflet.css'
 import './custom.css'
 import './index.css'
 import { ThemeProvider } from './context/ThemeContext'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 
 // Add Font Awesome for icons
 const link = document.createElement('link');
@@ -17,8 +18,10 @@ document.head.appendChild(link);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </GoogleOAuthProvider>
   </React.StrictMode>,
 );

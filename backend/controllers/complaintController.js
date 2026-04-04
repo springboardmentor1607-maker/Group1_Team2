@@ -150,6 +150,47 @@ const getDashboardStats = async (req, res) => {
         const recent = await Complaint.getRecent();
         const weekly = await Complaint.getWeeklyStats();
 
+        // System Activity for admins
+        let systemActivity = [];
+        try {
+            const [globalNotifs, recentUsers, recentZones] = await Promise.all([
+                Notification.findGlobal(15),
+                User.findRecent(5),
+                Zone.findRecent(5)
+            ]);
+
+            // Transform into unified activity format
+            const activities = [
+                ...globalNotifs.map(n => ({ 
+                    id: `notif-${n.id}`, 
+                    type: n.type, 
+                    title: n.title, 
+                    message: n.message, 
+                    created_at: n.created_at,
+                    complaint_id: n.complaint_id
+                })),
+                ...recentUsers.filter(u => u.role === 'volunteer').map(u => ({
+                    id: `user-${u.id}`,
+                    type: 'volunteer_registered',
+                    title: 'New Volunteer Joined',
+                    message: `${u.name} just registered as a volunteer.`,
+                    created_at: u.created_at
+                })),
+                ...recentZones.map(z => ({
+                    id: `zone-${z.id}`,
+                    type: 'zone_added',
+                    title: 'New Zone Added',
+                    message: `A new zone "${z.name}" was added in ${z.state || 'the city'}.`,
+                    created_at: z.created_at
+                }))
+            ];
+
+            // Sort by most recent first
+            systemActivity = activities.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 20);
+        } catch (actErr) {
+            console.error('Error fetching system activity:', actErr.message);
+        }
+
         res.json({
             success: true,
             stats: {
@@ -159,8 +200,10 @@ const getDashboardStats = async (req, res) => {
                 resolved: parseInt(stats.resolved) || 0
             },
             recent: recent,
-            weekly: weekly
+            weekly: weekly,
+            systemActivity: systemActivity
         });
+
     } catch (err) {
         console.error('Error in getDashboardStats:', err.message);
         res.status(500).json({ success: false, message: 'Server error' });

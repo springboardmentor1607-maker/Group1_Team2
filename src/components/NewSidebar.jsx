@@ -16,7 +16,6 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
             return [
                 { label: 'Dashboard', path: '/dashboard', icon: Home },
                 { label: 'Admin Panel', path: '/admin', icon: Shield },
-                { label: 'Report Issue', path: '/report-issue', icon: AlertTriangle },
                 { label: 'Complaints', path: '/complaints', icon: FileText },
                 { label: 'Notifications', path: '/notifications', icon: Bell },
                 { label: 'Map View', path: '/map', icon: MapPin },
@@ -84,14 +83,14 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                             <span className="text-white fw-bold fs-5">CS</span>
                         </div>
                         {isOpen && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.1 }}
-                            >
-                                <h5 className="mb-0 fw-bold" style={{ color: 'var(--bs-body-color)' }}>CleanStreet</h5>
-                                <small style={{ color: 'var(--bs-secondary-color)' }}>Smart City Solution</small>
-                            </motion.div>
+                             <motion.div
+                                 initial={{ opacity: 0 }}
+                                 animate={{ opacity: 1 }}
+                                 transition={{ delay: 0.1 }}
+                             >
+                                 <h5 className="mb-0 fw-bold" style={{ color: 'var(--text-primary)' }}>CleanStreet</h5>
+                                 <small style={{ color: 'var(--primary-color)', opacity: 0.7, fontWeight: '700' }}>Smart City Solution</small>
+                             </motion.div>
                         )}
                     </div>
                 </Link>
@@ -146,7 +145,8 @@ const NewSidebar = ({ isOpen, toggleSidebar, onLogout, user }) => {
                                          <motion.span
                                              initial={{ opacity: 0 }}
                                              animate={{ opacity: 1 }}
-                                             className="fw-medium"
+                                             className="fw-bold"
+                                             style={{ color: isActive ? 'var(--active-item-color)' : 'var(--text-primary)', opacity: isActive ? 1 : 0.8 }}
                                          >
                                              {item.label}
                                          </motion.span>

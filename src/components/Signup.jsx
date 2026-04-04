@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
 import { api } from '../lib/api';
 import PageWrapper from './PageWrapper';
 import AuthWrapper from './AuthWrapper';
+import { useToast } from '../context/ToastContext';
 
-function Signup({ onLogin }) {
+function Signup({ onLogin, getDashboardRoute }) {
     const [formData, setFormData] = useState({
         fullName: '',
         username: '',
@@ -17,6 +19,7 @@ function Signup({ onLogin }) {
         state: ''
     })
     const navigate = useNavigate();
+    const { showToast } = useToast();
 
     const [passwordValidation, setPasswordValidation] = useState({
         minLength: false,
@@ -147,72 +150,103 @@ function Signup({ onLogin }) {
                     localStorage.setItem('userData', JSON.stringify(response.user));
                 }
 
-                if (onLogin) {
-                    onLogin();
-                }
-
-                // Redirect based on role
-                if (userRole === 'admin') {
-                    navigate('/admin');
-                } else if (userRole === 'volunteer') {
-                    navigate('/volunteer');
-                } else {
-                    navigate('/dashboard');
-                }
+                showToast('Registration successful! Redirecting...', 'success');
+                onLogin(response.user); // Pass user data back to root App
+                navigate(getDashboardRoute());
             } catch (err) {
-                console.error('Registration error:', err);
-                setErrors({ ...errors, email: 'Registration failed. Email might already be in use.' });
+                console.error('Registration attempt error:', err);
+                showToast(err.response?.data?.message || 'Registration failed. Please try again.', 'error');
             }
         };
 
         registerUser();
     }
 
+    const handleGoogleSuccess = async (credentialResponse) => {
+        try {
+            console.log('Google signup success, verifying with backend...');
+            const response = await api.post('/auth/google', { 
+                token: credentialResponse.credential,
+                role: formData.role
+            });
+
+            // Store token and auth state
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('isAuthenticated', 'true');
+
+            // Store user data including role
+            if (response.user) {
+                localStorage.setItem('userRole', response.user.role);
+                localStorage.setItem('userData', JSON.stringify(response.user));
+            }
+
+            if (onLogin) {
+                onLogin(response.user);
+            }
+
+            // Use the getDashboardRoute helper for consistent redirection
+            if (getDashboardRoute) {
+                navigate(getDashboardRoute());
+            } else {
+                // Fallback
+                const userRole = response.user?.role || 'citizen';
+                if (userRole === 'admin') navigate('/admin');
+                else if (userRole === 'volunteer') navigate('/volunteer');
+                else navigate('/dashboard');
+            }
+        } catch (err) {
+            console.error('Google signup backend error:', err);
+            setErrors({ ...errors, email: 'Google registration failed. Please try again.' });
+        }
+    };
+
+    const handleGoogleError = () => {
+        console.error('Google signup failed');
+        setErrors({ ...errors, email: 'Sign up with Google failed. Please try again.' });
+    };
+
     const [isDetecting, setIsDetecting] = useState(false);
-    const detectLocation = () => {
+    const handleGetLocation = () => {
         if (!navigator.geolocation) {
-            setErrors(prev => ({ ...prev, location: 'Geolocation not supported' }));
+            showToast('Geolocation is not supported by your browser', 'error');
             return;
         }
 
         setIsDetecting(true);
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const { latitude, longitude } = position.coords;
-                try {
-                    const response = await api.get(`/zones/reverse-geocode?lat=${latitude}&lon=${longitude}`);
-                    if (response.data && response.data.success) {
-                        // Priority for zone: neighborhood info -> first part of address -> state -> "Unknown Area"
-                        const detectedState = response.data.state || '';
-                        const detectedZone = response.data.zone || 
-                                           (response.data.address ? response.data.address.split(',')[0] : '') || 
-                                           detectedState || 
-                                           'Detected Area';
-                        
-                        setFormData(prev => ({
-                            ...prev,
-                            location: detectedZone,
-                            state: detectedState || prev.state
-                        }));
-                        
-                        // Clear errors for these fields
-                        setErrors(prev => ({ ...prev, location: '', state: '' }));
-                    }
-                } catch (err) {
-                    console.error('Error in reverse geocoding:', err);
-                    setErrors(prev => ({ ...prev, location: 'Could not resolve address' }));
-                } finally {
-                    setIsDetecting(false);
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords;
+            setFormData(prev => ({ ...prev, latitude, longitude }));
+            try {
+                const response = await api.get(`/zones/reverse-geocode?lat=${latitude}&lon=${longitude}`);
+                if (response.success) {
+                    const detectedState = response.state || '';
+                    const detectedZone = response.zone || 'Detected Area';
+                    
+                    setFormData(prev => ({
+                        ...prev,
+                        location: detectedZone,
+                        state: detectedState || prev.state
+                    }));
+                    
+                    // Clear errors for these fields
+                    setErrors(prev => ({ ...prev, location: '', state: '' }));
+                    showToast('Location detected successfully', 'success');
                 }
-            },
-            (err) => {
-                console.error('Geolocation error:', err);
-                setErrors(prev => ({ ...prev, location: 'Location access denied. Please enter your area manually.' }));
+            } catch (err) {
+                console.error('Error in reverse geocoding:', err);
+                showToast('Location detected but address could not be fetched', 'warning');
+            } finally {
                 setIsDetecting(false);
-            },
-            { timeout: 10000, enableHighAccuracy: true }
-        );
-    };
+            }
+        },
+        (err) => {
+            console.error('Geolocation error:', err);
+            showToast('Permission denied or location unavailable', 'error');
+            setIsDetecting(false);
+        },
+        { timeout: 10000, enableHighAccuracy: true }
+    );
+};
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -365,7 +399,7 @@ function Signup({ onLogin }) {
                             </label>
                             <button 
                                 type="button" 
-                                onClick={detectLocation}
+                                onClick={handleGetLocation}
                                 disabled={isDetecting}
                                 className={`btn btn-link btn-sm p-0 position-absolute end-0 top-50 translate-middle-y me-3 text-primary text-decoration-none z-3 ${isDetecting ? 'opacity-50' : ''}`}
                                 style={{ pointerEvents: 'auto' }}
@@ -433,6 +467,30 @@ function Signup({ onLogin }) {
                 >
                     Create Account
                 </motion.button>
+
+                <motion.div 
+                    variants={itemVariants}
+                    className="my-4 d-flex align-items-center"
+                >
+                    <hr className="flex-grow-1 border-secondary opacity-25" />
+                    <span className="px-3 text-muted small fw-bold">OR REGISTER WITH</span>
+                    <hr className="flex-grow-1 border-secondary opacity-25" />
+                </motion.div>
+
+                <motion.div 
+                    variants={itemVariants}
+                    className="mb-4 d-flex justify-content-center google-signup-container"
+                >
+                    <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        useOneTap
+                        theme="filled_blue"
+                        shape="pill"
+                        text="signup_with"
+                        width="100%"
+                    />
+                </motion.div>
                 
                 <motion.div 
                     variants={itemVariants}

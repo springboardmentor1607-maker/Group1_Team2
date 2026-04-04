@@ -73,6 +73,17 @@ class Notification {
         const { rows } = await pool.query(query, [user_id]);
         return rows.length > 0;
     }
+
+    static async findGlobal(limit = 10) {
+        const query = `
+            SELECT * FROM notifications
+            ORDER BY created_at DESC
+            LIMIT $1
+        `;
+        const { rows } = await pool.query(query, [limit]);
+        return rows;
+    }
 }
+
 
 module.exports = Notification;

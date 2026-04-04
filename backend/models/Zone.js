@@ -95,7 +95,19 @@ const Zone = {
     async delete(id) {
         const result = await pool.query(`DELETE FROM zones WHERE id = $1`, [id]);
         return result.rowCount > 0;
+    },
+
+    async findRecent(limit = 10) {
+        const result = await pool.query(
+            `SELECT id, name, state, created_at 
+             FROM zones 
+             ORDER BY created_at DESC 
+             LIMIT $1`,
+            [limit]
+        );
+        return result.rows;
     }
 };
+
 
 module.exports = Zone;
