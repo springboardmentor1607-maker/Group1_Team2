@@ -10,7 +10,7 @@ Currently, two official plugins are available:
 - **eshwar**:database(postgresql) - Developed Admin Dashboard with advanced features  
 - Integrated OpenStreetMap & LocationIQ for map-based tracking  
 - Implemented complaint view, detail, and proof update modules  
-- Improved UI/UX and frontend functionality  
+- UI/UX and frontend functionality  
 - Connected frontend with backend APIs and database  
 
 ## React Compiler
